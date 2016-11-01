@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>Ride Thrift</h2>
+
+
+<form id="estimate-form" method="post" action="/estimates.json">
+    <input type="text" name="origin" id="orig-field">
+    <input type="text" name="destination" id="dest-field">
+    <input type="submit" value="Get Estimates">
+</form>
+<ul><span id="uber"></span>
+    <li id="pool"></li>
+    <li id="uberx"></li>
+    <li id="uberxl"></li>
+</ul>
+
+<ul><span id="lyft"></span>
+    <li id="line"></li>
+    <li id="lyft-lyft"></li>
+    <li id="plus"></li>
+</ul>
+
+<script src="/static/js/submit-addresses.js"></script>
+
+
+
+
+
+{% endblock %}

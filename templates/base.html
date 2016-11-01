@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+    <title>Ride Thrift</title>
+    <script src="https://code.jquery.com/jquery.js"></script>
+</head>
+<body>
+
+Ride Thrift
+
+{% if "user_id" in session %}
+    <a href="/logout">Logout</a>
+{% else %}
+    <a href="/login">Login</a>
+{% endif %}
+
+<hr>
+
+{% for flash in get_flashed_messages() %}
+  {{ flash }}
+{% endfor %}
+
+{% block content %}
+    Put your body here.
+{% endblock %}
+
+</body>
+</html>
