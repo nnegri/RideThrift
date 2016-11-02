@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+    
+    <form id="save-origin" method="post" action="/address-saved">
+        {{ origin }}<br>
+        <input type="hidden" name="origin" value="{{ origin }}">
+        Label: <input type="text" name="label" id="label"><br>
+        <input type="submit" value="Save">
+    </form>
+    <form id="save-dest" method="post" action="/address-saved">
+        {{ destination }}<br>
+        <input type="hidden" name="dest" value="{{ destination }}">
+        Label: <input type="text" name="label" id="label"><br>
+        <input type="submit" value="Save">
+    </form>
+    <p id="success"></p>
+
+    <script type="text/javascript">
+
+        $("#estimate-form").on("submit", function (evt) {
+            $("#success").html("Address saved");
+        });
+    </script>
+
+{% endblock %}

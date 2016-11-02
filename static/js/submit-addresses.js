@@ -1,41 +1,36 @@
 "use strict";
 
 function showEstimates(results) {
-    var uber = results[0]["prices"]
+    // Display estimate results on page.
+    var poolEst = (results[0][1] / 100).toFixed(2);
+    var uberEst = (results[0][2] / 100).toFixed(2);
+    var xlEst = (results[0][3] / 100).toFixed(2);
 
-    var poolMin = uber[0]["low_estimate"]
-    var poolMax = uber[0]["high_estimate"]
-
-    var uberMin = uber[1]["low_estimate"]
-    var uberMax = uber[1]["high_estimate"]
-
-    var xlMin = uber[2]["low_estimate"]
-    var xlMax = uber[2]["high_estimate"]
-
-    var lyft = results[1]["cost_estimates"]
-
-    var lineMin = lyft[0]["estimated_cost_cents_min"] / 100
-    var lineMax = lyft[0]["estimated_cost_cents_max"] / 100
-
-    var lyftMin = lyft[1]["estimated_cost_cents_min"] / 100
-    var lyftMax = lyft[1]["estimated_cost_cents_max"] / 100
-
-    var plusMin = lyft[2]["estimated_cost_cents_min"] / 100
-    var plusMax = lyft[2]["estimated_cost_cents_max"] / 100
+    var lineEst = (results[1][4] / 100).toFixed(2);
+    var lyftEst = (results[1][5] / 100).toFixed(2);
+    var plusEst = (results[1][6] / 100).toFixed(2);
 
     $("#uber").html("Uber:");
-    $("#pool").html("Pool: $" + poolMin + " - " + "$" + poolMax);
-    $("#uberx").html("UberX: $" + uberMin + " - " + "$" + uberMax);
-    $("#uberxl").html("UberXL: $" + xlMin + " - " + "$" + xlMax);
+    $("#pool").html("Pool: $" + poolEst);
+    $("#uberx").html("UberX: $" + uberEst);
+    $("#uberxl").html("UberXL: $" + xlEst);
 
     $("#lyft").html("Lyft:");
-    $("#line").html("Line: $" + lineMin + " - " + "$" + lineMax);
-    $("#lyft-lyft").html("Lyft: $" + lyftMin + " - " + "$" + lyftMax);
-    $("#plus").html("Plus: $" + plusMin + " - " + "$" + plusMax);
+    $("#line").html("Line: $" + lineEst);
+    $("#lyft-lyft").html("Lyft: $" + lyftEst);
+    $("#plus").html("Plus: $" + plusEst);
+    
+}
 
+function passInputs(formInputs) {
+    $("#origin-value").val(formInputs["origin"])
+    $("#dest-value").val(formInputs["destination"])
 }
 
 function getAddressInput(evt) {
+    // Use AJAX to submit user input to route, 
+    // and return to showEstimates function.
+
     evt.preventDefault();
 
     var formInputs = {
@@ -46,6 +41,9 @@ function getAddressInput(evt) {
     $.post("/estimates.json",
         formInputs,
         showEstimates);
+
+    passInputs(formInputs);
+
 }
 
 $("#estimate-form").on("submit", getAddressInput);

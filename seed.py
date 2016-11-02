@@ -22,10 +22,10 @@ def load_users():
     User.query.delete()
 
     for row in open("seed_data/u.user"):
-        row = row.rstrip()
+        row = row.strip()
         email, password = row.split("|")
 
-        user = User(email=email, password=password)
+        user = User(email=email.strip(), password=password.strip())
 
         db.session.add(user)
 
@@ -39,7 +39,7 @@ def load_addresses():
     Address.query.delete()
 
     for row in open("seed_data/u.address"):
-        row = row.rstrip()
+        row = row.strip()
         g = geocoder.google(row)
 
         address = Address(latitude=g.latlng[0], longitude=g.latlng[1],
