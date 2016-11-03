@@ -3,20 +3,40 @@
 
     <h1>Ride Thrift</h2>
 
-
     <form id="estimate-form" method="post" action="/estimates.json">
         <label>Origin:</label>
         <input type="text" name="origin" id="orig-field">
+        {% if session %}
+            Saved Addresses:
+            <select name="origins" id="origin-drop">
+                <option value="-">-
+                {% for user_address in user.user_addresses %}
+                    <option value="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}">{{ user_address.label }}
+                {% endfor %}
+            </select>
+        {% endif %}
+        <br>
         <label>Destination:</label>
         <input type="text" name="destination" id="dest-field">
+        {% if session %}
+            Saved Addresses:
+            <select name="dests" id="dest-drop">
+                <option value="-">-
+                {% for user_address in user.user_addresses %}
+                    <option value="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}">{{ user_address.label }}
+                {% endfor %}
+            </select>
+        {% endif %}
         <br><input type="submit" value="Get Estimates"><br>
         
     </form>
-    <form id="addresses" method="post" action="/save-address">
-        <input type="hidden" name="origin" id="origin-value">
-        <input type="hidden" name="destination" id="dest-value">
-        <br><input type="submit" value="Save Address" id="save-add"><br>
-    </form>
+    {% if session %}    
+        <form id="addresses" method="post" action="/save-address">
+            <input type="hidden" name="origin" id="origin-value">
+            <input type="hidden" name="destination" id="dest-value">
+            <br><input type="submit" value="Save Address" id="save-add"><br>
+        </form>
+    {% endif %}
     <ul><span id="uber"></span>
         <li id="pool"></li>
         <li id="uberx"></li>

@@ -25,6 +25,7 @@ function showEstimates(results) {
 function passInputs(formInputs) {
     $("#origin-value").val(formInputs["origin"])
     $("#dest-value").val(formInputs["destination"])
+    $("#save-add").show();
 }
 
 function getAddressInput(evt) {
@@ -45,5 +46,19 @@ function getAddressInput(evt) {
     passInputs(formInputs);
 
 }
+
+$("#save-add").hide();
+
+$("#origin-drop").on("change", function (evt) {
+    if ($("#origin-drop").val() != "-") {
+        $("#orig-field").attr("value", $("#origin-drop").val());
+    }
+});
+
+$("#dest-drop").on("change", function (evt) {
+    if ($("#dest-drop").val() != "-") {
+        $("#dest-field").attr("value", $("#dest-drop").val());
+    }
+});
 
 $("#estimate-form").on("submit", getAddressInput);

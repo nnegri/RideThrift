@@ -3,23 +3,31 @@
     
     <form id="save-origin" method="post" action="/address-saved">
         {{ origin }}<br>
-        <input type="hidden" name="origin" value="{{ origin }}">
-        Label: <input type="text" name="label" id="label"><br>
-        <input type="submit" value="Save">
-    </form>
-    <form id="save-dest" method="post" action="/address-saved">
+        <input type="hidden" name="origin" id="orig-text">
+        <input type="checkbox" name="origin" value="save" id="orig-check">
+        Label: <input type="text" name="label-or" id="label"><br>
         {{ destination }}<br>
-        <input type="hidden" name="dest" value="{{ destination }}">
-        Label: <input type="text" name="label" id="label"><br>
-        <input type="submit" value="Save">
+        <input type="hidden" name="dest" id="dest-text">
+        <input type="checkbox" name="dest" value="save" id="dest-check">
+        Label: <input type="text" name="label-de" id="label"><br>
+        <input type="submit" value="Save" id="save-address" disabled>
     </form>
-    <p id="success"></p>
+    <a href="/">Cancel</a>
 
     <script type="text/javascript">
+        "use strict";
 
-        $("#estimate-form").on("submit", function (evt) {
-            $("#success").html("Address saved");
+        $("#orig-check").on("change", function (evt) {
+            $("#save-address").prop("disabled", false);
+            $("#orig-text").attr("value", "{{ origin }}");
         });
+
+        $("#dest-check").on("change", function (evt) {
+            $("#save-address").prop("disabled", false);
+            $("#dest-text").attr("value", "{{ destination }}");
+        });
+
+
     </script>
 
 {% endblock %}

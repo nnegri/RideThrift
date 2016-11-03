@@ -8,7 +8,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from model import (connect_to_db, db, User, Address, UserAddress, RideType, Estimate)
 from apifunctions import getRideEstimates
-from datafunctions import estimatesToData
+from datafunctions import (estimatesToData, addressToData)
 
 import geocoder
 
@@ -26,7 +26,13 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 def index():
     """Homepage."""
 
-    return render_template("index.html")
+    if "user_id" in session:
+        user = User.query.filter_by(user_id = session["user_id"]).first()
+
+        return render_template("index.html", user=user)
+
+    else:
+        return render_template("index.html")
 
 @app.route('/estimates.json', methods=["POST"])
 def get_estimates():
@@ -118,8 +124,14 @@ def save_address():
     origin_address = request.form.get("origin")
     dest_address = request.form.get("destination")  
 
-    return render_template("save-address.html", origin=origin_address, 
-                            destination=dest_address) 
+    o = geocoder.google(origin_address)
+    d = geocoder.google(dest_address)
+
+    origin = o.housenumber + " " + o.street + ", " + o.city + ", " + o.state
+    destination = d.housenumber + " " + d.street + ", " + d.city + ", " + d.state
+
+    return render_template("save-address.html", origin=origin, 
+                            destination=destination) 
 
 
 @app.route('/address-saved', methods=['POST'])
@@ -128,31 +140,12 @@ def address_saved():
 
     origin = request.form.get("origin")
     destination = request.form.get("dest")
-    label = request.form.get("label")
+    orig_label = request.form.get("label-or")
+    dest_label = request.form.get("label-de")
 
-    if origin != None:
-        address = origin
-    elif destination != None:
-        address = destination
+    addressToData(origin, destination, orig_label, dest_label)
 
-    g = geocoder.google(address)
-
-    new_address = Address(latitude=g.latlng[0], longitude=g.latlng[1],
-                          house_number=g.housenumber, street=g.street,
-                          city=g.city, state=g.state, postal=g.postal)
-
-    db.session.add(new_address)
-    db.session.commit()
-
-    new_user_address = UserAddress(user_id=session["user_id"], 
-                       address_id=new_address.address_id, label=label)
-
-    db.session.add(new_user_address)
-    db.session.commit()
-
-    flash("Address saved.")
-    return redirect("/") # OR stay on same page to save other, 
-                         # or go to "manage saved addresses page"
+    return redirect("/") 
 
 
 if __name__ == "__main__":

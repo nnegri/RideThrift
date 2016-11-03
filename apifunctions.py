@@ -9,14 +9,14 @@ import os
 
 #Authorize access to Lyft API
 auth_flow = ClientCredentialGrant(
-    client_id=os.environ['CLIENT_ID'], 
-    client_secret=os.environ['CLIENT_SECRET'], 
+    client_id=os.environ['LYFT_CLIENT_ID'], 
+    client_secret=os.environ['LYFT_CLIENT_SECRET'], 
     scopes=None)
 session = auth_flow.get_session()
 lyft_client = LyftRidesClient(session)
 
 #Authorize access to Uber API
-session = Session(server_token=os.environ['SERVER_TOKEN'])
+session = Session(server_token=os.environ['UBER_SERVER_TOKEN'])
 uber_client = UberRidesClient(session)
 
 

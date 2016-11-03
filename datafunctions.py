@@ -1,6 +1,8 @@
 from model import (db, connect_to_db, User, Address, UserAddress, RideType, Estimate)
 from datetime import datetime
 import random
+import geocoder
+from flask import session, flash
 
 def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
     """Send data on estimates to estimates table."""
@@ -82,3 +84,47 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
     db.session.commit()
 
     return uber_est_dict, lyft_est_dict
+
+
+def addressToData(origin, destination, orig_label, dest_label):
+
+    addresses = []
+
+    if origin != "":
+        if orig_label == "":
+            orig_label = origin
+        addresses.append((origin, orig_label))
+
+    if destination != "":
+        if dest_label == "":
+            dest_label = destination
+        addresses.append((destination, dest_label))
+
+    for address in addresses:
+        g = geocoder.google(address[0])
+
+        addr_list = db.session.query(Address.latitude, Address.longitude).all()
+
+        if (g.latlng[0], g.latlng[1]) in addr_list:
+            input_address = Address.query.filter((Address.latitude == g.latlng[0]) 
+                                       & (Address.longitude == g.latlng[1])).one()     
+        else:           
+            input_address = Address(latitude=g.latlng[0], longitude=g.latlng[1],
+                                    house_number=g.housenumber, street=g.street,
+                                    city=g.city, state=g.state, postal=g.postal)
+
+            db.session.add(input_address)
+            db.session.commit()    
+
+        new_user_address = UserAddress(user_id=session["user_id"], 
+                           address_id=input_address.address_id, label=address[1])
+
+        db.session.add(new_user_address)
+
+    db.session.commit()
+
+    if len(addresses) == 1:
+        flash("Address saved.")
+    elif len(addresses) == 2:
+        flash("Addresses saved.")
+    
