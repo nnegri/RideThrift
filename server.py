@@ -17,6 +17,7 @@ app = Flask(__name__)
 app.secret_key = "SECRET"
 
 app.jinja_env.undefined = StrictUndefined
+app.jinja_env.auto_reload = True
 
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
@@ -38,17 +39,15 @@ def index():
 def get_estimates():
     """Take user input and request estimates from Uber and Lyft."""
 
-    origin_address = request.form.get("origin")
-    dest_address = request.form.get("destination")
-
-    origin = geocoder.google(origin_address)
-    destination = geocoder.google(dest_address)
-
-    origin_lat = origin.latlng[0]
-    origin_lng = origin.latlng[1]
-
-    dest_lat = destination.latlng[0]
-    dest_lng = destination.latlng[1]
+    origin = request.form.get("origin_address")
+    origin_lat = request.form.get("origin_lat")
+    origin_lng = request.form.get("origin_lng")
+    origin_arr = request.form.get("origin-arr")
+    
+    destination = request.form.get("dest_address")
+    dest_lat = request.form.get("dest_lat")
+    dest_lng = request.form.get("dest_lng")
+    dest_arr = request.form.get("dest-arr")
 
     ride_estimates = getRideEstimates(origin_lat, origin_lng, 
                                           dest_lat, dest_lng)
@@ -122,28 +121,39 @@ def logout():
 def save_address():
     """Save user address to use later"""
     origin_address = request.form.get("origin")
-    dest_address = request.form.get("destination")  
+    origin_lat = request.form.get("origin-lat")
+    origin_lng = request.form.get("origin-lng")
+    origin_array = request.form.get("origin-array")
 
-    o = geocoder.google(origin_address)
-    d = geocoder.google(dest_address)
+    dest_address = request.form.get("destination")
+    dest_lat = request.form.get("dest-lat")
+    dest_lng = request.form.get("dest-lng")
+    dest_array = request.form.get("dest-array")
 
-    origin = o.housenumber + " " + o.street + ", " + o.city + ", " + o.state
-    destination = d.housenumber + " " + d.street + ", " + d.city + ", " + d.state
-
-    return render_template("save-address.html", origin=origin, 
-                            destination=destination) 
+    return render_template("save-address.html", origin=origin_address, 
+                            origin_lat=origin_lat, origin_lng=origin_lng,
+                            origin_array=origin_array, destination=dest_address,
+                            dest_lat=dest_lat, dest_lng=dest_lng, 
+                            dest_array=dest_array) 
 
 
 @app.route('/address-saved', methods=['POST'])
 def address_saved():
     """Save user address to use later"""
 
-    origin = request.form.get("origin")
-    destination = request.form.get("dest")
+    origin_lat = request.form.get("origin-lat")
+    origin_lng = request.form.get("origin-long")
+    origin_array = request.form.get("origin-arr")
+
+    dest_lat = request.form.get("dest-lat")
+    dest_lng = request.form.get("dest-long")
+    dest_array = request.form.get("dest-arr")
+
     orig_label = request.form.get("label-or")
     dest_label = request.form.get("label-de")
 
-    addressToData(origin, destination, orig_label, dest_label)
+    addressToData(origin_lat, origin_lng, origin_array, dest_lat, dest_lng, 
+                dest_array, orig_label, dest_label)
 
     return redirect("/") 
 

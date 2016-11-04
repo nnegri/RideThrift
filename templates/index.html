@@ -5,25 +5,44 @@
 
     <form id="estimate-form" method="post" action="/estimates.json">
         <label>Origin:</label>
-        <input type="text" name="origin" id="orig-field">
+
+        <input type="hidden" name="origin-add" id="or-formatted-address"> 
+        <input type="hidden" name="origin-lat" id="orig-lat" value="origin"> 
+        <input type="hidden" name="origin-lng" id="orig-lng" value="origin">
+        <input type="hidden" name="origin-arr" id="orig-arr" value="origin">
+
+        <div id="locationField">
+            <input class = "auto" id="autocomplete-orig" placeholder="Enter your address"
+             onFocus="geolocate()" type="text"></input>
+        </div>
+
+
         {% if session %}
-            Saved Addresses:
             <select name="origins" id="origin-drop">
-                <option value="-">-
+                <option value="-">Saved Addresses
                 {% for user_address in user.user_addresses %}
-                    <option value="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}">{{ user_address.label }}
+                    <option value="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}" data-format="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}" data-lat="{{ user_address.address.latitude }}">{{ user_address.label }}
                 {% endfor %}
             </select>
         {% endif %}
         <br>
         <label>Destination:</label>
-        <input type="text" name="destination" id="dest-field">
+
+        <input type="hidden" name="dest-add" id="de-formatted-address"> 
+        <input type="hidden" name="dest-lat" id="dest-lat" value="dest"> 
+        <input type="hidden" name="dest-lng" id="dest-lng" value="dest">
+        <input type="hidden" name="dest-arr" id="dest-arr" value="dest">
+
+        <div id="locationField">
+            <input class = "auto" id="autocomplete-dest" placeholder="Enter your address"
+             onFocus="geolocate()" type="text"></input>
+        </div>
+
         {% if session %}
-            Saved Addresses:
             <select name="dests" id="dest-drop">
-                <option value="-">-
+                <option value="-">Saved Addresses
                 {% for user_address in user.user_addresses %}
-                    <option value="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}">{{ user_address.label }}
+                    <option value="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}" data-format="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}" data-lat="{{ user_address.address.latitude }}">{{ user_address.label }}
                 {% endfor %}
             </select>
         {% endif %}
@@ -33,7 +52,13 @@
     {% if session %}    
         <form id="addresses" method="post" action="/save-address">
             <input type="hidden" name="origin" id="origin-value">
+            <input type="hidden" name="origin-lat" id="origin-lat">
+            <input type="hidden" name="origin-lng" id="origin-lng">
+            <input type="hidden" name="origin-array" id="origin-array">
             <input type="hidden" name="destination" id="dest-value">
+            <input type="hidden" name="dest-lat" id="destin-lat">
+            <input type="hidden" name="dest-lng" id="destin-lng">
+            <input type="hidden" name="dest-array" id="destin-array">
             <br><input type="submit" value="Save Address" id="save-add"><br>
         </form>
     {% endif %}
@@ -49,7 +74,10 @@
         <li id="plus"></li>
     </ul>
 
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDONgg2Pw6W0awiwVNAVRD0HTK6Hzz2OA4&libraries=places&callback=initAutocomplete" async defer></script>
     <script src="/static/js/submit-addresses.js"></script>
 
+
+    
 
 {% endblock %}
