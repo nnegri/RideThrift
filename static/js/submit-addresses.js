@@ -9,8 +9,6 @@ function initAutocomplete() {
     autocomplete_dest = new google.maps.places.Autocomplete(
         (document.getElementById('autocomplete-dest')));
 
-    console.dir(autocomplete_orig[0]);
-
     autocomplete_orig.addListener('place_changed', fillInOrAddress);
     autocomplete_dest.addListener('place_changed', fillInDeAddress);
 
@@ -21,40 +19,59 @@ function fillInOrAddress() {
     var or_place = autocomplete_orig.getPlace();
 
     var val = or_place.formatted_address;
-    document.getElementById('or-formatted-address').value = val;
+    $('.origin-address').val(val);
+    $("#or-formatted-address").html(val);
 
     var val = or_place.geometry.location.lat();
-    document.getElementById('orig-lat').value = val;
+    $('.origin-lat').val(val);
 
     var val = or_place.geometry.location.lng();
-    document.getElementById('orig-lng').value = val;
+    $('.origin-lng').val(val);
 
-    var val = [or_place.address_components[0].long_name, 
-               or_place.address_components[1].short_name,
-               or_place.address_components[3].short_name,
-               or_place.address_components[5].short_name,
-               or_place.address_components[7].short_name]
-    document.getElementById('orig-arr').value = val;
+    var val = or_place.address_components[0].long_name;
+    $('#origin-house-num').val(val); 
+
+    var val = or_place.address_components[1].short_name;
+    $('#origin-street').val(val);
+
+    var val = or_place.address_components[3].short_name;
+    $('#origin-city').val(val);
+
+    var val = or_place.address_components[5].short_name;
+    $('#origin-state').val(val);
+
+    var val =  or_place.address_components[7].short_name;
+    $('#origin-postal').val(val);
+
 }
 
 function fillInDeAddress() {
     var de_place = autocomplete_dest.getPlace();
 
     var val = de_place.formatted_address;
-    document.getElementById('de-formatted-address').value = val;
+    $('.destn-address').val(val);
+    $("#de-formatted-address").html(val);
 
     var val = de_place.geometry.location.lat();
-    document.getElementById('dest-lat').value = val;
+    $('.destn-lat').val(val);
     
     var val = de_place.geometry.location.lng();
-    document.getElementById('dest-lng').value = val;
+    $('.destn-lng').val(val);
 
-    var val = [de_place.address_components[0].long_name, 
-               de_place.address_components[1].short_name,
-               de_place.address_components[3].short_name,
-               de_place.address_components[5].short_name,
-               de_place.address_components[7].short_name]
-    document.getElementById('dest-arr').value = val;
+    var val = de_place.address_components[0].long_name;
+    $('#destn-house-num').val(val); 
+
+    var val = de_place.address_components[1].short_name;
+    $('#destn-street').val(val);
+
+    var val = de_place.address_components[3].short_name;
+    $('#destn-city').val(val);
+
+    var val = de_place.address_components[5].short_name;
+    $('#destn-state').val(val);
+
+    var val =  de_place.address_components[7].short_name;
+    $('#destn-postal').val(val);
 }
 
 function geolocate() {
@@ -98,18 +115,6 @@ function showEstimates(results) {
     
 }
 
-function passInputs(formInputs) {
-    $("#origin-value").val(formInputs["origin_address"]);
-    $("#origin-lat").val(formInputs["origin_lat"]);
-    $("#origin-lng").val(formInputs["origin_lng"]);
-    $("#origin-array").val(formInputs["origin_arr"]);
-    $("#dest-value").val(formInputs["dest_address"]);
-    $("#destin-lat").val(formInputs["dest_lat"]);
-    $("#destin-lng").val(formInputs["dest_lng"]);
-    $("#destin-array").val(formInputs["dest_arr"]);
-    $("#save-add").show();
-}
-
 function getAddressInput(evt) {
     // Use AJAX to submit user input to route, 
     // and return to showEstimates function.
@@ -117,21 +122,18 @@ function getAddressInput(evt) {
     evt.preventDefault();
 
     var formInputs = {
-        "origin_address": $("#or-formatted-address").val(),      
         "origin_lat": $("#orig-lat").val(),
         "origin_lng": $("#orig-lng").val(),
-        "origin_arr": $("#orig-arr").val(),
-        "dest_address": $("#de-formatted-address").val(),
         "dest_lat": $("#dest-lat").val(),
         "dest_lng": $("#dest-lng").val(),
-        "dest_arr": $("#dest-arr").val()
     };
 
     $.post("/estimates.json",
         formInputs,
         showEstimates);
 
-    passInputs(formInputs);
+
+    $("#save-add").show();
 
 }
 
@@ -143,11 +145,13 @@ $("#origin-drop").on("change", function (evt) {
         $("#autocomplete-orig").val($("#origin-drop").val());
         var or_lat = $(this).find("option:selected").data("lat");
         var or_lng = $(this).find("option:selected").data("lng");
+        var or_num = $(this).find("option:selected").data("num");
         var or_format = $(this).find("option:selected").data("format");
 
-        $("#orig-lat").val(or_lat);
-        $("#orig-lng").val(or_lng);
-        $("#or-formatted-address").val(or_format);
+        $(".origin-lat").val(or_lat);
+        $(".origin-lng").val(or_lng);
+        // $(".origin-address").val(or_format);
+        $("#or-formatted-address").html(or_format);
         
     }
 });
@@ -160,9 +164,10 @@ $("#dest-drop").on("change", function (evt) {
         var de_lng = $(this).find("option:selected").data("lng");
         var de_format = $(this).find("option:selected").data("format");
 
-        $("#dest-lat").val(de_lat);
-        $("#dest-lng").val(de_lng);
-        $("#de-formatted-address").val(de_format);
+        $(".destn-lat").val(de_lat);
+        $(".destn-lng").val(de_lng);
+        // $(".destn-address").val(de_format);
+        $("#de-formatted-address").html(de_format);
 
     }
 });

@@ -39,15 +39,11 @@ def index():
 def get_estimates():
     """Take user input and request estimates from Uber and Lyft."""
 
-    origin = request.form.get("origin_address")
     origin_lat = request.form.get("origin_lat")
     origin_lng = request.form.get("origin_lng")
-    origin_arr = request.form.get("origin-arr")
     
-    destination = request.form.get("dest_address")
     dest_lat = request.form.get("dest_lat")
     dest_lng = request.form.get("dest_lng")
-    dest_arr = request.form.get("dest-arr")
 
     ride_estimates = getRideEstimates(origin_lat, origin_lng, 
                                           dest_lat, dest_lng)
@@ -117,43 +113,34 @@ def logout():
     flash("Logged Out.")
     return redirect("/")
 
-@app.route('/save-address', methods=['POST'])
-def save_address():
-    """Save user address to use later"""
-    origin_address = request.form.get("origin")
-    origin_lat = request.form.get("origin-lat")
-    origin_lng = request.form.get("origin-lng")
-    origin_array = request.form.get("origin-array")
-
-    dest_address = request.form.get("destination")
-    dest_lat = request.form.get("dest-lat")
-    dest_lng = request.form.get("dest-lng")
-    dest_array = request.form.get("dest-array")
-
-    return render_template("save-address.html", origin=origin_address, 
-                            origin_lat=origin_lat, origin_lng=origin_lng,
-                            origin_array=origin_array, destination=dest_address,
-                            dest_lat=dest_lat, dest_lng=dest_lng, 
-                            dest_array=dest_array) 
-
 
 @app.route('/address-saved', methods=['POST'])
 def address_saved():
     """Save user address to use later"""
 
     origin_lat = request.form.get("origin-lat")
-    origin_lng = request.form.get("origin-long")
-    origin_array = request.form.get("origin-arr")
+    origin_lng = request.form.get("origin-lng")
+    origin_house_num = request.form.get("origin-house-num")
+    origin_street = request.form.get("origin-street")
+    origin_city = request.form.get("origin-city")
+    origin_state = request.form.get("origin-state")
+    origin_postal = request.form.get("origin-postal")
 
     dest_lat = request.form.get("dest-lat")
-    dest_lng = request.form.get("dest-long")
-    dest_array = request.form.get("dest-arr")
+    dest_lng = request.form.get("dest-lng")
+    dest_house_num = request.form.get("destn-house-num")
+    dest_street = request.form.get("destn-street")
+    dest_city = request.form.get("destn-city")
+    dest_state = request.form.get("destn-state")
+    dest_postal = request.form.get("destn-postal")
 
     orig_label = request.form.get("label-or")
     dest_label = request.form.get("label-de")
 
-    addressToData(origin_lat, origin_lng, origin_array, dest_lat, dest_lng, 
-                dest_array, orig_label, dest_label)
+    addressToData(origin_lat, origin_lng, origin_house_num, origin_street, 
+                  origin_city, origin_state, origin_postal, dest_lat, dest_lng, 
+                  dest_house_num, dest_street, dest_city, dest_state, 
+                  dest_postal, orig_label, dest_label)
 
     return redirect("/") 
 

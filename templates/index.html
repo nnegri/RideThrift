@@ -6,10 +6,8 @@
     <form id="estimate-form" method="post" action="/estimates.json">
         <label>Origin:</label>
 
-        <input type="hidden" name="origin-add" id="or-formatted-address"> 
-        <input type="hidden" name="origin-lat" id="orig-lat" value="origin"> 
-        <input type="hidden" name="origin-lng" id="orig-lng" value="origin">
-        <input type="hidden" name="origin-arr" id="orig-arr" value="origin">
+        <input type="hidden" class="origin-lat" name="origin-lat" id="orig-lat" value="origin"> 
+        <input type="hidden" class="origin-lng" name="origin-lng" id="orig-lng" value="origin">
 
         <div id="locationField">
             <input class = "auto" id="autocomplete-orig" placeholder="Enter your address"
@@ -21,17 +19,15 @@
             <select name="origins" id="origin-drop">
                 <option value="-">Saved Addresses
                 {% for user_address in user.user_addresses %}
-                    <option value="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}" data-format="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}" data-lat="{{ user_address.address.latitude }}">{{ user_address.label }}
+                    <option value="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}" data-format="{{ user_address.label }}">{{ user_address.label }}
                 {% endfor %}
             </select>
         {% endif %}
         <br>
         <label>Destination:</label>
 
-        <input type="hidden" name="dest-add" id="de-formatted-address"> 
-        <input type="hidden" name="dest-lat" id="dest-lat" value="dest"> 
-        <input type="hidden" name="dest-lng" id="dest-lng" value="dest">
-        <input type="hidden" name="dest-arr" id="dest-arr" value="dest">
+        <input type="hidden" class="destn-lat" name="dest-lat" id="dest-lat" value="dest"> 
+        <input type="hidden" class="destn-lng" name="dest-lng" id="dest-lng" value="dest">
 
         <div id="locationField">
             <input class = "auto" id="autocomplete-dest" placeholder="Enter your address"
@@ -42,26 +38,15 @@
             <select name="dests" id="dest-drop">
                 <option value="-">Saved Addresses
                 {% for user_address in user.user_addresses %}
-                    <option value="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}" data-format="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}" data-lat="{{ user_address.address.latitude }}">{{ user_address.label }}
+                    <option value="{{ user_address.address.house_number }} {{ user_address.address.street }} {{ user_address.address.city }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}" data-format="{{ user_address.address.house_number }} {{ user_address.address.street }}, {{ user_address.address.city }}">{{ user_address.label }}
                 {% endfor %}
             </select>
         {% endif %}
-        <br><input type="submit" value="Get Estimates"><br>
-        
+        <br><input type="submit" value="Get Estimates"><br>    
+        {% if session %}    
+                <br><input type="submit" value="Save Address" id="save-add"><br>         
+        {% endif %}
     </form>
-    {% if session %}    
-        <form id="addresses" method="post" action="/save-address">
-            <input type="hidden" name="origin" id="origin-value">
-            <input type="hidden" name="origin-lat" id="origin-lat">
-            <input type="hidden" name="origin-lng" id="origin-lng">
-            <input type="hidden" name="origin-array" id="origin-array">
-            <input type="hidden" name="destination" id="dest-value">
-            <input type="hidden" name="dest-lat" id="destin-lat">
-            <input type="hidden" name="dest-lng" id="destin-lng">
-            <input type="hidden" name="dest-array" id="destin-array">
-            <br><input type="submit" value="Save Address" id="save-add"><br>
-        </form>
-    {% endif %}
     <ul><span id="uber"></span>
         <li id="pool"></li>
         <li id="uberx"></li>
@@ -74,10 +59,72 @@
         <li id="plus"></li>
     </ul>
 
+
+    <!-- Modal Window -->
+
+    <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="save-add-modal">
+      <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form id="save-origin" method="post" action="/address-saved">
+                    <p class="origin-address" id="or-formatted-address"></p> 
+                    <input type="hidden" class="origin-lat" name="origin-lat" id="orig-lat">
+                    <input type="hidden" class="origin-lng" name="origin-lng" id="orig-lng">
+                    <input type="hidden" name="origin-house-num" id="origin-house-num">
+                    <input type="hidden" name="origin-street" id="origin-street">
+                    <input type="hidden" name="origin-city" id="origin-city">
+                    <input type="hidden" name="origin-state" id="origin-state">
+                    <input type="hidden" name="origin-postal" id="origin-postal">
+                    <!-- <input type="hidden" name="origin-array" id="orig-arr"> -->
+                    <input type="checkbox" name="origin" value="save" id="orig-check" checked="checked">
+                    Label: <input type="text" name="label-or" id="label"><br>
+                    <p class="dest-address" id="de-formatted-address"></p> 
+                    <input type="hidden" class="destn-lat" name="dest-lat" id="dest-lat">
+                    <input type="hidden" class="destn-lng" name="dest-lng" id="dest-lng">
+                    <input type="hidden" name="destn-house-num" id="destn-house-num">
+                    <input type="hidden" name="destn-street" id="destn-street">
+                    <input type="hidden" name="destn-city" id="destn-city">
+                    <input type="hidden" name="destn-state" id="destn-state">
+                    <input type="hidden" name="destn-postal" id="destn-postal">
+                    <!-- <input type="hidden" name="dest-array" id="dest-arr"> -->
+                    <input type="checkbox" name="dest" value="save" id="dest-check" checked="checked">
+                    Label: <input type="text" name="label-de" id="label"><br>
+                    <input type="submit" value="Save" id="save-address">
+                </form>
+    <a href="/">Cancel</a>
+
+    <script type="text/javascript">
+        "use strict";
+
+
+        $(document).on("click", "#save-add", function() {
+            $("#save-add-modal").modal("show");
+            // $("#save-address").prop("disabled", true);
+        });
+
+        $("#orig-check").on("change", function (evt) {
+            // $("#save-address").prop("disabled", false);
+            $("#orig-lat").attr("value", "");
+            $("#orig-lng").attr("value", "");
+            $("#orig-array").attr("value", "");
+        });
+
+        $("#dest-check").on("change", function (evt) {
+            // $("#save-address").prop("disabled", false);
+            $("#dest-lat").attr("value", "");
+            $("#dest-lng").attr("value", "");
+            $("#dest-array").attr("value", "");
+        });
+
+    </script>
+
+            </div>
+        </div>
+    </div>
+
+
+
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDONgg2Pw6W0awiwVNAVRD0HTK6Hzz2OA4&libraries=places&callback=initAutocomplete" async defer></script>
     <script src="/static/js/submit-addresses.js"></script>
 
-
-    
 
 {% endblock %}

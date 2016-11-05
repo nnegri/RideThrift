@@ -103,45 +103,61 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
     return uber_est_dict, lyft_est_dict
 
 
-def addressToData(origin_lat, origin_lng, origin_array, dest_lat, dest_lng,
-                    dest_array, orig_label, dest_label):
+def addressToData(origin_lat, origin_lng, origin_house_num, origin_street, 
+                  origin_city, origin_state, origin_postal, dest_lat, dest_lng, 
+                  dest_house_num, dest_street, dest_city, dest_state, 
+                  dest_postal, orig_label, dest_label):
     
     addresses = []
 
     if origin_lat != "":
         if orig_label == "":
-            orig_label = origin_array
+            orig_label = origin_house_num + " " + origin_street + ", " + origin_city
 
-        origin = origin_array.split(",")
+        # origin = origin_array.split(",")
 
-        addresses.append((origin_lat, origin_lng, origin, orig_label))
+        addresses.append({"lat" : origin_lat, 
+                          "lng" : origin_lng,
+                          "house_num" : origin_house_num,
+                          "street" : origin_street,
+                          "city" : origin_city,
+                          "state" : origin_state,
+                          "postal" : origin_postal, 
+                          "label" : orig_label})
 
     if dest_lat != "":
         if dest_label == "":
-            dest_label = dest_array
+            dest_label = dest_house_num + " " + dest_street + ", " + dest_city
 
-        dest = dest_array.split(",")
+        # dest = dest_array.split(",")
 
-        addresses.append((dest_lat, dest_lng, dest, dest_label))
+        addresses.append({"lat" : dest_lat, 
+                          "lng" : dest_lng,
+                          "house_num" : dest_house_num,
+                          "street" : dest_street,
+                          "city" : dest_city,
+                          "state" : dest_state,
+                          "postal" : dest_postal, 
+                          "label" : dest_label})
 
     for address in addresses:
 
         addr_list = db.session.query(Address.latitude, Address.longitude).all()
 
-        if (address[0], address[1]) in addr_list:
-            input_address = Address.query.filter((Address.latitude == address[0]) 
-                                    & (Address.longitude == address[1])).one()     
+        if (address["lat"], address["lng"]) in addr_list:
+            input_address = Address.query.filter((Address.latitude == address["lat"]) 
+                                    & (Address.longitude == address["lng"])).one()     
         else:           
-            input_address = Address(latitude=address[0], longitude=address[1],
-                                    house_number=address[2][0], 
-                                    street=address[2][1], city=address[2][2], 
-                                    state=address[2][3], postal=address[2][4])
+            input_address = Address(latitude=address["lat"], longitude=address["lng"],
+                                    house_number=address["house_num"], 
+                                    street=address["street"], city=address["city"], 
+                                    state=address["state"], postal=address["postal"])
 
             db.session.add(input_address)
             db.session.commit()    
 
         new_user_address = UserAddress(user_id=session["user_id"], 
-                           address_id=input_address.address_id, label=address[3])
+                           address_id=input_address.address_id, label=address["label"])
 
         db.session.add(new_user_address)
 
