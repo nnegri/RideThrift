@@ -22,14 +22,16 @@ uber_client = UberRidesClient(session)
 
 def getRideEstimates(origin_lat, origin_lng, dest_lat, dest_lng):
     """Send requests to Uber and Lyft APIs for estimates."""
-
+    
     uber_est = uber_client.get_price_estimates(
         start_latitude= origin_lat,
         start_longitude= origin_lng,
         end_latitude= dest_lat,
         end_longitude= dest_lng
         )   
+
     uber_estimate = uber_est.json
+    print "\n\n\n", uber_estimate, "\n\n\n"
 
     lyft_est = lyft_client.get_cost_estimates(origin_lat, origin_lng, 
                                               dest_lat, dest_lng)

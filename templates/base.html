@@ -14,7 +14,7 @@ Ride Thrift
 {% if "user_id" in session %}
     <a href="/logout">Logout</a>
 {% else %}
-    <a href="/login">Login</a>
+    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#login-modal">Login</button>
 {% endif %}
 
 <hr>
@@ -27,6 +27,71 @@ Ride Thrift
     Put your body here.
 {% endblock %}
 
+    <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="login-modal" id="login-modal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <h1>Login</h1>
+                <form action="/login" method="POST">
+                    <div>
+                        <label>Email:
+                            <input type="email" name="email" required>
+                        </label>
+                    </div>
+                    <div>
+                        <label>Password:
+                            <input type="password" name="password" required>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="submit" value="Log In">
+                    </div>
+                </form>
+                New user? <button type="button" class="btn btn-primary btn-lg" id="rg" data-toggle="modal" data-target="#register-modal">Register Here!</button>
+                <a href="/">Cancel</a>
+
+                <script type="text/javascript">
+                "use strict";
+                $(document).on("click", "#rg", function() {
+                    $("#login-modal").modal("hide");
+                });
+                </script>
+            </div>
+        </div>
+    </div>  
+
+    <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="register-modal" id="register-modal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <h1>Register</h1>
+                <form action="/register" method="POST">
+                    <div>
+                        <label>Email:
+                            <input type="email" name="email" required>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label>Password:
+                            <input type="password" name="password" required>
+                        </label>
+                    </div>
+
+                    <div>
+                        <input type="submit" value="Register">
+                    </div>
+                </form>
+                Already Registered? <button type="button" class="btn btn-primary btn-lg" id="lgn" data-toggle="modal" data-target="#login-modal">Login Here!</button>
+                <a href="/">Cancel</a>
+
+                <script type="text/javascript">
+                "use strict";
+                $(document).on("click", "#lgn", function() {
+                    $("#register-modal").modal("hide");
+                });
+                </script>
+            </div>
+        </div>
+    </div> 
 
 </body>
 </html>

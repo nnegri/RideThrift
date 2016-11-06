@@ -44,6 +44,7 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
         time = uber["duration"]
         surge = float(uber["surge_multiplier"])
 
+        print "\n\n\n\n\nUber: ", surge
 
         estimate = Estimate(origin_lat=origin_lat, origin_long=origin_lng, 
                         dest_lat=dest_lat, dest_long=dest_lng, distance=distance, 
@@ -83,12 +84,12 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
 
         distance = lyft["estimated_distance_miles"]
         time = lyft["estimated_duration_seconds"]
-
+        print "\n\n\n\n", lyft["primetime_percentage"]
         if lyft["primetime_percentage"] == "0%":
             surge = 1.0
         else:
             surge = float(lyft["primetime_percentage"].strip("%")) / 100 + 1
-        
+        print "\n\n\n\n\nLyft: ", surge, "\n\n\n\n"
 
         estimate = Estimate(origin_lat=origin_lat, origin_long=origin_lng, 
                         dest_lat=dest_lat, dest_long=dest_lng, distance=distance, 
@@ -103,23 +104,21 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
     return uber_est_dict, lyft_est_dict
 
 
-def addressToData(origin_lat, origin_lng, origin_house_num, origin_street, 
+def addressToData(origin_lat, origin_lng, origin_address, 
                   origin_city, origin_state, origin_postal, dest_lat, dest_lng, 
-                  dest_house_num, dest_street, dest_city, dest_state, 
+                  dest_address, dest_city, dest_state, 
                   dest_postal, orig_label, dest_label):
-    
+
     addresses = []
 
     if origin_lat != "":
         if orig_label == "":
-            orig_label = origin_house_num + " " + origin_street + ", " + origin_city
+            orig_label = origin_address
 
-        # origin = origin_array.split(",")
 
         addresses.append({"lat" : origin_lat, 
                           "lng" : origin_lng,
-                          "house_num" : origin_house_num,
-                          "street" : origin_street,
+                          "address" : origin_address,
                           "city" : origin_city,
                           "state" : origin_state,
                           "postal" : origin_postal, 
@@ -127,43 +126,49 @@ def addressToData(origin_lat, origin_lng, origin_house_num, origin_street,
 
     if dest_lat != "":
         if dest_label == "":
-            dest_label = dest_house_num + " " + dest_street + ", " + dest_city
+            dest_label = dest_address
 
-        # dest = dest_array.split(",")
 
         addresses.append({"lat" : dest_lat, 
                           "lng" : dest_lng,
-                          "house_num" : dest_house_num,
-                          "street" : dest_street,
+                          "address" : dest_address,
                           "city" : dest_city,
                           "state" : dest_state,
                           "postal" : dest_postal, 
                           "label" : dest_label})
 
+    addresses_db = [address[0] for address in db.session.query(Address.address).all()]
+    print addresses_db
+    i=0
     for address in addresses:
-
-        addr_list = db.session.query(Address.latitude, Address.longitude).all()
-
-        if (address["lat"], address["lng"]) in addr_list:
-            input_address = Address.query.filter((Address.latitude == address["lat"]) 
-                                    & (Address.longitude == address["lng"])).one()     
+        if address["address"] in addresses_db:
+            input_address = Address.query.filter(Address.address == 
+                                                  address["address"]).one()
         else:           
             input_address = Address(latitude=address["lat"], longitude=address["lng"],
-                                    house_number=address["house_num"], 
-                                    street=address["street"], city=address["city"], 
+                                    address=address["address"], city=address["city"], 
                                     state=address["state"], postal=address["postal"])
 
             db.session.add(input_address)
             db.session.commit()    
 
-        new_user_address = UserAddress(user_id=session["user_id"], 
-                           address_id=input_address.address_id, label=address["label"])
+        print input_address
+        user_addresses = [u_address[0] for u_address in 
+                          db.session.query(UserAddress.address_id).filter
+                          (UserAddress.user_id == session["user_id"]).all()]
 
-        db.session.add(new_user_address)
+        if input_address.address_id in user_addresses:
+            flash("Address already saved.")
+            addresses.remove(address)
+        else:
+            new_user_address = UserAddress(user_id=session["user_id"], 
+                               address_id=input_address.address_id, label=address["label"])
 
-    db.session.commit()
-
-    if len(addresses) == 1:
-        flash("Address saved.")
-    elif len(addresses) == 2:
-        flash("Addresses saved.")
+            db.session.add(new_user_address)
+            db.session.commit()            
+            if i == 0:
+                if len(addresses) == 1:
+                    flash("Address saved.")
+                elif len(addresses) == 2:
+                    flash("Addresses saved.")
+                i += 1

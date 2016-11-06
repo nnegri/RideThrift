@@ -32,8 +32,9 @@ class Address(db.Model):
     address_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
-    house_number = db.Column(db.String(10), nullable=False)
-    street = db.Column(db.String(20), nullable=False)
+    address = db.Column(db.String(60), nullable=False)
+    # house_number = db.Column(db.String(10), nullable=False)
+    # street = db.Column(db.String(20), nullable=False)
     city = db.Column(db.String(20), nullable=False)
     state = db.Column(db.String(20), nullable=False)
     postal = db.Column(db.String(15), nullable=False)
@@ -41,8 +42,8 @@ class Address(db.Model):
     def __repr__(self):
         """Address representation when printed."""
 
-        s = "<Address address_id=%s latitude=%s longitude=%s street=%s>" 
-        return s % (self.address_id, self.latitude, self.longitude, self.street)
+        s = "<Address address_id=%s latitude=%s longitude=%s>" 
+        return s % (self.address_id, self.latitude, self.longitude)
 
 
 class UserAddress(db.Model): 
@@ -54,7 +55,7 @@ class UserAddress(db.Model):
     user_add_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
     address_id = db.Column(db.Integer, db.ForeignKey("addresses.address_id"), nullable=False)
-    label = db.Column(db.String(40), nullable=True)
+    label = db.Column(db.String(60), nullable=True)
 
     user = db.relationship("User", backref=db.backref("user_addresses", order_by=user_add_id))
 
