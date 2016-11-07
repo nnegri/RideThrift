@@ -55,7 +55,7 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
 
 
     lyft_ests = []
-
+    print ride_estimates[1]
     i = 0
     for i in range(len(ride_estimates[1]["cost_estimates"])):
         lyft_ests.append(ride_estimates[1]["cost_estimates"][i])
