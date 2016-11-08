@@ -20,30 +20,25 @@ function fillInOrAddress() {
     // Get latitude, longitude, and complete addresses for origin input by users
     var or_place = autocomplete_orig.getPlace();
     
-    var val = or_place.formatted_address;
-    $('.origin-address').val(val);
-    $("#or-formatted-address").html(val);
+    var val_form = or_place.formatted_address;
+    var val_name = or_place.name;
+
+    if (or_place.adr_address === '') { // If intersection
+        $('#origin-address').val(val_name);
+    }
+    else {
+        $('#origin-address').val(val_form);
+    }
+    
+    $("#or-display-address").html(val_name);
+
+    $("#origin-name").val(val_name);
 
     var val = or_place.geometry.location.lat();
-    $('#orig-lat-est').val(val);
+    $('#orig-lat-est').val(val); 
 
     var val = or_place.geometry.location.lng();
     $('#orig-lng-est').val(val);
-
-    // var val = or_place.address_components[0].long_name;
-    // $('#origin-house-num').val(val); 
-
-    // var val = or_place.address_components[1].short_name;
-    // $('#origin-street').val(val);
-    // if or_place.address_components[0]
-    var val = or_place.address_components[3].short_name;
-    $('#origin-city').val(val);
-
-    var val = or_place.address_components[5].short_name;
-    $('#origin-state').val(val);
-
-    var val =  or_place.address_components[7].short_name;
-    $('#origin-postal').val(val);
 
 }
 
@@ -51,30 +46,25 @@ function fillInDeAddress() {
     // Get latitude, longitude, and complete addresses for destination input by users
     var de_place = autocomplete_dest.getPlace();
     
-    var val = de_place.formatted_address;
-    $('.destn-address').val(val);
-    $("#de-formatted-address").html(val);
+    var val_form = de_place.formatted_address;
+    var val_name = de_place.name;
+
+    if (de_place.adr_address === '') { // If intersection
+        $('#destn-address').val(val_name);
+    }
+    else {
+        $('#destn-address').val(val_form);
+    }
+    
+    $("#de-display-address").html(val_name);
+
+    $("#destn-name").val(val_name);
 
     var val = de_place.geometry.location.lat();
     $('#dest-lat-est').val(val);
     
     var val = de_place.geometry.location.lng();
     $('#dest-lng-est').val(val);
-
-    // var val = de_place.address_components[0].long_name;
-    // $('#destn-house-num').val(val); 
-
-    // var val = de_place.address_components[1].short_name;
-    // $('#destn-street').val(val);
-
-    var val = de_place.address_components[3].short_name;
-    $('#destn-city').val(val);
-
-    var val = de_place.address_components[5].short_name;
-    $('#destn-state').val(val);
-
-    var val =  de_place.address_components[7].short_name;
-    $('#destn-postal').val(val);
 }
 
 function geolocate() {
@@ -85,7 +75,6 @@ function geolocate() {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
-        console.log(geolocation);
         var circle = new google.maps.Circle({
           center: geolocation,
           radius: position.coords.accuracy
@@ -95,6 +84,34 @@ function geolocate() {
       });
     }
 }
+
+// User's current location as origin
+$("#location").on("click", function (evt) {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        var geolocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        $('#orig-lat-est').val(geolocation.lat);
+        $('#orig-lng-est').val(geolocation.lng);
+
+        var geocoder = new google.maps.Geocoder();
+        geocoder.geocode({
+            "location": geolocation
+        }, function (results) {
+            var val = results[0].formatted_address
+            $('#origin-address').val(val);
+            $("#or-display-address").html(val);
+            $("#origin-name").val(val);
+            $("#autocomplete-orig").val(val);
+            });
+        })
+    }
+    else {
+        alert("Cannot find current location.")
+    }
+});
 
 
 
@@ -120,19 +137,35 @@ function showEstimates(results) {
         $("#uberx").html("UberX: None available");
     }
     else {
-    $("#uberx").html("UberX: $" + uberEst);
+        $("#uberx").html("UberX: $" + uberEst);
     }
     if (isNaN(xlEst)) {
         $("#uberxl").html("UberXL: None available");
     }
     else {
-    $("#uberxl").html("UberXL: $" + xlEst);
+        $("#uberxl").html("UberXL: $" + xlEst);
     }
 
     $("#lyft").html("Lyft:");
-    $("#line").html("Line: $" + lineEst);
-    $("#lyft-lyft").html("Lyft: $" + lyftEst);
-    $("#plus").html("Plus: $" + plusEst);
+    if (isNaN(lineEst)) {
+        $("#line").html("Line: None available");
+    }
+    else {
+        $("#line").html("Line: $" + lineEst);
+    }
+    if (isNaN(lyftEst)) {
+        $("#lyft-lyft").html("Lyft: None available");
+    }
+    else {
+        $("#lyft-lyft").html("Lyft: $" + lyftEst);
+    }
+    if (isNaN(plusEst)) {
+        $("#plus").html("Plus: None available");
+    }
+    else {
+        $("#plus").html("Plus: $" + plusEst);
+    }
+
     
 }
 
@@ -156,26 +189,38 @@ function getAddressInput(evt) {
         var origin = new google.maps.LatLng($("#orig-lat-est").val(), $("#orig-lng-est").val());
         var dest = new google.maps.LatLng($("#dest-lat-est").val(), $("#dest-lng-est").val());
 
-        var distance = google.maps.geometry.spherical.computeDistanceBetween (origin, dest);
+        var service = new google.maps.DistanceMatrixService();
+
+        service.getDistanceMatrix(
+            {
+                origins: [origin],
+                destinations: [dest],
+                travelMode: google.maps.TravelMode.DRIVING
+            },
+            function (response) {
+                var distance = response["rows"][0]["elements"][0]["distance"]["value"]
+
+                if (distance / 1609.34 > 100) {
+                    alert("Distance must be less than 100 miles.");
+                }
+                else {
+                    var formInputs = {
+                    "origin_lat": $("#orig-lat-est").val(),
+                    "origin_lng": $("#orig-lng-est").val(),
+                    "dest_lat": $("#dest-lat-est").val(),
+                    "dest_lng": $("#dest-lng-est").val(),
+                };
+
+                    $.post("/estimates.json",
+                    formInputs,
+                    showEstimates);
+
+                    $("#save-add").show();
+                }
+            }
+        );
+
         
-        // CALCULATES ABSOLUTE DISTANCE, TRY DISTANCE MATRIX
-        if (distance / 1609.34 > 100) {
-            alert("Distance must be less than 100 miles.");
-        }
-        else {
-            var formInputs = {
-                "origin_lat": $("#orig-lat-est").val(),
-                "origin_lng": $("#orig-lng-est").val(),
-                "dest_lat": $("#dest-lat-est").val(),
-                "dest_lng": $("#dest-lng-est").val(),
-            };
-
-            $.post("/estimates.json",
-                formInputs,
-                showEstimates);
-
-            $("#save-add").show();
-        }
     }
 }
 
@@ -189,13 +234,11 @@ $("#origin-drop").on("change", function (evt) {
         $("#autocomplete-orig").val($("#origin-drop").val());
         var or_lat = $(this).find("option:selected").data("lat");
         var or_lng = $(this).find("option:selected").data("lng");
-        var or_num = $(this).find("option:selected").data("num");
-        var or_format = $(this).find("option:selected").data("format");
 
         $("#orig-lat-est").val(or_lat);
         $("#orig-lng-est").val(or_lng);
-        $(".origin-address").val(or_format);
-        $("#or-formatted-address").html(or_format);
+        $("#orig-check").prop("disabled", true);
+        $("#or-display-address").html("Address already saved.");
         
     }
 });
@@ -208,12 +251,11 @@ $("#dest-drop").on("change", function (evt) {
         $("#autocomplete-dest").val($("#dest-drop").val());
         var de_lat = $(this).find("option:selected").data("lat");
         var de_lng = $(this).find("option:selected").data("lng");
-        var de_format = $(this).find("option:selected").data("format");
 
         $("#dest-lat-est").val(de_lat);
         $("#dest-lng-est").val(de_lng);
-        $(".destn-address").val(de_format);
-        $("#de-formatted-address").html(de_format);
+        $("#dest-check").prop("disabled", true);
+        $("#de-display-address").html("Address already saved.");
 
     }
 });

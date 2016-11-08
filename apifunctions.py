@@ -31,7 +31,6 @@ def getRideEstimates(origin_lat, origin_lng, dest_lat, dest_lng):
         )   
 
     uber_estimate = uber_est.json
-    print "\n\n\n", uber_estimate, "\n\n\n"
 
     lyft_est = lyft_client.get_cost_estimates(origin_lat, origin_lng, 
                                               dest_lat, dest_lng)

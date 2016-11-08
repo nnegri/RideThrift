@@ -115,28 +115,20 @@ def address_saved():
     origin_lat = request.form.get("origin-lat")
     origin_lng = request.form.get("origin-lng")
     origin_address = request.form.get("origin-address")
-    # origin_house_num = request.form.get("origin-house-num")
-    # origin_street = request.form.get("origin-street")
-    origin_city = request.form.get("origin-city")
-    origin_state = request.form.get("origin-state")
-    origin_postal = request.form.get("origin-postal")
+    origin_name = request.form.get("origin-name")
 
     dest_lat = request.form.get("destn-lat")
     dest_lng = request.form.get("destn-lng")
-    # dest_house_num = request.form.get("destn-house-num")
-    # dest_street = request.form.get("destn-street")
     dest_address = request.form.get("destn-address")
-    dest_city = request.form.get("destn-city")
-    dest_state = request.form.get("destn-state")
-    dest_postal = request.form.get("destn-postal")
+    dest_name = request.form.get("destn-name")
+
 
     orig_label = request.form.get("label-or")
     dest_label = request.form.get("label-de")
 
-    addressToData(origin_lat, origin_lng, origin_address, 
-                  origin_city, origin_state, origin_postal, dest_lat, dest_lng, 
-                  dest_address, dest_city, dest_state, 
-                  dest_postal, orig_label, dest_label)
+    addressToData(origin_lat, origin_lng, origin_address, origin_name, 
+                  dest_lat, dest_lng, dest_address, dest_name, 
+                  orig_label, dest_label)
 
     return redirect("/") 
 

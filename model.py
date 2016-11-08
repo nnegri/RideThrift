@@ -32,12 +32,8 @@ class Address(db.Model):
     address_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
-    address = db.Column(db.String(60), nullable=False)
-    # house_number = db.Column(db.String(10), nullable=False)
-    # street = db.Column(db.String(20), nullable=False)
-    city = db.Column(db.String(20), nullable=False)
-    state = db.Column(db.String(20), nullable=False)
-    postal = db.Column(db.String(15), nullable=False)
+    address = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
 
     def __repr__(self):
         """Address representation when printed."""

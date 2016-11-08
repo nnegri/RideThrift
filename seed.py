@@ -41,10 +41,8 @@ def load_addresses():
     for row in open("seed_data/u.address"):
         row = row.strip()
         g = geocoder.google(row)
-        # house_number=g.housenumber, street=g.street
         address = Address(latitude=g.latlng[0], longitude=g.latlng[1],
-                          address=g.address, city=g.city, state=g.state, 
-                          postal=g.postal)
+                          address=g.address, name=g.address)
 
         db.session.add(address)
 

@@ -14,12 +14,12 @@
              onFocus="geolocate()" type="text"></input>
         </div>
 
-
+        <button type="button" name="location" id="location">Current Location</button>
         {% if session %}
             <select name="origins" id="origin-drop">
                 <option value="-">Saved Addresses
                 {% for user_address in user.user_addresses %}
-                    <option value="{{ user_address.address.address }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}" data-format="{{ user_address.address.address }}">{{ user_address.label }}
+                    <option value="{{ user_address.address.address }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}">{{ user_address.label }}
                 {% endfor %}
             </select>
         {% endif %}
@@ -33,20 +33,20 @@
             <input class = "auto" id="autocomplete-dest" placeholder="Enter your address"
              onFocus="geolocate()" type="text"></input>
         </div>
-
         {% if session %}
             <select name="dests" id="dest-drop">
                 <option value="-">Saved Addresses
                 {% for user_address in user.user_addresses %}
-                    <option value="{{ user_address.address.address }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}" data-format="{{ user_address.address.address }}">{{ user_address.label }}
+                    <option value="{{ user_address.address.address }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}">{{ user_address.label }}
                 {% endfor %}
             </select>
         {% endif %}
         <br><input type="submit" value="Get Estimates"><br>    
+    </form>
         {% if session %}    
                 <br><input type="submit" value="Save Addresses" id="save-add"><br>         
         {% endif %}
-    </form>
+    
     <ul><span id="uber"></span>
         <li id="pool"></li>
         <li id="uberx"></li>
@@ -66,27 +66,19 @@
       <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <form id="save-origin" method="post" action="/address-saved">
-                    <p class="origin-address" id="or-formatted-address"></p> 
+                    <p class="origin-address" id="or-display-address"></p> 
                     <input type="hidden" name="origin-lat" id="orig-lat-modal">
                     <input type="hidden" name="origin-lng" id="orig-lng-modal">
-                    <input type="hidden" class="origin-address" name="origin-address">
-                    <!-- <input type="hidden" name="origin-house-num" id="origin-house-num"> -->
-                    <!-- <input type="hidden" name="origin-street" id="origin-street"> -->
-                    <input type="hidden" name="origin-city" id="origin-city">
-                    <input type="hidden" name="origin-state" id="origin-state">
-                    <input type="hidden" name="origin-postal" id="origin-postal">
+                    <input type="hidden" id="origin-address" name="origin-address">
+                    <input type="hidden" id="origin-name" name="origin-name">
                     <input type="checkbox" name="origin" value="save" id="orig-check">
                     Label: <input type="text" name="label-or" id="label"><br>
 
-                    <p class="dest-address" id="de-formatted-address"></p> 
+                    <p class="dest-address" id="de-display-address"></p> 
                     <input type="hidden" name="destn-lat" id="dest-lat-modal">
                     <input type="hidden" name="destn-lng" id="dest-lng-modal">
-                    <input type="hidden" class="destn-address" name="destn-address">
-                    <!-- <input type="hidden" name="destn-house-num" id="destn-house-num"> -->
-                    <!-- <input type="hidden" name="destn-street" id="destn-street"> -->
-                    <input type="hidden" name="destn-city" id="destn-city">
-                    <input type="hidden" name="destn-state" id="destn-state">
-                    <input type="hidden" name="destn-postal" id="destn-postal">
+                    <input type="hidden" id="destn-address" name="destn-address">
+                    <input type="hidden" id="destn-name" name="destn-name">
                     <input type="checkbox" name="dest" value="save" id="dest-check">
                     Label: <input type="text" name="label-de" id="label"><br>
                     <input type="submit" value="Save" id="save-address">
