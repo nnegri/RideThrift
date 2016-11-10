@@ -7,7 +7,7 @@ from flask import session, flash
 def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
     """Send data on estimates to estimates table."""
 
-    time_requested = datetime.now()
+    time_requested = datetime.utcnow()
 
     uber_ests = []
 

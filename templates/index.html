@@ -6,8 +6,8 @@
     <form id="estimate-form" method="post" action="/estimates.json">
         <label>Origin:</label>
 
-        <input type="hidden" name="origin-lat" id="orig-lat-est" value="origin"> 
-        <input type="hidden" name="origin-lng" id="orig-lng-est" value="origin">
+        <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-est" value="origin"> 
+        <input type="hidden" class="orig-lng-rides"name="origin-lng" id="orig-lng-est" value="origin">
 
         <div id="locationField">
             <input class = "auto" id="autocomplete-orig" placeholder="Enter your address"
@@ -26,8 +26,8 @@
         <br>
         <label>Destination:</label>
 
-        <input type="hidden" name="dest-lat" id="dest-lat-est" value="dest"> 
-        <input type="hidden" name="dest-lng" id="dest-lng-est" value="dest">
+        <input type="hidden" class="dest-lat-rides" name="dest-lat" id="dest-lat-est" value="dest"> 
+        <input type="hidden" class="dest-lng-rides" name="dest-lng" id="dest-lng-est" value="dest">
 
         <div id="locationField">
             <input class = "auto" id="autocomplete-dest" placeholder="Enter your address"
@@ -47,18 +47,31 @@
                 <br><input type="submit" value="Save Addresses" id="save-add"><br>         
         {% endif %}
     
-    <ul><span id="uber"></span>
-        <li id="pool"></li>
-        <li id="uberx"></li>
-        <li id="uberxl"></li>
-    </ul>
+    <form action="/call_uber" method="POST">
+        <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-uber" value="origin"> 
+        <input type="hidden" class="orig-lng-rides" name="origin-lng" id="orig-lng-uber" value="origin">
+        <input type="hidden" class="dest-lat-rides" name="dest-lat" id="dest-lat-uber" value="dest"> 
+        <input type="hidden" class="dest-lng-rides" name="dest-lng" id="dest-lng-uber" value="dest">
+        <input type="hidden" name="ride-type" id="uber-ride-choice">
+        <span id="uber"></span><br>
+        <input class="rdo-uber" type="radio" name="uber-rdo" id="rdo-pool"> <label id="pool"></label><br>
+        <input class="rdo-uber" type="radio" name="uber-rdo" id="rdo-uberx" checked="checked"> <label id="uberx"></label><br>
+        <input class="rdo-uber" type="radio" name="uber-rdo" id="rdo-uberxl"> <label id="uberxl"></label><br>
+        <input type="submit" value="Request Uber" id="uber-req-button">
+    </form>
 
-    <ul><span id="lyft"></span>
-        <li id="line"></li>
-        <li id="lyft-lyft"></li>
-        <li id="plus"></li>
-    </ul>
-
+    <form action="/call_lyft" method="POST">
+        <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-uber" value="origin"> 
+        <input type="hidden" class="orig-lng-rides" name="origin-lng" id="orig-lng-uber" value="origin">
+        <input type="hidden" class="dest-lat-rides" name="dest-lat" id="dest-lat-uber" value="dest"> 
+        <input type="hidden" class="dest-lng-rides" name="dest-lng" id="dest-lng-uber" value="dest">
+        <input type="hidden" name="ride-type" id="lyft-ride-choice">
+        <span id="lyft"></span><br>
+        <input class="rdo-lyft" type="radio" name="lyft-rdo" id="rdo-line"> <label id="line"></label><br>
+        <input class="rdo-lyft" type="radio" name="lyft-rdo" id="rdo-lyft-lyft" checked="checked"> <label id="lyft-lyft"></label><br>
+        <input class="rdo-lyft" type="radio" name="lyft-rdo" id="rdo-plus"> <label id="plus"></label><br>
+        <input type="submit" value="Request Lyft" id="lyft-req-button">
+    </form>
 
     <!-- Modal Window -->
 

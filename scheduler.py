@@ -142,19 +142,19 @@ def estimatesToData(origin_lat, origin_lng, dest_lat, dest_lng):
         if price_min < base_min:
             min_surge = 0
         else:
-            min_surge = price_min / base_min
+            min_surge = float(price_min / base_min)
 
         if price_max < base_max:
             max_surge = 0
         else:
-            max_surge = price_max / base_max
+            max_surge = float(price_max / base_max)
 
         total = min_surge + max_surge
 
         if total == 0:
             surge = 1.0
         else:
-            surge = (min_surge + max_surge) / 2
+            surge = round(float((min_surge + max_surge) / 2), 2)
 
         sql = """INSERT INTO estimates (origin_lat, origin_long, dest_lat, 
                             dest_long, distance, time, time_requested, 

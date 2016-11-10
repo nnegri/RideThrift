@@ -35,10 +35,10 @@ function fillInOrAddress() {
     $("#origin-name").val(val_name);
 
     var val = or_place.geometry.location.lat();
-    $('#orig-lat-est').val(val); 
+    $('.orig-lat-rides').val(val); 
 
     var val = or_place.geometry.location.lng();
-    $('#orig-lng-est').val(val);
+    $('.orig-lng-rides').val(val);
 
 }
 
@@ -61,10 +61,10 @@ function fillInDeAddress() {
     $("#destn-name").val(val_name);
 
     var val = de_place.geometry.location.lat();
-    $('#dest-lat-est').val(val);
+    $('.dest-lat-rides').val(val);
     
     var val = de_place.geometry.location.lng();
-    $('#dest-lng-est').val(val);
+    $('.dest-lng-rides').val(val);
 }
 
 function geolocate() {
@@ -93,8 +93,8 @@ $("#location").on("click", function (evt) {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
-        $('#orig-lat-est').val(geolocation.lat);
-        $('#orig-lng-est').val(geolocation.lng);
+        $('.orig-lat-rides').val(geolocation.lat);
+        $('.orig-lng-rides').val(geolocation.lng);
 
         var geocoder = new google.maps.Geocoder();
         geocoder.geocode({
@@ -204,6 +204,12 @@ function getAddressInput(evt) {
                     alert("Distance must be less than 100 miles.");
                 }
                 else {
+
+                    $(".rdo-uber").show();
+                    $("#uber-req-button").show();
+                    $(".rdo-lyft").show();
+                    $("#lyft-req-button").show();
+
                     var formInputs = {
                     "origin_lat": $("#orig-lat-est").val(),
                     "origin_lng": $("#orig-lng-est").val(),
@@ -235,8 +241,8 @@ $("#origin-drop").on("change", function (evt) {
         var or_lat = $(this).find("option:selected").data("lat");
         var or_lng = $(this).find("option:selected").data("lng");
 
-        $("#orig-lat-est").val(or_lat);
-        $("#orig-lng-est").val(or_lng);
+        $(".orig-lat-rides").val(or_lat);
+        $(".orig-lng-rides").val(or_lng);
         $("#orig-check").prop("disabled", true);
         $("#or-display-address").html("Address already saved.");
         
@@ -252,8 +258,8 @@ $("#dest-drop").on("change", function (evt) {
         var de_lat = $(this).find("option:selected").data("lat");
         var de_lng = $(this).find("option:selected").data("lng");
 
-        $("#dest-lat-est").val(de_lat);
-        $("#dest-lng-est").val(de_lng);
+        $(".dest-lat-rides").val(de_lat);
+        $(".dest-lng-rides").val(de_lng);
         $("#dest-check").prop("disabled", true);
         $("#de-display-address").html("Address already saved.");
 
@@ -272,13 +278,74 @@ $(document).on("click", "#save-add", function() {
 // Checking the box indicates that the address will be saved in the database
 $("#orig-check").on("change", function (evt) {
     $("#save-address").prop("disabled", false);
-    $("#orig-lat-modal").val($("#orig-lat-est").val());
-    $("#orig-lng-modal").val($("#orig-lng-est").val());
+    console.log("change orig check");
+    if ($("#orig-check").prop("checked")) {
+        console.log("orig checked");
+        $("#orig-lat-modal").val($("#orig-lat-est").val());
+        $("#orig-lng-modal").val($("#orig-lng-est").val());
+    }
+    else if ($("#orig-check").prop("checked") === false) {
+        console.log("orig unchecked");
+        $("#orig-lat-modal").val("");
+        $("#orig-lng-modal").val("");
+
+        if ($("#dest-check").prop("checked") === false) {
+            console.log("both unchecked");
+            $("#save-address").prop("disabled", true);
+        }
+    }
 });
 
 // Checking the box indicates that the address will be saved in the database
 $("#dest-check").on("change", function (evt) {
     $("#save-address").prop("disabled", false);
-    $("#dest-lat-modal").val($("#dest-lat-est").val());
-    $("#dest-lng-modal").val($("#dest-lng-est").val());
+    console.log("change dest check");
+    if ($("#dest-check").prop("checked")) {     
+    console.log("dest checked"); 
+        $("#dest-lat-modal").val($("#dest-lat-est").val());
+        $("#dest-lng-modal").val($("#dest-lng-est").val());
+    }
+    else if ($("#dest-check").prop("checked") === false) {
+        console.log("dest unchecked");
+        $("#dest-lat-modal").val("");
+        $("#dest-lng-modal").val("");
+
+        if ($("#orig-check").prop("checked") === false) {
+            console.log("both unchecked");
+            $("#save-address").prop("disabled", true);
+        }
+    }
 });
+
+$(".rdo-uber").hide();
+$("#uber-req-button").hide();
+
+$(".rdo-lyft").hide();
+$("#lyft-req-button").hide();
+
+
+$("#uber-ride-choice").val("a1111c8c-c720-46c3-8534-2fcdd730040d");
+$(".rdo-uber").on("change", function (evt) {
+    if ($("#rdo-pool").prop("checked") === true) {
+    $("#uber-ride-choice").val("26546650-e557-4a7b-86e7-6a3942445247");
+}
+else if ($("#rdo-uberx").prop("checked") === true) {
+    $("#uber-ride-choice").val("a1111c8c-c720-46c3-8534-2fcdd730040d");
+}
+else if ($("#rdo-uberxl").prop("checked") === true) {
+    $("#uber-ride-choice").val("821415d8-3bd5-4e27-9604-194e4359a449");
+}
+})
+
+$("#lyft-ride-choice").val("lyft");
+$(".rdo-lyft").on("change", function (evt) {
+    if ($("#rdo-line").prop("checked") === true) {
+    $("#lyft-ride-choice").val("lyft_line");
+}
+else if ($("#rdo-lyft-lyft").prop("checked") === true) {
+    $("#lyft-ride-choice").val("lyft");
+}
+else if ($("#rdo-plus").prop("checked") === true) {
+    $("#lyft-ride-choice").val("lyft_plus");
+}
+})

@@ -7,10 +7,11 @@ from flask import (Flask, render_template, redirect, request, flash,
 from flask_debugtoolbar import DebugToolbarExtension
 
 from model import (connect_to_db, db, User, Address, UserAddress, RideType, Estimate)
-from apifunctions import getRideEstimates
+from apifunctions import getRideEstimates, getUberAuth, requestUber, getLyftAuth, requestLyft
 from datafunctions import (estimatesToData, addressToData)
 
 import geocoder
+
 
 app = Flask(__name__)
 
@@ -103,7 +104,8 @@ def register_user():
 def logout():
     """End user session"""
 
-    del session["user_id"]
+    # del session["user_id"]
+    session.clear()
     flash("Logged Out.")
     return redirect("/")
 
@@ -131,6 +133,80 @@ def address_saved():
                   orig_label, dest_label)
 
     return redirect("/") 
+
+@app.route('/call_uber', methods=['POST'])
+def signin_uber():
+    """Redirects user to Uber to authorize ride requests."""
+
+    origin_lat = request.form.get("origin-lat")
+    origin_lng = request.form.get("origin-lng")
+
+    session['origin-lat'] = origin_lat
+    session['origin-lng'] = origin_lng
+
+    dest_lat = request.form.get("dest-lat")
+    dest_lng = request.form.get("dest-lng")
+
+    session['dest-lat'] = dest_lat
+    session['dest-lng'] = dest_lng
+
+    ride_type = request.form.get("ride-type")
+    session['ride-type'] = ride_type
+
+    url = getUberAuth()
+
+    return redirect(url)
+
+@app.route('/callback')
+def call_uber():
+    """Calls Uber for user."""
+
+    code = request.args.get('code')
+    state = request.args.get('state')
+
+    requestUber(session['origin-lat'], session['origin-lng'], 
+                session['dest-lat'], session['dest-lng'], 
+                session['ride-type'], code, state)
+
+    return redirect('/')
+
+@app.route('/call_lyft', methods=['POST'])
+def signin_lyft():
+    """Redirects user to Uber to authorize ride requests."""
+
+    origin_lat = request.form.get("origin-lat")
+    origin_lng = request.form.get("origin-lng")
+
+    session['origin-lat'] = origin_lat
+    session['origin-lng'] = origin_lng
+
+    dest_lat = request.form.get("dest-lat")
+    dest_lng = request.form.get("dest-lng")
+
+    session['dest-lat'] = dest_lat
+    session['dest-lng'] = dest_lng
+
+    ride_type = request.form.get("ride-type")
+    session['ride-type'] = ride_type
+
+    url = getLyftAuth()
+
+    return redirect(url)
+
+@app.route('/callback_lyft')
+def call_lyft():
+    """Calls Uber for user."""
+
+    code = request.args.get('code')
+    state = request.args.get('state')
+    error = request.args.get('error')
+
+    requestLyft(session['origin-lat'], session['origin-lng'], 
+                session['dest-lat'], session['dest-lng'], 
+                session['ride-type'], code, state)
+
+    return redirect('/')
+
 
 
 if __name__ == "__main__":
