@@ -11,6 +11,8 @@ from apifunctions import getRideEstimates, getUberAuth, requestUber, getLyftAuth
 from datafunctions import (estimatesToData, addressToData)
 
 import geocoder
+from datetime import datetime, timedelta, date
+import arrow 
 
 
 app = Flask(__name__)
@@ -27,6 +29,12 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 def index():
     """Homepage."""
 
+    if 'depart_timestamp' in session:
+        session['minutes'] = (session['depart_timestamp'] - arrow.now('US/Pacific').timestamp) / 60
+
+    if 'arrive_timestamp' in session:
+        session['minutes-arr'] = (session['arrive_timestamp'] - arrow.now('US/Pacific').timestamp) / 60
+        
     if "user_id" in session:
         user = User.query.filter_by(user_id = session["user_id"]).first()
 
@@ -39,6 +47,13 @@ def index():
 def get_estimates():
     """Take user input and request estimates from Uber and Lyft."""
 
+    session['lyft_arrive_time'] = ""
+    session['lyft_depart_time'] = ""
+    session['uber_arrive_time'] = ""
+    session['uber_depart_time'] = ""
+    session['minutes'] = ""
+    session['minutes-arr'] = ""
+    
     origin_lat = request.form.get("origin_lat")
     origin_lng = request.form.get("origin_lng")
     
@@ -51,8 +66,26 @@ def get_estimates():
     estimates = estimatesToData(ride_estimates, origin_lat, origin_lng, 
                                                     dest_lat, dest_lng)
 
-    return jsonify(estimates)
+    orig_lat = request.form.get("origin-lat-save")
+    orig_lng = request.form.get("origin-lng-save")
+    origin_address = request.form.get("origin-address")
+    origin_name = request.form.get("origin-name")
 
+    destn_lat = request.form.get("destn-lat-save")
+    destn_lng = request.form.get("destn-lng-save")
+    dest_address = request.form.get("destn-address")
+    dest_name = request.form.get("destn-name")
+
+
+    orig_label = request.form.get("label-or")
+    dest_label = request.form.get("label-de")
+
+
+    addressToData(orig_lat, orig_lng, origin_address, origin_name, 
+                  destn_lat, destn_lng, dest_address, dest_name, 
+                  orig_label, dest_label)
+
+    return jsonify(estimates)
 
 @app.route('/login', methods=["POST"])
 def login_user():
@@ -67,11 +100,17 @@ def login_user():
         flash("We have no record of this user, please register.")
         return redirect("/")
 
-    if user.password != password:
+    if user.password != str(hash(password)):
         flash("Incorrect password")
         return redirect("/")
 
     session["user_id"] = user.user_id
+    session['lyft_arrive_time'] = ""
+    session['lyft_depart_time'] = ""
+    session['uber_arrive_time'] = ""
+    session['uber_depart_time'] = ""
+    session['minutes'] = ""
+    session['minutes-arr'] = ""
 
     flash("Logged in")
     return redirect("/")
@@ -90,7 +129,7 @@ def register_user():
         flash("You have already registered.")
         return redirect("/")
 
-    user = User(email=email, password=password)
+    user = User(email=email, password=hash(password))
 
     db.session.add(user)
     db.session.commit()
@@ -104,35 +143,10 @@ def register_user():
 def logout():
     """End user session"""
 
-    # del session["user_id"]
     session.clear()
     flash("Logged Out.")
     return redirect("/")
 
-
-@app.route('/address-saved', methods=['POST'])
-def address_saved():
-    """Save user address to use later"""
-
-    origin_lat = request.form.get("origin-lat")
-    origin_lng = request.form.get("origin-lng")
-    origin_address = request.form.get("origin-address")
-    origin_name = request.form.get("origin-name")
-
-    dest_lat = request.form.get("destn-lat")
-    dest_lng = request.form.get("destn-lng")
-    dest_address = request.form.get("destn-address")
-    dest_name = request.form.get("destn-name")
-
-
-    orig_label = request.form.get("label-or")
-    dest_label = request.form.get("label-de")
-
-    addressToData(origin_lat, origin_lng, origin_address, origin_name, 
-                  dest_lat, dest_lng, dest_address, dest_name, 
-                  orig_label, dest_label)
-
-    return redirect("/") 
 
 @app.route('/call_uber', methods=['POST'])
 def signin_uber():
@@ -150,8 +164,8 @@ def signin_uber():
     session['dest-lat'] = dest_lat
     session['dest-lng'] = dest_lng
 
-    ride_type = request.form.get("ride-type")
-    session['ride-type'] = ride_type
+    ride_type = request.form.get("uber-ride-type")
+    session['uber-ride-type'] = ride_type
 
     url = getUberAuth()
 
@@ -164,9 +178,7 @@ def call_uber():
     code = request.args.get('code')
     state = request.args.get('state')
 
-    requestUber(session['origin-lat'], session['origin-lng'], 
-                session['dest-lat'], session['dest-lng'], 
-                session['ride-type'], code, state)
+    requestUber(code, state)
 
     return redirect('/')
 
@@ -186,8 +198,8 @@ def signin_lyft():
     session['dest-lat'] = dest_lat
     session['dest-lng'] = dest_lng
 
-    ride_type = request.form.get("ride-type")
-    session['ride-type'] = ride_type
+    ride_type = request.form.get("lyft-ride-type")
+    session['lyft-ride-type'] = ride_type
 
     url = getLyftAuth()
 
@@ -201,9 +213,7 @@ def call_lyft():
     state = request.args.get('state')
     error = request.args.get('error')
 
-    requestLyft(session['origin-lat'], session['origin-lng'], 
-                session['dest-lat'], session['dest-lng'], 
-                session['ride-type'], code, state)
+    requestLyft(code, state)
 
     return redirect('/')
 

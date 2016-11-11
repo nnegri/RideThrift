@@ -40,6 +40,8 @@ function fillInOrAddress() {
     var val = or_place.geometry.location.lng();
     $('.orig-lng-rides').val(val);
 
+    $("#save-origin").show();
+
 }
 
 function fillInDeAddress() {
@@ -65,6 +67,8 @@ function fillInDeAddress() {
     
     var val = de_place.geometry.location.lng();
     $('.dest-lng-rides').val(val);
+
+    $("#save-dest").show();
 }
 
 function geolocate() {
@@ -107,6 +111,9 @@ $("#location").on("click", function (evt) {
             $("#autocomplete-orig").val(val);
             });
         })
+
+        $("#save-origin").show();
+        $("#save-dest").show();
     }
     else {
         alert("Cannot find current location.")
@@ -117,6 +124,10 @@ $("#location").on("click", function (evt) {
 
 function showEstimates(results) {
     // Display estimate results on page.
+    console.log(results);
+    var poolId = (results[0]["pool_product_id"])
+    var uberxId = (results[0]["uberx_product_id"])
+    var uberxlId = (results[0]["uberxl_product_id"])
 
     var poolEst = (results[0][1] / 100).toFixed(2);
     var uberEst = (results[0][2] / 100).toFixed(2);
@@ -126,21 +137,28 @@ function showEstimates(results) {
     var lyftEst = (results[1][5] / 100).toFixed(2);
     var plusEst = (results[1][6] / 100).toFixed(2);
 
+
+    $(".rdo-uber").show();
+    $(".rdo-lyft").show();
+
     $("#uber").html("Uber:");
     if (isNaN(poolEst)) {
         $("#pool").html("Pool: None available");
+        $("#rdo-pool").hide();
     }
     else {
         $("#pool").html("Pool: $" + poolEst);
     }
     if (isNaN(uberEst)) {
         $("#uberx").html("UberX: None available");
+        $("#rdo-uberx").hide();
     }
     else {
         $("#uberx").html("UberX: $" + uberEst);
     }
     if (isNaN(xlEst)) {
         $("#uberxl").html("UberXL: None available");
+        $("#rdo-uberxl").hide();
     }
     else {
         $("#uberxl").html("UberXL: $" + xlEst);
@@ -149,23 +167,56 @@ function showEstimates(results) {
     $("#lyft").html("Lyft:");
     if (isNaN(lineEst)) {
         $("#line").html("Line: None available");
+        $("#rdo-line").hide();
     }
     else {
         $("#line").html("Line: $" + lineEst);
     }
     if (isNaN(lyftEst)) {
         $("#lyft-lyft").html("Lyft: None available");
+        $("#rdo-lyft-lyft").hide();
     }
     else {
         $("#lyft-lyft").html("Lyft: $" + lyftEst);
     }
     if (isNaN(plusEst)) {
         $("#plus").html("Plus: None available");
+        $("#rdo-plus").hide();
     }
     else {
         $("#plus").html("Plus: $" + plusEst);
     }
 
+    
+    $("#uber-req-button").show();
+    $("#uber-ride-choice").val(uberxId);
+
+    $(".rdo-uber").on("change", function (evt) {
+    if ($("#rdo-pool").prop("checked") === true) {
+        $("#uber-ride-choice").val(poolId);
+    }
+    else if ($("#rdo-uberx").prop("checked") === true) {
+        $("#uber-ride-choice").val(uberxId);
+    }
+    else if ($("#rdo-uberxl").prop("checked") === true) {
+        $("#uber-ride-choice").val(uberxlId);
+    }
+    })
+    
+    $("#lyft-req-button").show();
+    $("#lyft-ride-choice").val("lyft");
+
+    $(".rdo-lyft").on("change", function (evt) {
+    if ($("#rdo-line").prop("checked") === true) {
+        $("#lyft-ride-choice").val("lyft_line");
+    }
+    else if ($("#rdo-lyft-lyft").prop("checked") === true) {
+        $("#lyft-ride-choice").val("lyft");
+    }
+    else if ($("#rdo-plus").prop("checked") === true) {
+    $("#lyft-ride-choice").val("lyft_plus");
+    }
+    })
     
 }
 
@@ -205,23 +256,28 @@ function getAddressInput(evt) {
                 }
                 else {
 
-                    $(".rdo-uber").show();
-                    $("#uber-req-button").show();
-                    $(".rdo-lyft").show();
-                    $("#lyft-req-button").show();
-
                     var formInputs = {
                     "origin_lat": $("#orig-lat-est").val(),
                     "origin_lng": $("#orig-lng-est").val(),
                     "dest_lat": $("#dest-lat-est").val(),
                     "dest_lng": $("#dest-lng-est").val(),
-                };
+                    "origin-lat-save" : $("#orig-lat-save").val(),
+                    "origin-lng-save" : $("#orig-lng-save").val(),
+                    "destn-lat-save" : $("#dest-lat-save").val(),
+                    "destn-lng-save" : $("#dest-lng-save").val(),
+                    "origin-address" : $("#origin-address").val(),
+                    "destn-address" : $("#destn-address").val(),
+                    "origin-name" : $("#origin-name").val(),
+                    "destn-name" : $("#destn-name").val(),
+                    "label-or" : $("#label-or").val(),
+                    "label-de" : $("#label-de").val()
+                    };
 
+                                        
                     $.post("/estimates.json",
                     formInputs,
                     showEstimates);
-
-                    $("#save-add").show();
+                    
                 }
             }
         );
@@ -229,8 +285,6 @@ function getAddressInput(evt) {
         
     }
 }
-
-$("#save-add").hide(); //Hide modal for saving addresses upon loading page
 
 // Fill in inputs in order to get cost estimates with an origin chosen from 
 // saved addresses.
@@ -243,9 +297,7 @@ $("#origin-drop").on("change", function (evt) {
 
         $(".orig-lat-rides").val(or_lat);
         $(".orig-lng-rides").val(or_lng);
-        $("#orig-check").prop("disabled", true);
-        $("#or-display-address").html("Address already saved.");
-        
+        $("#save-origin").hide()        
     }
 });
 
@@ -260,62 +312,16 @@ $("#dest-drop").on("change", function (evt) {
 
         $(".dest-lat-rides").val(de_lat);
         $(".dest-lng-rides").val(de_lng);
-        $("#dest-check").prop("disabled", true);
-        $("#de-display-address").html("Address already saved.");
+        $("#save-dest").hide();
 
     }
 });
+
+$("#save-origin").hide();
+$("#save-dest").hide();
 
 // Request estimates upon submitting origin and destination. 
 $("#estimate-form").on("submit", getAddressInput);
-
-// Show modal window for saving addresses upon clicking the Save Address button.
-$(document).on("click", "#save-add", function() {
-            $("#save-add-modal").modal("show");
-            $("#save-address").prop("disabled", true);
-        });
-
-// Checking the box indicates that the address will be saved in the database
-$("#orig-check").on("change", function (evt) {
-    $("#save-address").prop("disabled", false);
-    console.log("change orig check");
-    if ($("#orig-check").prop("checked")) {
-        console.log("orig checked");
-        $("#orig-lat-modal").val($("#orig-lat-est").val());
-        $("#orig-lng-modal").val($("#orig-lng-est").val());
-    }
-    else if ($("#orig-check").prop("checked") === false) {
-        console.log("orig unchecked");
-        $("#orig-lat-modal").val("");
-        $("#orig-lng-modal").val("");
-
-        if ($("#dest-check").prop("checked") === false) {
-            console.log("both unchecked");
-            $("#save-address").prop("disabled", true);
-        }
-    }
-});
-
-// Checking the box indicates that the address will be saved in the database
-$("#dest-check").on("change", function (evt) {
-    $("#save-address").prop("disabled", false);
-    console.log("change dest check");
-    if ($("#dest-check").prop("checked")) {     
-    console.log("dest checked"); 
-        $("#dest-lat-modal").val($("#dest-lat-est").val());
-        $("#dest-lng-modal").val($("#dest-lng-est").val());
-    }
-    else if ($("#dest-check").prop("checked") === false) {
-        console.log("dest unchecked");
-        $("#dest-lat-modal").val("");
-        $("#dest-lng-modal").val("");
-
-        if ($("#orig-check").prop("checked") === false) {
-            console.log("both unchecked");
-            $("#save-address").prop("disabled", true);
-        }
-    }
-});
 
 $(".rdo-uber").hide();
 $("#uber-req-button").hide();
@@ -323,29 +329,24 @@ $("#uber-req-button").hide();
 $(".rdo-lyft").hide();
 $("#lyft-req-button").hide();
 
+$("#orig-check").on("change", function (evt) {
+    if ($("#orig-check").prop("checked")) {
+        $("#orig-lat-save").val($("#orig-lat-est").val());
+        $("#orig-lng-save").val($("#orig-lng-est").val());
+    }
+    else if ($("#orig-check").prop("checked") === false) {
+        $("#orig-lat-save").val("");
+        $("#orig-lng-save").val("");
+    }
+});
 
-$("#uber-ride-choice").val("a1111c8c-c720-46c3-8534-2fcdd730040d");
-$(".rdo-uber").on("change", function (evt) {
-    if ($("#rdo-pool").prop("checked") === true) {
-    $("#uber-ride-choice").val("26546650-e557-4a7b-86e7-6a3942445247");
-}
-else if ($("#rdo-uberx").prop("checked") === true) {
-    $("#uber-ride-choice").val("a1111c8c-c720-46c3-8534-2fcdd730040d");
-}
-else if ($("#rdo-uberxl").prop("checked") === true) {
-    $("#uber-ride-choice").val("821415d8-3bd5-4e27-9604-194e4359a449");
-}
-})
-
-$("#lyft-ride-choice").val("lyft");
-$(".rdo-lyft").on("change", function (evt) {
-    if ($("#rdo-line").prop("checked") === true) {
-    $("#lyft-ride-choice").val("lyft_line");
-}
-else if ($("#rdo-lyft-lyft").prop("checked") === true) {
-    $("#lyft-ride-choice").val("lyft");
-}
-else if ($("#rdo-plus").prop("checked") === true) {
-    $("#lyft-ride-choice").val("lyft_plus");
-}
-})
+$("#dest-check").on("change", function (evt) {
+    if ($("#dest-check").prop("checked")) {     
+        $("#dest-lat-save").val($("#dest-lat-est").val());
+        $("#dest-lng-save").val($("#dest-lng-est").val());
+    }
+    else if ($("#dest-check").prop("checked") === false) {
+        $("#dest-lat-save").val("");
+        $("#dest-lng-save").val("");
+    }
+});

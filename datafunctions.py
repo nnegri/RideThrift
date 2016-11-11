@@ -8,6 +8,7 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
     """Send data on estimates to estimates table."""
 
     time_requested = datetime.utcnow()
+    session["time_requested"] = time_requested
 
     uber_ests = []
 
@@ -31,26 +32,29 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
         if uber["display_name"] == "POOL":
             ridetype_id = 1
             uber_est_dict[1] = price
+            uber_est_dict["pool_product_id"] = uber["product_id"]
         elif uber["display_name"] == "uberX":
             ridetype_id = 2
             uber_est_dict[2] = price
+            uber_est_dict["uberx_product_id"] = uber["product_id"]
         elif uber["display_name"] == "uberXL":
             ridetype_id = 3
             uber_est_dict[3] = price
+            uber_est_dict["uberxl_product_id"] = uber["product_id"]
         else:
             continue
 
         distance = uber["distance"]
-        time = uber["duration"]
+        uber_time = uber["duration"]
         surge = float(uber["surge_multiplier"])
 
         estimate = Estimate(origin_lat=origin_lat, origin_long=origin_lng, 
                         dest_lat=dest_lat, dest_long=dest_lng, distance=distance, 
-                        time=time, time_requested=time_requested, surge=surge, 
+                        time=uber_time, time_requested=time_requested, surge=surge, 
                         price_min=price_min, price_max=price_max, ridetype_id=ridetype_id)
 
         db.session.add(estimate)
-
+    session["uber_time"] = uber_time
 
     lyft_ests = []
 
@@ -81,7 +85,7 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
             continue
 
         distance = lyft["estimated_distance_miles"]
-        time = lyft["estimated_duration_seconds"]
+        lyft_time = lyft["estimated_duration_seconds"]
 
         if lyft["primetime_percentage"] == "0%":
             surge = 1.0
@@ -90,41 +94,40 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
 
         estimate = Estimate(origin_lat=origin_lat, origin_long=origin_lng, 
                         dest_lat=dest_lat, dest_long=dest_lng, distance=distance, 
-                        time=time, time_requested=time_requested, surge=surge, 
+                        time=lyft_time, time_requested=time_requested, surge=surge, 
                         price_min=price_min, price_max=price_max, ridetype_id=ridetype_id)
 
         db.session.add(estimate)
 
-    
+    session["lyft_time"] = lyft_time
     db.session.commit()
 
     return uber_est_dict, lyft_est_dict
 
 
-def addressToData(origin_lat, origin_lng, origin_address, origin_name, 
-                  dest_lat, dest_lng, dest_address, dest_name, 
+def addressToData(orig_lat, orig_lng, origin_address, origin_name, 
+                  destn_lat, destn_lng, dest_address, dest_name, 
                   orig_label, dest_label):
-
     addresses = []
 
-    if origin_lat != "":
+    if orig_lat != "":
         if orig_label == "":
             orig_label = origin_name
 
 
-        addresses.append({"lat" : origin_lat, 
-                          "lng" : origin_lng,
+        addresses.append({"lat" : orig_lat, 
+                          "lng" : orig_lng,
                           "address" : origin_address,
                           "name" : origin_name,
                           "label" : orig_label})
 
-    if dest_lat != "":
+    if destn_lat != "":
         if dest_label == "":
             dest_label = dest_name
 
 
-        addresses.append({"lat" : dest_lat, 
-                          "lng" : dest_lng,
+        addresses.append({"lat" : destn_lat, 
+                          "lng" : destn_lng,
                           "address" : dest_address,
                           "name" : dest_name, 
                           "label" : dest_label})

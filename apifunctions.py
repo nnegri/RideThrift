@@ -7,16 +7,18 @@ import lyft_rides.auth
 from uber_rides.session import Session
 from uber_rides.client import UberRidesClient
 from uber_rides.auth import AuthorizationCodeGrant
-from flask import flash 
+from flask import flash, Markup, session
 import os
-
+from random import randint
+from datetime import datetime, timedelta, date
+import arrow 
 #Authorize access to Lyft API
 auth_flow = ClientCredentialGrant(
     client_id=os.environ['LYFT_CLIENT_ID'], 
     client_secret=os.environ['LYFT_CLIENT_SECRET'], 
     scopes=None)
-session = auth_flow.get_session()
-lyft_client = LyftRidesClient(session)
+lyft_est_session = auth_flow.get_session()
+lyft_client = LyftRidesClient(lyft_est_session)
 
 lyft_auth_flow = lyft_rides.auth.AuthorizationCodeGrant(
     os.environ['LYFT_CLIENT_ID'],
@@ -26,8 +28,8 @@ lyft_auth_flow = lyft_rides.auth.AuthorizationCodeGrant(
     )
 
 #Authorize access to Uber API
-session = Session(server_token=os.environ['UBER_SERVER_TOKEN'])
-uber_client = UberRidesClient(session)
+uber_est_session = Session(server_token=os.environ['UBER_SERVER_TOKEN'])
+uber_client = UberRidesClient(uber_est_session)
 
 uber_auth_flow = AuthorizationCodeGrant(
     os.environ['UBER_CLIENT_ID'], 
@@ -60,8 +62,7 @@ def getUberAuth():
 
     return uber_auth_flow.get_authorization_url()
 
-def requestUber(start_lat, start_long, end_lat, end_long, 
-                ride_type, code, state):
+def requestUber(code, state):
     """Request an Uber."""
 
     redirect_url = "http//0.0.0.0:5000/callback?code=%s&state=%s" % (code, state)
@@ -72,13 +73,13 @@ def requestUber(start_lat, start_long, end_lat, end_long,
     access_token = credentials.access_token
 
     uber_ride_client.cancel_current_ride()
-
+    
     response = uber_ride_client.request_ride(
-        product_id=ride_type,
-        start_latitude=start_lat,
-        start_longitude=start_long,
-        end_latitude=end_lat,
-        end_longitude=end_long
+        product_id=session['uber-ride-type'],
+        start_latitude=session['origin-lat'],
+        start_longitude=session['origin-lng'],
+        end_latitude=session['dest-lat'],
+        end_longitude=session['dest-lng']
         )
 
     ride_details = response.json
@@ -89,15 +90,33 @@ def requestUber(start_lat, start_long, end_lat, end_long,
     response = uber_ride_client.update_sandbox_ride(ride_id, 'in_progress')
 
     print response.status_code
-    flash("Your Uber is on its way!")
+
+    time = uber_client.get_pickup_time_estimates(
+        session['origin-lat'],
+        session['origin-lng'],
+        product_id=session['uber-ride-type']
+        )
+    
+    eta = time.json
+
+    minutes = eta['times'][0]['estimate'] / 60
+
+    depart_time = arrow.now('US/Pacific').replace(seconds=(minutes * 60))
+
+    arrive_time = depart_time.replace(seconds=session['uber_time'])
+
+    session['depart_timestamp'] = depart_time.timestamp
+    session['arrive_timestamp'] = arrive_time.timestamp
+
+    session['uber_depart_time'] = depart_time.strftime("%-I:%M %p")
+    session['uber_arrive_time'] = arrive_time.strftime("%-I:%M %p")
 
 def getLyftAuth():
     """Authorize user's Lyft account."""
 
     return lyft_auth_flow.get_authorization_url()
 
-def requestLyft(start_lat, start_long, end_lat, end_long, 
-                ride_type, code, state):
+def requestLyft(code, state):
     """Request an Lyft."""
 
     redirect_url = "http//0.0.0.0:5000/callback_lyft?code=%s&state=%s" % (code, state)
@@ -107,13 +126,12 @@ def requestLyft(start_lat, start_long, end_lat, end_long,
     credentials = lyft_session.oauth2credential
     access_tokenn = credentials.access_token
 
-    print "\n\n\n", lyft_ride_client, dir(lyft_ride_client), "\n\n\n"
     response = lyft_ride_client.request_ride(
-        ride_type=ride_type,
-        start_latitude=start_lat,
-        start_longitude=start_long,
-        end_latitude=end_lat,
-        end_longitude=end_long,
+        ride_type=session['lyft-ride-type'],
+        start_latitude=session['origin-lat'],
+        start_longitude=session['origin-lng'],
+        end_latitude=session['dest-lat'],
+        end_longitude=session['dest-lng']
         )
 
     ride_details = response.json
@@ -121,5 +139,23 @@ def requestLyft(start_lat, start_long, end_lat, end_long,
     ride_id = ride_details.get('ride_id')
 
     print response.status_code
-    flash("Your Lyft is on its way!")
 
+    time = lyft_client.get_pickup_time_estimates(
+        session['origin-lat'],
+        session['origin-lng'],
+        session['lyft-ride-type']
+        )
+
+    eta = time.json
+
+    minutes = eta['eta_estimates'][0]['eta_seconds'] / 60
+
+    depart_time = arrow.now('US/Pacific').replace(seconds=(minutes * 60))
+
+    arrive_time = depart_time.replace(seconds=session['lyft_time'])
+
+    session['depart_timestamp'] = depart_time.timestamp
+    session['arrive_timestamp'] = arrive_time.timestamp
+
+    session['lyft_depart_time'] = depart_time.strftime("%-I:%M %p")
+    session['lyft_arrive_time'] = arrive_time.strftime("%-I:%M %p")
