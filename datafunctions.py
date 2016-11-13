@@ -106,8 +106,10 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
 
 
 def addressToData(orig_lat, orig_lng, origin_address, origin_name, 
-                  destn_lat, destn_lng, dest_address, dest_name, 
+                  dest_lat, dest_lng, dest_address, dest_name, 
                   orig_label, dest_label):
+    """Send user saved addresses to database."""
+
     addresses = []
 
     if orig_lat != "":
@@ -121,13 +123,13 @@ def addressToData(orig_lat, orig_lng, origin_address, origin_name,
                           "name" : origin_name,
                           "label" : orig_label})
 
-    if destn_lat != "":
+    if dest_lat != "":
         if dest_label == "":
             dest_label = dest_name
 
 
-        addresses.append({"lat" : destn_lat, 
-                          "lng" : destn_lng,
+        addresses.append({"lat" : dest_lat, 
+                          "lng" : dest_lng,
                           "address" : dest_address,
                           "name" : dest_name, 
                           "label" : dest_label})

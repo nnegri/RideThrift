@@ -75,11 +75,11 @@ def requestUber(code, state):
     uber_ride_client.cancel_current_ride()
     
     response = uber_ride_client.request_ride(
-        product_id=session['uber-ride-type'],
-        start_latitude=session['origin-lat'],
-        start_longitude=session['origin-lng'],
-        end_latitude=session['dest-lat'],
-        end_longitude=session['dest-lng']
+        product_id=session['uber_ride_type'],
+        start_latitude=session['origin_lat'],
+        start_longitude=session['origin_lng'],
+        end_latitude=session['dest_lat'],
+        end_longitude=session['dest_lng']
         )
 
     ride_details = response.json
@@ -92,9 +92,9 @@ def requestUber(code, state):
     print response.status_code
 
     time = uber_client.get_pickup_time_estimates(
-        session['origin-lat'],
-        session['origin-lng'],
-        product_id=session['uber-ride-type']
+        session['origin_lat'],
+        session['origin_lng'],
+        product_id=session['uber_ride_type']
         )
     
     eta = time.json
@@ -127,11 +127,11 @@ def requestLyft(code, state):
     access_tokenn = credentials.access_token
 
     response = lyft_ride_client.request_ride(
-        ride_type=session['lyft-ride-type'],
-        start_latitude=session['origin-lat'],
-        start_longitude=session['origin-lng'],
-        end_latitude=session['dest-lat'],
-        end_longitude=session['dest-lng']
+        ride_type=session['lyft_ride_type'],
+        start_latitude=session['origin_lat'],
+        start_longitude=session['origin_lng'],
+        end_latitude=session['dest_lat'],
+        end_longitude=session['dest_lng']
         )
 
     ride_details = response.json
@@ -141,9 +141,9 @@ def requestLyft(code, state):
     print response.status_code
 
     time = lyft_client.get_pickup_time_estimates(
-        session['origin-lat'],
-        session['origin-lng'],
-        session['lyft-ride-type']
+        session['origin_lat'],
+        session['origin_lng'],
+        session['lyft_ride_type']
         )
 
     eta = time.json

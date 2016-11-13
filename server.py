@@ -29,12 +29,6 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 def index():
     """Homepage."""
 
-    if 'depart_timestamp' in session:
-        session['minutes'] = (session['depart_timestamp'] - arrow.now('US/Pacific').timestamp) / 60
-
-    if 'arrive_timestamp' in session:
-        session['minutes-arr'] = (session['arrive_timestamp'] - arrow.now('US/Pacific').timestamp) / 60
-        
     if "user_id" in session:
         user = User.query.filter_by(user_id = session["user_id"]).first()
 
@@ -42,6 +36,7 @@ def index():
 
     else:
         return render_template("index.html")
+
 
 @app.route('/login', methods=["POST"])
 def login_user():
@@ -61,13 +56,6 @@ def login_user():
         return jsonify(wrong_password)
 
     session["user_id"] = user.user_id
-
-    session['lyft_arrive_time'] = ""
-    session['lyft_depart_time'] = ""
-    session['uber_arrive_time'] = ""
-    session['uber_depart_time'] = ""
-    session['minutes'] = ""
-    session['minutes-arr'] = ""
 
     success = {"login" : "success"}
     return jsonify(success)
@@ -92,14 +80,7 @@ def register_user():
     db.session.commit()
 
     session["user_id"] = user.user_id
-
-    session['lyft_arrive_time'] = ""
-    session['lyft_depart_time'] = ""
-    session['uber_arrive_time'] = ""
-    session['uber_depart_time'] = ""
-    session['minutes'] = ""
-    session['minutes-arr'] = ""
-
+   
     success = {"register" : "success"}
     return jsonify(success)
 
@@ -112,6 +93,24 @@ def logout():
     flash("Logged Out.")
     return redirect("/")
 
+
+@app.route('/delete_addresses', methods=["POST"])
+def delete_addresses():
+    """Delete address in user's database."""
+
+    addresses = []
+    for key in request.form.keys():
+        addresses.append(request.form.get(key))
+
+    for address in addresses:
+        UserAddress.query.filter_by(user_add_id = address).delete()
+
+    db.session.commit()
+
+    deleted = {"addresses" : "deleted"}
+    return jsonify(deleted)
+
+
 @app.route('/estimates.json', methods=["POST"])
 def get_estimates():
     """Take user input and request estimates from Uber and Lyft."""
@@ -120,8 +119,6 @@ def get_estimates():
     session['lyft_depart_time'] = ""
     session['uber_arrive_time'] = ""
     session['uber_depart_time'] = ""
-    session['minutes'] = ""
-    session['minutes-arr'] = ""
 
     origin_lat = request.form.get("origin_lat")
     origin_lng = request.form.get("origin_lng")
@@ -135,26 +132,34 @@ def get_estimates():
     estimates = estimatesToData(ride_estimates, origin_lat, origin_lng, 
                                                     dest_lat, dest_lng)
 
-    orig_lat = request.form.get("origin-lat-save")
-    orig_lng = request.form.get("origin-lng-save")
-    origin_address = request.form.get("origin-address")
-    origin_name = request.form.get("origin-name")
+    if request.form.get("origin-save") == "":
+        origin_lat = ""
+        origin_lng = ""
+        origin_address = ""
+        origin_name = ""
+        orig_label = ""
+    else:    
+        origin_address = request.form.get("origin-address")
+        origin_name = request.form.get("origin-name")
+        orig_label = request.form.get("label-or")
 
-    destn_lat = request.form.get("destn-lat-save")
-    destn_lng = request.form.get("destn-lng-save")
-    dest_address = request.form.get("destn-address")
-    dest_name = request.form.get("destn-name")
+    if request.form.get("dest-save") == "":
+        dest_lat = ""
+        dest_lng = ""
+        dest_address = ""
+        dest_name = ""
+        dest_label = ""
+    else:
+        dest_address = request.form.get("dest-address")
+        dest_name = request.form.get("dest-name")
+        dest_label = request.form.get("label-de")
 
-
-    orig_label = request.form.get("label-or")
-    dest_label = request.form.get("label-de")
-
-
-    addressToData(orig_lat, orig_lng, origin_address, origin_name, 
-                  destn_lat, destn_lng, dest_address, dest_name, 
+    addressToData(origin_lat, origin_lng, origin_address, origin_name, 
+                  dest_lat, dest_lng, dest_address, dest_name, 
                   orig_label, dest_label)
 
     return jsonify(estimates)
+
 
 
 @app.route('/call_uber', methods=['POST'])
@@ -164,21 +169,22 @@ def signin_uber():
     origin_lat = request.form.get("origin-lat")
     origin_lng = request.form.get("origin-lng")
 
-    session['origin-lat'] = origin_lat
-    session['origin-lng'] = origin_lng
+    session['origin_lat'] = origin_lat
+    session['origin_lng'] = origin_lng
 
     dest_lat = request.form.get("dest-lat")
     dest_lng = request.form.get("dest-lng")
 
-    session['dest-lat'] = dest_lat
-    session['dest-lng'] = dest_lng
+    session['dest_lat'] = dest_lat
+    session['dest_lng'] = dest_lng
 
     ride_type = request.form.get("uber-ride-type")
-    session['uber-ride-type'] = ride_type
+    session['uber_ride_type'] = ride_type
 
     url = getUberAuth()
 
     return redirect(url)
+
 
 @app.route('/callback')
 def call_uber():
@@ -191,6 +197,7 @@ def call_uber():
 
     return redirect('/')
 
+
 @app.route('/call_lyft', methods=['POST'])
 def signin_lyft():
     """Redirects user to Uber to authorize ride requests."""
@@ -198,21 +205,22 @@ def signin_lyft():
     origin_lat = request.form.get("origin-lat")
     origin_lng = request.form.get("origin-lng")
 
-    session['origin-lat'] = origin_lat
-    session['origin-lng'] = origin_lng
+    session['origin_lat'] = origin_lat
+    session['origin_lng'] = origin_lng
 
     dest_lat = request.form.get("dest-lat")
     dest_lng = request.form.get("dest-lng")
 
-    session['dest-lat'] = dest_lat
-    session['dest-lng'] = dest_lng
+    session['dest_lat'] = dest_lat
+    session['dest_lng'] = dest_lng
 
     ride_type = request.form.get("lyft-ride-type")
-    session['lyft-ride-type'] = ride_type
+    session['lyft_ride_type'] = ride_type
 
     url = getLyftAuth()
 
     return redirect(url)
+
 
 @app.route('/callback_lyft')
 def call_lyft():
@@ -227,10 +235,11 @@ def call_lyft():
     return redirect('/')
 
 
+
 @app.route('/ride_message')
 def ride_message():
     """Message for arrival and updates on ride."""
-    print "\n\n\n\n IN ROUTE \n\n\n\n"
+
     if 'depart_timestamp' in session:
         if session['depart_timestamp'] != "":
             minutes = (session['depart_timestamp'] - arrow.now('US/Pacific').timestamp) / 60
@@ -252,7 +261,6 @@ def ride_message():
         "minutes_arr" : minutes_arr,
         "ride" : ride}
 
-        print "\n", time, "\n\n\n\n"
 
         return jsonify(time)
 

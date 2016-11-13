@@ -51,15 +51,15 @@ function fillInDeAddress() {
     var val_name = de_place.name;
 
     if (de_place.adr_address === '') { // If intersection
-        $('#destn-address').val(val_name);
+        $('#dest-address').val(val_name);
     }
     else {
-        $('#destn-address').val(val_form);
+        $('#dest-address').val(val_form);
     }
     
     $("#de-display-address").html(val_name);
 
-    $("#destn-name").val(val_name);
+    $("#dest-name").val(val_name);
 
     var val = de_place.geometry.location.lat();
     $('.dest-lat-rides').val(val);
@@ -112,7 +112,7 @@ $("#location").on("click", function (evt) {
         })
 
         $("#save-origin").show();
-        $("#save-dest").show();
+
     }
     else {
         alert("Cannot find current location.")
@@ -123,7 +123,12 @@ $("#location").on("click", function (evt) {
 /////////// POPULATE HIDDEN INPUTS FOR COST ESTIMATES USING SAVED ADDRESSES ///////////
 
 $("#origin-drop").on("change", function (evt) {
-    if ($("#origin-drop").val() != "Saved Addresses") {
+    if ($("#origin-drop").val() === "manage-saved-addresses") {
+        ($("#manage-address-modal").modal('show'));
+    }
+
+    if ($("#origin-drop").val() != "saved-addresses" && 
+        $("#origin-drop").val() != "manage-saved-addresses") {
         $("autocomplete").val("");
         $("#autocomplete-orig").val($("#origin-drop").val());
         var or_lat = $(this).find("option:selected").data("lat");
@@ -136,7 +141,7 @@ $("#origin-drop").on("change", function (evt) {
 });
 
 $("#dest-drop").on("change", function (evt) {
-    if ($("#dest-drop").val() != "Saved Addresses") {
+    if ($("#dest-drop").val() != "saved-addresses") {
         $("autocomplete").val("");
         $("#autocomplete-dest").val($("#dest-drop").val());
         var de_lat = $(this).find("option:selected").data("lat");
@@ -152,27 +157,54 @@ $("#dest-drop").on("change", function (evt) {
 
 /////////// POPULATE HIDDEN INPUTS IF USER WANTS TO SAVE ADDRESSES ///////////
 
+$("#orig-save").val("");
+
 $("#orig-check").on("change", function (evt) {
     if ($("#orig-check").prop("checked")) {
-        $("#orig-lat-save").val($("#orig-lat-est").val());
-        $("#orig-lng-save").val($("#orig-lng-est").val());
+        $("#origin-save").val("save");
     }
     else if ($("#orig-check").prop("checked") === false) {
-        $("#orig-lat-save").val("");
-        $("#orig-lng-save").val("");
+        $("#origin-save").val("");
     }
 });
 
+$("#orig-save").val("");
+
 $("#dest-check").on("change", function (evt) {
     if ($("#dest-check").prop("checked")) {     
-        $("#dest-lat-save").val($("#dest-lat-est").val());
-        $("#dest-lng-save").val($("#dest-lng-est").val());
+        $("#dest-save").val("save");
     }
     else if ($("#dest-check").prop("checked") === false) {
-        $("#dest-lat-save").val("");
-        $("#dest-lng-save").val("");
+        $("#dest-save").val("");
     }
 });
+
+
+/////////// DELETE USER ADDRESSES FROM DATABASE USING AJAX ///////////
+
+function deleteAddresses (results) {
+    $("#manage-address-modal").modal("hide");
+    location.reload();
+}
+
+function chooseAddresses (evt) {
+
+    evt.preventDefault();
+
+    var formInputs = {};
+
+    $(".address-check").each(function (index) {
+        if ($(this).prop("checked")) {
+            formInputs[index] = $(this).val();
+        }
+    });
+
+    $.post("/delete_addresses",
+        formInputs,
+        deleteAddresses);
+}
+
+$("#delete-address").on("submit", chooseAddresses);
 
 
 /////////// HIDE REQUEST RADIOS AND SUBMIT BUTTONS AT PAGE LOAD ///////////
@@ -332,20 +364,17 @@ function getAddressInput(evt) {
                     alert("Distance must be less than 100 miles.");
                 }
                 else {
-
                     var formInputs = {
                     "origin_lat": $("#orig-lat-est").val(),
                     "origin_lng": $("#orig-lng-est").val(),
                     "dest_lat": $("#dest-lat-est").val(),
                     "dest_lng": $("#dest-lng-est").val(),
-                    "origin-lat-save" : $("#orig-lat-save").val(),
-                    "origin-lng-save" : $("#orig-lng-save").val(),
-                    "destn-lat-save" : $("#dest-lat-save").val(),
-                    "destn-lng-save" : $("#dest-lng-save").val(),
+                    "origin-save" : $("#origin-save").val(),
+                    "dest-save" : $("#dest-save").val(),
                     "origin-address" : $("#origin-address").val(),
-                    "destn-address" : $("#destn-address").val(),
+                    "dest-address" : $("#dest-address").val(),
                     "origin-name" : $("#origin-name").val(),
-                    "destn-name" : $("#destn-name").val(),
+                    "dest-name" : $("#dest-name").val(),
                     "label-or" : $("#label-or").val(),
                     "label-de" : $("#label-de").val()
                     };
@@ -373,34 +402,35 @@ function showMessage(response) {
     // Show ride progress depending on eta.
     if (response['minutes'] > 0) {
         if (response['minutes'] === 1) {
-            m = " minute."
+            m = " minute.";
         }
         else {
-            m = " minutes."
+            m = " minutes.";
         }
 
         $("#ride-message").html("Your " + response['ride'] + 
             " is on its way! Please be ready to depart in " + 
             response['minutes'] + m + " You will reach your destination at " + 
-            response['arrive_time'] + ".")
+            response['arrive_time'] + ".");
     }
     else if (response['minutes'] === 0) {
         $("#ride-message").html("Your " + response['ride'] + 
             " has arrived! You will reach your destination at " +
-            response['arrive_time'] + ".")
+            response['arrive_time'] + ".");
     }
     else if (response['minutes'] < 0 && response['minutes_arr'] > 0) {
         if (response['minutes_arr'] === 1) {
-            ma = " minute, "
+            ma = " minute, ";
         }
         else {
-            ma = " minutes, "
+            ma = " minutes, ";
         }
 
         $("#ride-message").html("You are on your way! You will reach your destination in " +
-            response['minutes_arr'] + ma + "at " + response['arrive_time'])
+            response['minutes_arr'] + ma + "at " + response['arrive_time'] + ".");
     }
     else if (response['minutes'] < 0  && response['minutes_arr'] <= 0) {
+        $("#ride-message").html("");
         clearInterval(message);
     }
 
@@ -413,15 +443,16 @@ function writeMessage() {
 }
 
 // Set interval to initiate request to server every 30 seconds
-var message = setInterval(writeMessage, 30000); 
+// var message = setInterval(writeMessage, 30000); 
 
 var callRide = function (evt) {
     clearInterval(message); // Clear previous interval call
-    message();
+    writeMessage();
+    setInterval(writeMessage, 30000);
 }
 
 // Upon requesting a ride, call the function that shows ride progress.
 $("#call-uber").on("submit", callRide);
 $("#call-lyft").on("submit", callRide);
 
-writeMessage(); // Show ride progress message upon re-loading the page
+// writeMessage(); // Show ride progress message upon re-loading the page
