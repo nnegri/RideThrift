@@ -43,6 +43,75 @@ def index():
     else:
         return render_template("index.html")
 
+@app.route('/login', methods=["POST"])
+def login_user():
+    """Log in existing user"""
+
+    email = request.form["email"]
+    password = request.form["password"]
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        not_user = {"login" : "no_record"}
+        return jsonify(not_user)
+
+    if user.password != str(hash(password)):
+        wrong_password = {"login" : "incorrect_password"}
+        return jsonify(wrong_password)
+
+    session["user_id"] = user.user_id
+
+    session['lyft_arrive_time'] = ""
+    session['lyft_depart_time'] = ""
+    session['uber_arrive_time'] = ""
+    session['uber_depart_time'] = ""
+    session['minutes'] = ""
+    session['minutes-arr'] = ""
+
+    success = {"login" : "success"}
+    return jsonify(success)
+
+
+@app.route('/register', methods=['POST'])
+def register_user():
+    """Register and log in new user"""
+
+    email = request.form["email"].strip()
+    password = request.form["password"].strip()
+
+    emails = [query[0] for query in db.session.query(User.email).all()]
+
+    if email in emails:
+        user_exists = {"register" : "exists"}
+        return jsonify(user_exists)
+
+    user = User(email=email, password=hash(password))
+
+    db.session.add(user)
+    db.session.commit()
+
+    session["user_id"] = user.user_id
+
+    session['lyft_arrive_time'] = ""
+    session['lyft_depart_time'] = ""
+    session['uber_arrive_time'] = ""
+    session['uber_depart_time'] = ""
+    session['minutes'] = ""
+    session['minutes-arr'] = ""
+
+    success = {"register" : "success"}
+    return jsonify(success)
+
+
+@app.route('/logout')
+def logout():
+    """End user session"""
+
+    session.clear()
+    flash("Logged Out.")
+    return redirect("/")
+
 @app.route('/estimates.json', methods=["POST"])
 def get_estimates():
     """Take user input and request estimates from Uber and Lyft."""
@@ -53,7 +122,7 @@ def get_estimates():
     session['uber_depart_time'] = ""
     session['minutes'] = ""
     session['minutes-arr'] = ""
-    
+
     origin_lat = request.form.get("origin_lat")
     origin_lng = request.form.get("origin_lng")
     
@@ -86,66 +155,6 @@ def get_estimates():
                   orig_label, dest_label)
 
     return jsonify(estimates)
-
-@app.route('/login', methods=["POST"])
-def login_user():
-    """Log in existing user"""
-
-    email = request.form["email"]
-    password = request.form["password"]
-
-    user = User.query.filter_by(email=email).first()
-
-    if not user:
-        flash("We have no record of this user, please register.")
-        return redirect("/")
-
-    if user.password != str(hash(password)):
-        flash("Incorrect password")
-        return redirect("/")
-
-    session["user_id"] = user.user_id
-    session['lyft_arrive_time'] = ""
-    session['lyft_depart_time'] = ""
-    session['uber_arrive_time'] = ""
-    session['uber_depart_time'] = ""
-    session['minutes'] = ""
-    session['minutes-arr'] = ""
-
-    flash("Logged in")
-    return redirect("/")
-
-
-@app.route('/register', methods=['POST'])
-def register_user():
-    """Register and log in new user"""
-
-    email = request.form["email"].strip()
-    password = request.form["password"].strip()
-
-    emails = [query[0] for query in db.session.query(User.email).all()]
-
-    if email in emails:
-        flash("You have already registered.")
-        return redirect("/")
-
-    user = User(email=email, password=hash(password))
-
-    db.session.add(user)
-    db.session.commit()
-
-    session["user_id"] = user.user_id
-
-    flash("Welcome! You are now logged in.")
-    return redirect("/")
-
-@app.route('/logout')
-def logout():
-    """End user session"""
-
-    session.clear()
-    flash("Logged Out.")
-    return redirect("/")
 
 
 @app.route('/call_uber', methods=['POST'])
@@ -216,6 +225,36 @@ def call_lyft():
     requestLyft(code, state)
 
     return redirect('/')
+
+
+@app.route('/ride_message')
+def ride_message():
+    """Message for arrival and updates on ride."""
+    print "\n\n\n\n IN ROUTE \n\n\n\n"
+    if 'depart_timestamp' in session:
+        if session['depart_timestamp'] != "":
+            minutes = (session['depart_timestamp'] - arrow.now('US/Pacific').timestamp) / 60
+            minutes_arr = (session['arrive_timestamp'] - arrow.now('US/Pacific').timestamp) / 60
+
+        if session["lyft_arrive_time"] != "":
+            ride = "Lyft"
+            depart_time = session['lyft_depart_time']
+            arrive_time = session['lyft_arrive_time']
+        else:
+            ride = "Uber"
+            depart_time = session['uber_depart_time']
+            arrive_time = session['uber_arrive_time']
+
+        time = {
+        "depart_time" : depart_time,
+        "arrive_time" : arrive_time,
+        "minutes" : minutes,
+        "minutes_arr" : minutes_arr,
+        "ride" : ride}
+
+        print "\n", time, "\n\n\n\n"
+
+        return jsonify(time)
 
 
 

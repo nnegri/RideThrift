@@ -2,52 +2,8 @@
 {% block content %}
 
     <h1>Ride Thrift</h2>
-    {% if session %}
-        {% if session['lyft_depart_time'] != "" %}
-            {% if session['minutes'] > 0 %}
-                <h3>Your Lyft is on its way! Please be ready to depart in {{ session['minutes'] }} 
-                {% if session['minutes'] == 1 %}
-                    minute. 
-                {% else %}
-                    minutes. 
-                {% endif %}
-                You will arrive at your destination at {{ session['lyft_arrive_time'] }}.</h3>
-            {% elif session['minutes'] == 0 %}
-                <h3>Your Lyft has arrived! You will reach your destination at {{ session['lyft_arrive_time'] }}.</h3>
-            {% elif session['minutes'] < 0 and session['minutes-arr'] > 0 %}
-                <h3>Your are on your way! You will reach your destination in {{ session['minutes-arr'] }} 
-                {% if session['minutes-arr'] == 1 %} 
-                    minute, 
-                {% else %} 
-                    minutes, 
-                {% endif %} 
-                at {{ session['lyft_arrive_time'] }}.</h3>
-            {% endif %}
-        {% endif %}
 
-        {% if session['uber_depart_time'] != "" %}
-            {% if session['minutes'] > 0 %}
-                <h3>Your Uber is on its way! Please be ready to depart in {{ session['minutes'] }} 
-                {% if session['minutes'] == 1 %}
-                    minute. 
-                {% else %}
-                    minutes. 
-                {% endif %}
-                You will arrive at your destination at {{ session['uber_arrive_time'] }}.</h3>
-            {% elif session['minutes'] == 0 %}
-                <h3>Your Uber has arrived! You will reach your destination at {{ session['uber_arrive_time'] }}.</h3>
-            {% elif session['minutes'] < 0 and session['minutes-arr'] > 0 %}
-                <h3>Your are on your way! You will reach your destination in {{ session['minutes-arr'] }} 
-                {% if session['minutes-arr'] == 1 %}
-                    minute, 
-                {% else %}
-                    minutes, 
-                {% endif %}
-                at {{ session['uber_arrive_time'] }}.</h3>
-            {% endif %}
-        {% endif %}
-
-    {% endif %}
+    <h4 id="ride-message"></h4>
 
     <form id="estimate-form" method="post" action="/estimates.json">
         <label>Origin:</label>
@@ -100,7 +56,7 @@
         <br><input type="submit" value="Get Estimates"><br>    
     </form>
     
-    <form action="/call_uber" method="POST">
+    <form action="/call_uber" method="POST" id="call-uber">
         <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-uber" value="origin"> 
         <input type="hidden" class="orig-lng-rides" name="origin-lng" id="orig-lng-uber" value="origin">
         <input type="hidden" class="dest-lat-rides" name="dest-lat" id="dest-lat-uber" value="dest"> 
@@ -113,7 +69,7 @@
         <input type="submit" value="Request Uber" id="uber-req-button">
     </form>
 
-    <form action="/call_lyft" method="POST">
+    <form action="/call_lyft" method="POST" id="call-lyft">
         <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-uber" value="origin"> 
         <input type="hidden" class="orig-lng-rides" name="origin-lng" id="orig-lng-uber" value="origin">
         <input type="hidden" class="dest-lat-rides" name="dest-lat" id="dest-lat-uber" value="dest"> 

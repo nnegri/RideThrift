@@ -6,7 +6,7 @@
     <link rel="stylesheet" 
           href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    
+
 </head>
 <body>
 
@@ -15,7 +15,7 @@ Ride Thrift
 {% if "user_id" in session %}
     <a href="/logout">Logout</a>
 {% else %}
-    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#login-modal">Login</button>
+    <button type="button" class="btn btn-primary btn-lg" id="login-btn" data-toggle="modal" data-target="#login-modal">Login</button>
 {% endif %}
 
 <hr>
@@ -31,21 +31,22 @@ Ride Thrift
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <h1>Login</h1>
-                <form action="/login" method="POST">
+                <form id="login" action="/login" method="POST">
                     <div>
                         <label>Email:
-                            <input type="email" name="email" required>
+                            <input type="email" name="email" id="email" required>
                         </label>
                     </div>
                     <div>
                         <label>Password:
-                            <input type="password" name="password" required>
+                            <input type="password" name="password" id="password" required>
                         </label>
                     </div>
                     <div>
                         <input type="submit" value="Log In">
                     </div>
                 </form>
+                <span id="login-msg"></span><br>
                 New user? <button type="button" class="btn btn-primary btn-lg" id="rg" data-toggle="modal" data-target="#register-modal">Register Here!</button>
                 <a href="/">Cancel</a>
 
@@ -54,6 +55,39 @@ Ride Thrift
                 $(document).on("click", "#rg", function() {
                     $("#login-modal").modal("hide");
                 });
+
+                function showLogin(response) {
+
+                    if (response["login"] == "no_record") {
+                        $("#login-msg").html("We have no record of this user, please register.");
+                    }
+                    else if (response["login"] == "incorrect_password") {
+                        $("#login-msg").html("Incorrect password.");
+                    }
+                    else {
+                        $("#login-modal").modal("hide");
+                        location.reload();
+                    }
+                }
+
+                function verifyUser(evt) {
+                    // Use AJAX to submit user input to route, 
+                    // and return to showEstimates function.
+
+                    evt.preventDefault();
+
+                    var formInputs = {
+                        "email": $("#email").val(),
+                        "password": $("#password").val(),
+                    };
+                              
+                    $.post("/login",
+                    formInputs,
+                    showLogin);
+                }
+
+                $("#login").on("submit", verifyUser);
+             
                 </script>
             </div>
         </div>
@@ -63,16 +97,16 @@ Ride Thrift
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <h1>Register</h1>
-                <form action="/register" method="POST">
+                <form id="registration" action="/register" method="POST">
                     <div>
                         <label>Email:
-                            <input type="email" name="email" required>
+                            <input type="email" name="email" id="email" required>
                         </label>
                     </div>
 
                     <div>
                         <label>Password:
-                            <input type="password" name="password" required>
+                            <input type="password" name="password" id="password" required>
                         </label>
                     </div>
 
@@ -80,6 +114,7 @@ Ride Thrift
                         <input type="submit" value="Register">
                     </div>
                 </form>
+                <span id="reg-msg"></span><br>
                 Already Registered? <button type="button" class="btn btn-primary btn-lg" id="lgn" data-toggle="modal" data-target="#login-modal">Login Here!</button>
                 <a href="/">Cancel</a>
 
@@ -88,6 +123,36 @@ Ride Thrift
                 $(document).on("click", "#lgn", function() {
                     $("#register-modal").modal("hide");
                 });
+
+                function showRegistration(response) {
+
+                    if (response["register"] == "exists") {
+                        $("#reg-msg").html("You have already registered. Please log in.");
+                    }
+                    else {
+                        $("#register-modal").modal("hide");
+                        location.reload();
+                    }
+                }
+
+                function registerUser(evt) {
+                    // Use AJAX to submit user input to route, 
+                    // and return to showEstimates function.
+
+                    evt.preventDefault();
+
+                    var formInputs = {
+                        "email": $("#email").val(),
+                        "password": $("#password").val(),
+                    };
+                              
+                    $.post("/register",
+                    formInputs,
+                    showRegistration);
+                }
+
+                $("#registration").on("submit", registerUser);
+
                 </script>
             </div>
         </div>

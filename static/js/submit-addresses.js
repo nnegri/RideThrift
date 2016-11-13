@@ -1,4 +1,4 @@
-"use strict";
+/////////// POPULATE HIDDEN INPUTS FOR COST ESTIMATES USING GOOGLEMAPS API ///////////
 
 var placeSearch, autocomplete_orig, autocomplete_dest;
 
@@ -14,7 +14,6 @@ function initAutocomplete() {
     autocomplete_dest.addListener('place_changed', fillInDeAddress);
 
 }
-
 
 function fillInOrAddress() {
     // Get latitude, longitude, and complete addresses for origin input by users
@@ -89,7 +88,7 @@ function geolocate() {
     }
 }
 
-// User's current location as origin
+// Set origin as user's current location
 $("#location").on("click", function (evt) {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
@@ -121,10 +120,80 @@ $("#location").on("click", function (evt) {
 });
 
 
+/////////// POPULATE HIDDEN INPUTS FOR COST ESTIMATES USING SAVED ADDRESSES ///////////
+
+$("#origin-drop").on("change", function (evt) {
+    if ($("#origin-drop").val() != "Saved Addresses") {
+        $("autocomplete").val("");
+        $("#autocomplete-orig").val($("#origin-drop").val());
+        var or_lat = $(this).find("option:selected").data("lat");
+        var or_lng = $(this).find("option:selected").data("lng");
+
+        $(".orig-lat-rides").val(or_lat);
+        $(".orig-lng-rides").val(or_lng);
+        $("#save-origin").hide()        
+    }
+});
+
+$("#dest-drop").on("change", function (evt) {
+    if ($("#dest-drop").val() != "Saved Addresses") {
+        $("autocomplete").val("");
+        $("#autocomplete-dest").val($("#dest-drop").val());
+        var de_lat = $(this).find("option:selected").data("lat");
+        var de_lng = $(this).find("option:selected").data("lng");
+
+        $(".dest-lat-rides").val(de_lat);
+        $(".dest-lng-rides").val(de_lng);
+        $("#save-dest").hide();
+
+    }
+});
+
+
+/////////// POPULATE HIDDEN INPUTS IF USER WANTS TO SAVE ADDRESSES ///////////
+
+$("#orig-check").on("change", function (evt) {
+    if ($("#orig-check").prop("checked")) {
+        $("#orig-lat-save").val($("#orig-lat-est").val());
+        $("#orig-lng-save").val($("#orig-lng-est").val());
+    }
+    else if ($("#orig-check").prop("checked") === false) {
+        $("#orig-lat-save").val("");
+        $("#orig-lng-save").val("");
+    }
+});
+
+$("#dest-check").on("change", function (evt) {
+    if ($("#dest-check").prop("checked")) {     
+        $("#dest-lat-save").val($("#dest-lat-est").val());
+        $("#dest-lng-save").val($("#dest-lng-est").val());
+    }
+    else if ($("#dest-check").prop("checked") === false) {
+        $("#dest-lat-save").val("");
+        $("#dest-lng-save").val("");
+    }
+});
+
+
+/////////// HIDE REQUEST RADIOS AND SUBMIT BUTTONS AT PAGE LOAD ///////////
+
+$(".rdo-uber").hide();
+$("#uber-req-button").hide();
+
+$(".rdo-lyft").hide();
+$("#lyft-req-button").hide();
+
+/////////// HIDE SAVE INPUTS AT PAGE LOAD ///////////
+
+$("#save-origin").hide();
+$("#save-dest").hide();
+
+
+/////////// REQUEST ESTIMATES USING AJAX ///////////
 
 function showEstimates(results) {
     // Display estimate results on page.
-    console.log(results);
+
     var poolId = (results[0]["pool_product_id"])
     var uberxId = (results[0]["uberx_product_id"])
     var uberxlId = (results[0]["uberxl_product_id"])
@@ -138,8 +207,10 @@ function showEstimates(results) {
     var plusEst = (results[1][6] / 100).toFixed(2);
 
 
+    // Show estimates for Uber
+
     $(".rdo-uber").show();
-    $(".rdo-lyft").show();
+    $("#uber-req-button").show();
 
     $("#uber").html("Uber:");
     if (isNaN(poolEst)) {
@@ -164,6 +235,11 @@ function showEstimates(results) {
         $("#uberxl").html("UberXL: $" + xlEst);
     }
 
+    // Show estimates for Lyft
+
+    $(".rdo-lyft").show();
+    $("#lyft-req-button").show();
+
     $("#lyft").html("Lyft:");
     if (isNaN(lineEst)) {
         $("#line").html("Line: None available");
@@ -186,9 +262,9 @@ function showEstimates(results) {
     else {
         $("#plus").html("Plus: $" + plusEst);
     }
-
     
-    $("#uber-req-button").show();
+    // Set default Uber choice, and change according to radio button selected
+
     $("#uber-ride-choice").val(uberxId);
 
     $(".rdo-uber").on("change", function (evt) {
@@ -202,8 +278,9 @@ function showEstimates(results) {
         $("#uber-ride-choice").val(uberxlId);
     }
     })
+
+    // Set default Lyft choice, and change according to radio button selected
     
-    $("#lyft-req-button").show();
     $("#lyft-ride-choice").val("lyft");
 
     $(".rdo-lyft").on("change", function (evt) {
@@ -286,67 +363,65 @@ function getAddressInput(evt) {
     }
 }
 
-// Fill in inputs in order to get cost estimates with an origin chosen from 
-// saved addresses.
-$("#origin-drop").on("change", function (evt) {
-    if ($("#origin-drop").val() != "Saved Addresses") {
-        $("autocomplete").val("");
-        $("#autocomplete-orig").val($("#origin-drop").val());
-        var or_lat = $(this).find("option:selected").data("lat");
-        var or_lng = $(this).find("option:selected").data("lng");
-
-        $(".orig-lat-rides").val(or_lat);
-        $(".orig-lng-rides").val(or_lng);
-        $("#save-origin").hide()        
-    }
-});
-
-// Fill in inputs in order to get cost estimates with a destination chosen from 
-// saved addresses.
-$("#dest-drop").on("change", function (evt) {
-    if ($("#dest-drop").val() != "Saved Addresses") {
-        $("autocomplete").val("");
-        $("#autocomplete-dest").val($("#dest-drop").val());
-        var de_lat = $(this).find("option:selected").data("lat");
-        var de_lng = $(this).find("option:selected").data("lng");
-
-        $(".dest-lat-rides").val(de_lat);
-        $(".dest-lng-rides").val(de_lng);
-        $("#save-dest").hide();
-
-    }
-});
-
-$("#save-origin").hide();
-$("#save-dest").hide();
-
 // Request estimates upon submitting origin and destination. 
 $("#estimate-form").on("submit", getAddressInput);
 
-$(".rdo-uber").hide();
-$("#uber-req-button").hide();
 
-$(".rdo-lyft").hide();
-$("#lyft-req-button").hide();
+/////////// SHOW RIDE PROGRESS USING AJAX REQUESTS ON TIME INTERVAL ///////////
 
-$("#orig-check").on("change", function (evt) {
-    if ($("#orig-check").prop("checked")) {
-        $("#orig-lat-save").val($("#orig-lat-est").val());
-        $("#orig-lng-save").val($("#orig-lng-est").val());
-    }
-    else if ($("#orig-check").prop("checked") === false) {
-        $("#orig-lat-save").val("");
-        $("#orig-lng-save").val("");
-    }
-});
+function showMessage(response) {
+    // Show ride progress depending on eta.
+    if (response['minutes'] > 0) {
+        if (response['minutes'] === 1) {
+            m = " minute."
+        }
+        else {
+            m = " minutes."
+        }
 
-$("#dest-check").on("change", function (evt) {
-    if ($("#dest-check").prop("checked")) {     
-        $("#dest-lat-save").val($("#dest-lat-est").val());
-        $("#dest-lng-save").val($("#dest-lng-est").val());
+        $("#ride-message").html("Your " + response['ride'] + 
+            " is on its way! Please be ready to depart in " + 
+            response['minutes'] + m + " You will reach your destination at " + 
+            response['arrive_time'] + ".")
     }
-    else if ($("#dest-check").prop("checked") === false) {
-        $("#dest-lat-save").val("");
-        $("#dest-lng-save").val("");
+    else if (response['minutes'] === 0) {
+        $("#ride-message").html("Your " + response['ride'] + 
+            " has arrived! You will reach your destination at " +
+            response['arrive_time'] + ".")
     }
-});
+    else if (response['minutes'] < 0 && response['minutes_arr'] > 0) {
+        if (response['minutes_arr'] === 1) {
+            ma = " minute, "
+        }
+        else {
+            ma = " minutes, "
+        }
+
+        $("#ride-message").html("You are on your way! You will reach your destination in " +
+            response['minutes_arr'] + ma + "at " + response['arrive_time'])
+    }
+    else if (response['minutes'] < 0  && response['minutes_arr'] <= 0) {
+        clearInterval(message);
+    }
+
+}
+
+function writeMessage() {
+    // Ajax request to route, to retrieve departure and arrival times for ride.
+    $.get("/ride_message",
+    showMessage);
+}
+
+// Set interval to initiate request to server every 30 seconds
+var message = setInterval(writeMessage, 30000); 
+
+var callRide = function (evt) {
+    clearInterval(message); // Clear previous interval call
+    message();
+}
+
+// Upon requesting a ride, call the function that shows ride progress.
+$("#call-uber").on("submit", callRide);
+$("#call-lyft").on("submit", callRide);
+
+writeMessage(); // Show ride progress message upon re-loading the page
