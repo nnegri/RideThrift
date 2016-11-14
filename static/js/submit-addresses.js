@@ -141,7 +141,12 @@ $("#origin-drop").on("change", function (evt) {
 });
 
 $("#dest-drop").on("change", function (evt) {
-    if ($("#dest-drop").val() != "saved-addresses") {
+    if ($("#dest-drop").val() === "manage-saved-addresses") {
+        ($("#manage-address-modal").modal('show'));
+    }
+
+    if ($("#dest-drop").val() != "saved-addresses" && 
+        $("#dest-drop").val() != "manage-saved-addresses") {
         $("autocomplete").val("");
         $("#autocomplete-dest").val($("#dest-drop").val());
         var de_lat = $(this).find("option:selected").data("lat");
@@ -199,7 +204,7 @@ function chooseAddresses (evt) {
         }
     });
 
-    $.post("/delete_addresses",
+    $.post("/delete_addresses.json",
         formInputs,
         deleteAddresses);
 }
@@ -226,18 +231,21 @@ $("#save-dest").hide();
 function showEstimates(results) {
     // Display estimate results on page.
 
-    var poolId = (results[0]["pool_product_id"])
-    var uberxId = (results[0]["uberx_product_id"])
-    var uberxlId = (results[0]["uberxl_product_id"])
+    var poolId = (results[0]["pool_product_id"]);
+    var uberxId = (results[0]["uberx_product_id"]);
+    var uberxlId = (results[0]["uberxl_product_id"]);
 
-    var poolEst = (results[0][1] / 100).toFixed(2);
-    var uberEst = (results[0][2] / 100).toFixed(2);
-    var xlEst = (results[0][3] / 100).toFixed(2);
+    var poolEst = (results[0][1] / 100);
+    var uberEst = (results[0][2] / 100);
+    var xlEst = (results[0][3] / 100);
 
-    var lineEst = (results[1][4] / 100).toFixed(2);
-    var lyftEst = (results[1][5] / 100).toFixed(2);
-    var plusEst = (results[1][6] / 100).toFixed(2);
 
+    var lineEst = (results[1][4] / 100);
+    var lyftEst = (results[1][5] / 100);
+    var plusEst = (results[1][6] / 100);
+
+    // var rideArray = [poolEst, uberEst, xlEst, lineEst, lyftEst, plusEst];
+    // rideArray.sort(function(a, b){return a-b}); // SORTING FOR CONDITIONAL FORMATTING
 
     // Show estimates for Uber
 
@@ -250,21 +258,22 @@ function showEstimates(results) {
         $("#rdo-pool").hide();
     }
     else {
-        $("#pool").html("Pool: $" + poolEst);
+        $("#pool").html("Pool: $" + poolEst.toFixed(2));
+        // $("#pool").val(rideArray.indexOf(poolEst));
     }
     if (isNaN(uberEst)) {
         $("#uberx").html("UberX: None available");
         $("#rdo-uberx").hide();
     }
     else {
-        $("#uberx").html("UberX: $" + uberEst);
+        $("#uberx").html("UberX: $" + uberEst.toFixed(2));
     }
     if (isNaN(xlEst)) {
         $("#uberxl").html("UberXL: None available");
         $("#rdo-uberxl").hide();
     }
     else {
-        $("#uberxl").html("UberXL: $" + xlEst);
+        $("#uberxl").html("UberXL: $" + xlEst.toFixed(2));
     }
 
     // Show estimates for Lyft
@@ -278,21 +287,21 @@ function showEstimates(results) {
         $("#rdo-line").hide();
     }
     else {
-        $("#line").html("Line: $" + lineEst);
+        $("#line").html("Line: $" + lineEst.toFixed(2));
     }
     if (isNaN(lyftEst)) {
         $("#lyft-lyft").html("Lyft: None available");
         $("#rdo-lyft-lyft").hide();
     }
     else {
-        $("#lyft-lyft").html("Lyft: $" + lyftEst);
+        $("#lyft-lyft").html("Lyft: $" + lyftEst.toFixed(2));
     }
     if (isNaN(plusEst)) {
         $("#plus").html("Plus: None available");
         $("#rdo-plus").hide();
     }
     else {
-        $("#plus").html("Plus: $" + plusEst);
+        $("#plus").html("Plus: $" + plusEst.toFixed(2));
     }
     
     // Set default Uber choice, and change according to radio button selected
@@ -400,6 +409,8 @@ $("#estimate-form").on("submit", getAddressInput);
 
 function showMessage(response) {
     // Show ride progress depending on eta.
+    console.log(response);
+
     if (response['minutes'] > 0) {
         if (response['minutes'] === 1) {
             m = " minute.";
@@ -412,11 +423,13 @@ function showMessage(response) {
             " is on its way! Please be ready to depart in " + 
             response['minutes'] + m + " You will reach your destination at " + 
             response['arrive_time'] + ".");
+        $("#ride-message").val("");
     }
     else if (response['minutes'] === 0) {
         $("#ride-message").html("Your " + response['ride'] + 
             " has arrived! You will reach your destination at " +
             response['arrive_time'] + ".");
+        $("#ride-message").val("");
     }
     else if (response['minutes'] < 0 && response['minutes_arr'] > 0) {
         if (response['minutes_arr'] === 1) {
@@ -428,31 +441,33 @@ function showMessage(response) {
 
         $("#ride-message").html("You are on your way! You will reach your destination in " +
             response['minutes_arr'] + ma + "at " + response['arrive_time'] + ".");
+        $("#ride-message").val("");
     }
     else if (response['minutes'] < 0  && response['minutes_arr'] <= 0) {
         $("#ride-message").html("");
-        clearInterval(message);
+        $("#ride-message").val("done");
     }
 
 }
 
 function writeMessage() {
     // Ajax request to route, to retrieve departure and arrival times for ride.
-    $.get("/ride_message",
-    showMessage);
+    // Does not make request if ride is done
+    if ($("#ride-message").val() === "") { 
+        $.get("/ride_message.json",
+        showMessage);
+    }
 }
 
-// Set interval to initiate request to server every 30 seconds
-// var message = setInterval(writeMessage, 30000); 
+var message = setInterval(writeMessage, 30000); 
 
 var callRide = function (evt) {
     clearInterval(message); // Clear previous interval call
-    writeMessage();
     setInterval(writeMessage, 30000);
+    // Set interval to initiate request to server every 30 seconds
+    writeMessage();
 }
 
-// Upon requesting a ride, call the function that shows ride progress.
-$("#call-uber").on("submit", callRide);
-$("#call-lyft").on("submit", callRide);
 
-// writeMessage(); // Show ride progress message upon re-loading the page
+callRide(); 
+// Show ride progress message upon calling ridde and/or re-loading the page

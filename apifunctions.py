@@ -1,17 +1,19 @@
 from lyft_rides.auth import ClientCredentialGrant
 from lyft_rides.session import Session
 from lyft_rides.client import LyftRidesClient
-# from lyft_rides.auth import AuthorizationCodeGrant
+from lyft_rides.auth import AuthorizationCodeGrant
 import lyft_rides.auth
 
 from uber_rides.session import Session
 from uber_rides.client import UberRidesClient
 from uber_rides.auth import AuthorizationCodeGrant
-from flask import flash, Markup, session
+
+from flask import session
 import os
 from random import randint
-from datetime import datetime, timedelta, date
 import arrow 
+import googlemaps
+
 #Authorize access to Lyft API
 auth_flow = ClientCredentialGrant(
     client_id=os.environ['LYFT_CLIENT_ID'], 
@@ -98,15 +100,19 @@ def requestUber(code, state):
         )
     
     eta = time.json
-
     minutes = eta['times'][0]['estimate'] / 60
 
-    depart_time = arrow.now('US/Pacific').replace(seconds=(minutes * 60))
+    gmaps = googlemaps.Client(key=os.environ['GOOGLE_API_KEY'])
+    result = gmaps.timezone((session['origin_lat'], session['origin_lng']), 
+             arrow.utcnow())
+    timezone = result['timeZoneId']
 
+    depart_time = arrow.now(timezone).replace(seconds=(minutes * 60))
     arrive_time = depart_time.replace(seconds=session['uber_time'])
 
     session['depart_timestamp'] = depart_time.timestamp
     session['arrive_timestamp'] = arrive_time.timestamp
+    session['timezone'] = timezone
 
     session['uber_depart_time'] = depart_time.strftime("%-I:%M %p")
     session['uber_arrive_time'] = arrive_time.strftime("%-I:%M %p")
@@ -147,15 +153,19 @@ def requestLyft(code, state):
         )
 
     eta = time.json
-
     minutes = eta['eta_estimates'][0]['eta_seconds'] / 60
 
-    depart_time = arrow.now('US/Pacific').replace(seconds=(minutes * 60))
+    gmaps = googlemaps.Client(key=os.environ['GOOGLE_API_KEY'])
+    result = gmaps.timezone((session['origin_lat'], session['origin_lng']), 
+             arrow.utcnow())
+    timezone = result['timeZoneId']
 
+    depart_time = arrow.now(timezone).replace(seconds=(minutes * 60))
     arrive_time = depart_time.replace(seconds=session['lyft_time'])
 
     session['depart_timestamp'] = depart_time.timestamp
     session['arrive_timestamp'] = arrive_time.timestamp
+    session['timezone'] = timezone
 
     session['lyft_depart_time'] = depart_time.strftime("%-I:%M %p")
     session['lyft_arrive_time'] = arrive_time.strftime("%-I:%M %p")

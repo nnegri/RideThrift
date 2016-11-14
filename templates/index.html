@@ -16,12 +16,14 @@
         <div id="locationField">
             <input class = "auto" id="autocomplete-orig" placeholder="Enter your address"
              onFocus="geolocate()" type="text"></input>
-            <span id="save-origin">Save Address: <input type="checkbox" name="origin" value="save" id="orig-check">
-            Label: <input type="text" name="label-or" id="label-or"></span><br>
+             {% if "user_id" in session %}
+                <span id="save-origin">Save Address: <input type="checkbox" name="origin" value="save" id="orig-check">
+                Label: <input type="text" name="label-or" id="label-or"></span><br>
+            {% endif %}
         </div>
 
         <button type="button" name="location" id="location">Current Location</button>
-        {% if session %}
+        {% if "user_id" in session %}
             <select name="origins" id="origin-drop">
                 <option value="saved-addresses">Saved Addresses
                 {% for user_address in user.user_addresses %}
@@ -41,20 +43,23 @@
         <div id="locationField">
             <input class = "auto" id="autocomplete-dest" placeholder="Enter your address"
              onFocus="geolocate()" type="text"></input>
-            <span id="save-dest">Save Address: <input type="checkbox" name="dest" value="save" id="dest-check">
-            Label: <input type="text" name="label-de" id="label-de"></span><br>
+            {% if "user_id" in session %}
+                <span id="save-dest">Save Address: <input type="checkbox" name="dest" value="save" id="dest-check">
+                Label: <input type="text" name="label-de" id="label-de"></span><br>
+            {% endif %}
         </div>
-        {% if session %}
+        {% if "user_id" in session %}
             <select name="dests" id="dest-drop">
                 <option value="saved-addresses">Saved Addresses
                 {% for user_address in user.user_addresses %}
                     <option value="{{ user_address.address.address }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}">{{ user_address.label }}
                 {% endfor %}
+                <option value="manage-saved-addresses">Manage Saved Addresses
             </select>
         {% endif %}
         <br><input type="submit" value="Get Estimates"><br>    
     </form>
-    
+
     <form action="/call_uber" method="POST" id="call-uber">
         <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-uber" value="origin"> 
         <input type="hidden" class="orig-lng-rides" name="origin-lng" id="orig-lng-uber" value="origin">
@@ -65,7 +70,9 @@
         <input class="rdo-uber" type="radio" name="uber-rdo" id="rdo-pool"> <label id="pool"></label><br>
         <input class="rdo-uber" type="radio" name="uber-rdo" id="rdo-uberx" checked="checked"> <label id="uberx"></label><br>
         <input class="rdo-uber" type="radio" name="uber-rdo" id="rdo-uberxl"> <label id="uberxl"></label><br>
-        <input type="submit" value="Request Uber" id="uber-req-button">
+        {% if "user_id" in session %}
+            <input type="submit" value="Request Uber" id="uber-req-button">
+        {% endif %}
     </form>
 
     <form action="/call_lyft" method="POST" id="call-lyft">
@@ -78,7 +85,9 @@
         <input class="rdo-lyft" type="radio" name="lyft-rdo" id="rdo-line"> <label id="line"></label><br>
         <input class="rdo-lyft" type="radio" name="lyft-rdo" id="rdo-lyft-lyft" checked="checked"> <label id="lyft-lyft"></label><br>
         <input class="rdo-lyft" type="radio" name="lyft-rdo" id="rdo-plus"> <label id="plus"></label><br>
-        <input type="submit" value="Request Lyft" id="lyft-req-button">
+        {% if "user_id" in session %}
+            <input type="submit" value="Request Lyft" id="lyft-req-button">
+        {% endif %}
     </form>
 
 <!-- Manage Saved Addresses Modal -->
@@ -87,11 +96,13 @@
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <h1>Manage Addresses</h1>
-                <form id="delete-address" method="post" action="/delete_addresses">
+                <form id="delete-address" method="post" action="/delete_addresses.json">
                     <div id="manage-addresses">
-                    {% for user_address in user.user_addresses %}
-                        <input type="checkbox" class="address-check" name="delete" value="{{ user_address.user_add_id }}"> {{ user_address.label }}<br>
-                    {% endfor %}
+                    {% if "user_id" in session %}    
+                        {% for user_address in user.user_addresses %}
+                            <input type="checkbox" class="address-check" name="delete" value="{{ user_address.user_add_id }}"> {{ user_address.label }}<br>
+                        {% endfor %}
+                    {% endif %}
                     </div>
                     <div>
                         <input type="submit" value="Delete Addresses">
@@ -102,7 +113,7 @@
         </div>
     </div>  
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDONgg2Pw6W0awiwVNAVRD0HTK6Hzz2OA4&libraries=geometry,places&callback=initAutocomplete" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&libraries=geometry,places&callback=initAutocomplete" async defer></script>
 <script src="/static/js/submit-addresses.js"></script>
 
 {% endblock %}

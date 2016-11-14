@@ -10,9 +10,8 @@ from model import (connect_to_db, db, User, Address, UserAddress, RideType, Esti
 from apifunctions import getRideEstimates, getUberAuth, requestUber, getLyftAuth, requestLyft
 from datafunctions import (estimatesToData, addressToData)
 
-import geocoder
-from datetime import datetime, timedelta, date
-import arrow 
+import os
+import arrow
 
 
 app = Flask(__name__)
@@ -29,13 +28,15 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 def index():
     """Homepage."""
 
+    google_api_key = os.environ['GOOGLE_API_KEY']
+
     if "user_id" in session:
         user = User.query.filter_by(user_id = session["user_id"]).first()
 
-        return render_template("index.html", user=user)
+        return render_template("index.html", user=user, google_api_key=google_api_key)
 
     else:
-        return render_template("index.html")
+        return render_template("index.html", google_api_key=google_api_key)
 
 
 @app.route('/login', methods=["POST"])
@@ -94,7 +95,7 @@ def logout():
     return redirect("/")
 
 
-@app.route('/delete_addresses', methods=["POST"])
+@app.route('/delete_addresses.json', methods=["POST"])
 def delete_addresses():
     """Delete address in user's database."""
 
@@ -236,14 +237,16 @@ def call_lyft():
 
 
 
-@app.route('/ride_message')
+@app.route('/ride_message.json')
 def ride_message():
     """Message for arrival and updates on ride."""
 
-    if 'depart_timestamp' in session:
-        if session['depart_timestamp'] != "":
-            minutes = (session['depart_timestamp'] - arrow.now('US/Pacific').timestamp) / 60
-            minutes_arr = (session['arrive_timestamp'] - arrow.now('US/Pacific').timestamp) / 60
+    if 'timezone' in session:
+        if session['timezone'] != "":
+            minutes = (session['depart_timestamp'] - 
+                       arrow.now(session['timezone']).timestamp) / 60
+            minutes_arr = (session['arrive_timestamp'] - 
+                           arrow.now(session['timezone']).timestamp) / 60
 
         if session["lyft_arrive_time"] != "":
             ride = "Lyft"
