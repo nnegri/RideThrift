@@ -118,4 +118,14 @@
 <script src="/static/js/estimates.js"></script>
 <script src="/static/js/ride-status.js"></script>
 
+{% if g.jasmine_tests %}
+    <!-- stuff for testing -->
+    <link rel="stylesheet" href="/static/js/jasmine.css">
+    <script src="/static/js/jasmine.js"></script>
+    <script src="/static/js/jasmine-html.js"></script>
+    <script src="/static/js/boot.js"></script>
+    <script src="/static/js/ridethrift-test.js"></script>
+    <!-- end of stuff for testing -->
+{% endif %}
+
 {% endblock %}

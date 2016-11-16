@@ -3,7 +3,7 @@
 from jinja2 import StrictUndefined
 
 from flask import (Flask, render_template, redirect, request, flash, 
-                   session, jsonify)
+                   session, jsonify, g)
 from flask_debugtoolbar import DebugToolbarExtension
 
 from model import (connect_to_db, db, User, Address, UserAddress, RideType, Estimate)
@@ -24,7 +24,11 @@ app.jinja_env.undefined = StrictUndefined
 app.jinja_env.auto_reload = True
 
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+JS_TESTING_MODE = False
 
+@app.before_request
+def add_tests():
+    g.jasmine_tests = JS_TESTING_MODE
 
 @app.route('/')
 def index():
@@ -135,7 +139,6 @@ def get_estimates():
 
     uber_estimates = uberEstimatesToData(uber_ride_estimates, origin_lat, origin_lng, 
                                                     dest_lat, dest_lng)
-    ###not tested, involves session
 
     lyft_ride_estimates = getLyftEstimates(origin_lat, origin_lng, 
                                           dest_lat, dest_lng)
@@ -289,4 +292,10 @@ if __name__ == "__main__":
 
     DebugToolbarExtension(app)
 
-    app.run(host="0.0.0.0")
+    import sys
+    if sys.argv[-1] == "jstest":
+        JS_TESTING_MODE = True
+        
+    # app.run(debug=True)
+
+    app.run(host="0.0.0.0", debug=True)

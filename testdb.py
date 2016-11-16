@@ -2,11 +2,10 @@ import json
 from unittest import TestCase
 from model import User, Address, UserAddress, RideType, Estimate, connect_to_db, db
 from server import app
-# import server
+import server
 from seed import load_users, load_addresses, load_ridetypes, load_user_addresses, set_val_add_id
 from apifunctions import getUberEstimates, getLyftEstimates
 from datafunctions import addressInformation, addressToDatabase
-
 
 
 class RideThriftUnitTestCase(TestCase):
@@ -18,7 +17,8 @@ class RideThriftUnitTestCase(TestCase):
 
         # Show Flask errors that happen during tests
         app.config['TESTING'] = True
-
+        app.config['SECRET_KEY'] = 'SECRET'
+        self.client = app.test_client() 
         # Connect to test database
         connect_to_db(app, "postgresql:///testdb")
 
@@ -27,6 +27,7 @@ class RideThriftUnitTestCase(TestCase):
         load_users()
         load_addresses()
         load_user_addresses()
+        load_ridetypes()
         set_val_add_id()
         db.session.commit()
 
@@ -70,7 +71,7 @@ class RideThriftUnitTestCase(TestCase):
     #                     u'1830 Cowper St, Palo Alto, CA 94301, USA']
     #     result = addressToDatabase(addresses, addresses_db, 1)
     #     print result.data
-    #     # RuntimeError: Working outside of request context. 
+    # #     # RuntimeError: Working outside of request context. 
     #     # Even after taking into account session['user_id'], flash messages still cause an issue
         
 
@@ -166,7 +167,7 @@ class FlaskTestsDatabase(TestCase):
                                         'lyft-ride-type' : 'lyft'
                                         },
                                   follow_redirects=False)
-        print result.data
+
         self.assertIn('client_id', result.data)
         # Won't work if the ride is not available. I prevent the user from
         # selecting a non-available ride on the front end...

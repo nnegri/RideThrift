@@ -27,8 +27,15 @@ function showEstimates(results) {
     var lyftEst = (results[1][5] / 100);
     var plusEst = (results[1][6] / 100);
 
-    // var rideArray = [poolEst, uberEst, xlEst, lineEst, lyftEst, plusEst];
-    // rideArray.sort(function(a, b){return a-b}); // SORTING FOR CONDITIONAL FORMATTING
+    var rideArray = [poolEst, uberEst, xlEst, lineEst, lyftEst, plusEst];
+
+    for (var i=0; i < rideArray.length; i++) {
+        if (isNaN(rideArray[i])) {
+            rideArray.splice(i, 1);
+        }
+    }
+    rideArray.sort(function(a, b){return a-b});
+    // SORTING FOR CONDITIONAL FORMATTING
 
     // Show estimates for Uber
 
@@ -42,7 +49,7 @@ function showEstimates(results) {
     }
     else {
         $("#pool").html("Pool: $" + poolEst.toFixed(2));
-        // $("#pool").val(rideArray.indexOf(poolEst));
+        $("#pool").val(rideArray.indexOf(poolEst));
     }
     if (isNaN(uberEst)) {
         $("#uberx").html("UberX: None available");
@@ -50,6 +57,7 @@ function showEstimates(results) {
     }
     else {
         $("#uberx").html("UberX: $" + uberEst.toFixed(2));
+        $("#uberx").val(rideArray.indexOf(poolEst));
     }
     if (isNaN(xlEst)) {
         $("#uberxl").html("UberXL: None available");
@@ -57,6 +65,7 @@ function showEstimates(results) {
     }
     else {
         $("#uberxl").html("UberXL: $" + xlEst.toFixed(2));
+        $("#uberxl").val(rideArray.indexOf(xlEst));
     }
 
     // Show estimates for Lyft
@@ -71,6 +80,7 @@ function showEstimates(results) {
     }
     else {
         $("#line").html("Line: $" + lineEst.toFixed(2));
+        $("#line").val(rideArray.indexOf(lineEst));
     }
     if (isNaN(lyftEst)) {
         $("#lyft-lyft").html("Lyft: None available");
@@ -78,6 +88,7 @@ function showEstimates(results) {
     }
     else {
         $("#lyft-lyft").html("Lyft: $" + lyftEst.toFixed(2));
+        $("#lyft-lyft").val(rideArray.indexOf(lyftEst));
     }
     if (isNaN(plusEst)) {
         $("#plus").html("Plus: None available");
@@ -85,6 +96,7 @@ function showEstimates(results) {
     }
     else {
         $("#plus").html("Plus: $" + plusEst.toFixed(2));
+        $("#plus").val(rideArray.indexOf(plusEst));
     }
     
     // Set default Uber choice, and change according to radio button selected
