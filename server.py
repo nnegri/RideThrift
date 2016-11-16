@@ -7,8 +7,10 @@ from flask import (Flask, render_template, redirect, request, flash,
 from flask_debugtoolbar import DebugToolbarExtension
 
 from model import (connect_to_db, db, User, Address, UserAddress, RideType, Estimate)
-from apifunctions import getRideEstimates, getUberAuth, requestUber, getLyftAuth, requestLyft
-from datafunctions import (estimatesToData, addressToData)
+from apifunctions import (getUberEstimates, getLyftEstimates, getUberAuth, 
+                          requestUber, getLyftAuth, requestLyft)
+from datafunctions import (uberEstimatesToData, lyftEstimatesToData, 
+                           addressInformation, addressToDatabase)
 
 import os
 import arrow
@@ -75,7 +77,7 @@ def register_user():
         user_exists = {"register" : "exists"}
         return jsonify(user_exists)
 
-    user = User(email=email, password=hash(password))
+    user = User(email=email, password=str(hash(password)))
 
     db.session.add(user)
     db.session.commit()
@@ -108,8 +110,7 @@ def delete_addresses():
 
     db.session.commit()
 
-    deleted = {"addresses" : "deleted"}
-    return jsonify(deleted)
+    return "Deleted"
 
 
 @app.route('/estimates.json', methods=["POST"])
@@ -127,12 +128,22 @@ def get_estimates():
     dest_lat = request.form.get("dest_lat")
     dest_lng = request.form.get("dest_lng")
 
-    ride_estimates = getRideEstimates(origin_lat, origin_lng, 
+    # Retrive Uber & Lyft estimates from APIs, enter estimates into database,
+    # and format results to send to front end for user display
+    uber_ride_estimates = getUberEstimates(origin_lat, origin_lng, 
                                           dest_lat, dest_lng)
 
-    estimates = estimatesToData(ride_estimates, origin_lat, origin_lng, 
+    uber_estimates = uberEstimatesToData(uber_ride_estimates, origin_lat, origin_lng, 
+                                                    dest_lat, dest_lng)
+    ###not tested, involves session
+
+    lyft_ride_estimates = getLyftEstimates(origin_lat, origin_lng, 
+                                          dest_lat, dest_lng)
+
+    lyft_estimates = lyftEstimatesToData(lyft_ride_estimates, origin_lat, origin_lng, 
                                                     dest_lat, dest_lng)
 
+    # Determine which addresses to save
     if request.form.get("origin-save") == "":
         origin_lat = ""
         origin_lng = ""
@@ -155,11 +166,15 @@ def get_estimates():
         dest_name = request.form.get("dest-name")
         dest_label = request.form.get("label-de")
 
-    addressToData(origin_lat, origin_lng, origin_address, origin_name, 
-                  dest_lat, dest_lng, dest_address, dest_name, 
-                  orig_label, dest_label)
+    addresses, addresses_db = addressInformation(origin_lat, origin_lng, 
+                            origin_address, origin_name, orig_label, 
+                            dest_lat, dest_lng, dest_address, dest_name, 
+                            dest_label)
 
-    return jsonify(estimates)
+    addressToDatabase(addresses, addresses) 
+    ###cannot test, flash message
+
+    return jsonify(uber_estimates, lyft_estimates)
 
 
 
@@ -242,20 +257,16 @@ def ride_message():
     """Message for arrival and updates on ride."""
 
     if 'timezone' in session:
-        if session['timezone'] != "":
-            minutes = (session['depart_timestamp'] - 
+        # if session['timezone'] != "":
+        minutes = (session['depart_timestamp'] - 
+                   arrow.now(session['timezone']).timestamp) / 60
+        minutes_arr = (session['arrive_timestamp'] - 
                        arrow.now(session['timezone']).timestamp) / 60
-            minutes_arr = (session['arrive_timestamp'] - 
-                           arrow.now(session['timezone']).timestamp) / 60
 
-        if session["lyft_arrive_time"] != "":
-            ride = "Lyft"
-            depart_time = session['lyft_depart_time']
-            arrive_time = session['lyft_arrive_time']
-        else:
-            ride = "Uber"
-            depart_time = session['uber_depart_time']
-            arrive_time = session['uber_arrive_time']
+        depart_time = session['depart_time']
+        arrive_time = session['arrive_time']
+
+        ride = session['ride_type']
 
         time = {
         "depart_time" : depart_time,
@@ -264,8 +275,9 @@ def ride_message():
         "minutes_arr" : minutes_arr,
         "ride" : ride}
 
-
         return jsonify(time)
+    else:
+        return "No current rides."
 
 
 

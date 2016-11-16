@@ -4,7 +4,7 @@ import random
 import geocoder
 from flask import session, flash
 
-def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
+def uberEstimatesToData(uber_ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
     """Send data on estimates to estimates table."""
 
     time_requested = datetime.utcnow()
@@ -13,8 +13,8 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
     uber_ests = []
 
     i = 0
-    for i in range(len(ride_estimates[0]["prices"])):
-        uber_ests.append(ride_estimates[0]["prices"][i])
+    for i in range(len(uber_ride_estimates["prices"])):
+        uber_ests.append(uber_ride_estimates["prices"][i])
         i += 1
 
     uber_est_dict = {}
@@ -56,11 +56,19 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
         db.session.add(estimate)
     session["uber_time"] = uber_time
 
+    return uber_est_dict
+
+def lyftEstimatesToData(lyft_ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
+    """Send data on estimates to estimates table."""
+
+    time_requested = datetime.utcnow()
+    session["time_requested"] = time_requested
+
     lyft_ests = []
 
     i = 0
-    for i in range(len(ride_estimates[1]["cost_estimates"])):
-        lyft_ests.append(ride_estimates[1]["cost_estimates"][i])
+    for i in range(len(lyft_ride_estimates["cost_estimates"])):
+        lyft_ests.append(lyft_ride_estimates["cost_estimates"][i])
         i += 1
 
     lyft_est_dict = {}
@@ -102,14 +110,14 @@ def estimatesToData(ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
     session["lyft_time"] = lyft_time
     db.session.commit()
 
-    return uber_est_dict, lyft_est_dict
+    return lyft_est_dict
 
 
-def addressToData(orig_lat, orig_lng, origin_address, origin_name, 
-                  dest_lat, dest_lng, dest_address, dest_name, 
-                  orig_label, dest_label):
-    """Send user saved addresses to database."""
-
+def addressInformation(orig_lat, orig_lng, origin_address, origin_name, 
+                       orig_label, dest_lat, dest_lng, dest_address, 
+                       dest_name, dest_label):
+    """Gather addresses from user input to compare to addresses from database."""
+    
     addresses = []
 
     if orig_lat != "":
@@ -137,6 +145,12 @@ def addressToData(orig_lat, orig_lng, origin_address, origin_name,
 
     addresses_db = [address[0] for address in db.session.query(Address.address).all()]
 
+    return addresses, addresses_db
+
+
+def addressToDatabase(addresses, addresses_db):
+    """Send user saved addresses to database."""
+
     i=0
     for address in addresses:
         if address["address"] in addresses_db:
@@ -148,8 +162,8 @@ def addressToData(orig_lat, orig_lng, origin_address, origin_name,
 
             db.session.add(input_address)
             db.session.commit()    
-
-        new_user_address = UserAddress(user_id=session["user_id"], 
+            
+        new_user_address = UserAddress(user_id=session['user_id'], 
                                        address_id=input_address.address_id, 
                                        label=address["label"])
 

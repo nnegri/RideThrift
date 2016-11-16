@@ -23,9 +23,11 @@ def load_users():
 
     for row in open("seed_data/u.user"):
         row = row.strip()
-        email, password = row.split("|")
+        user_id, email, password = row.split("|")
+        password = password.strip()
 
-        user = User(email=email.strip(), password=password.strip())
+        user = User(user_id=user_id.strip(), email=email.strip(), 
+                    password=str(hash(password)))
 
         db.session.add(user)
 
@@ -40,11 +42,29 @@ def load_addresses():
 
     for row in open("seed_data/u.address"):
         row = row.strip()
-        g = geocoder.google(row)
-        address = Address(latitude=g.latlng[0], longitude=g.latlng[1],
-                          address=g.address, name=g.address)
+        address_id, address = row.split("|")
+        g = geocoder.google(address)
+        address = Address(address_id=address_id.strip(), latitude=g.latlng[0], 
+                        longitude=g.latlng[1], address=g.address, name=g.address)
 
         db.session.add(address)
+
+    db.session.commit()
+
+def load_user_addresses():
+    """Load user addresses from u.user_address into database."""
+
+    print "Addresses"
+
+    UserAddress.query.delete()
+
+    for row in open("seed_data/u.user_address"):
+        row = row.strip()
+        user_id, address_id, label = row.split("|")
+
+        user_address = UserAddress(user_id=user_id.strip(), address_id=address_id.strip(), label=label.strip())
+
+        db.session.add(user_address)
 
     db.session.commit()
 
@@ -66,15 +86,15 @@ def load_ridetypes():
 
     db.session.commit()
 
-# def set_val_user_id():
-#     """Set value for next user_id."""
+def set_val_add_id():
+    """Set value for next address_id."""
 
-#     result = db.session.query(func.max(User.user_id)).one()
-#     max_id = int(result[0])
+    result = db.session.query(func.max(Address.address_id)).one()
+    max_id = int(result[0])
 
-#     query = "SELECT setval('users_user_id_seq', :new_id)"
-#     db.session.execute(query, {'new_id': max_id + 1})
-#     db.session.commit()
+    query = "SELECT setval('addresses_address_id_seq', :new_id)"
+    db.session.execute(query, {'new_id': max_id + 1})
+    db.session.commit()
 
 
 if __name__ == "__main__":

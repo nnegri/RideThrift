@@ -41,8 +41,8 @@ uber_auth_flow = AuthorizationCodeGrant(
     )
 
 
-def getRideEstimates(origin_lat, origin_lng, dest_lat, dest_lng):
-    """Send requests to Uber and Lyft APIs for estimates."""
+def getUberEstimates(origin_lat, origin_lng, dest_lat, dest_lng):
+    """Send request to Uber API for estimates."""
     
     uber_est = uber_client.get_price_estimates(
         start_latitude= origin_lat,
@@ -53,11 +53,16 @@ def getRideEstimates(origin_lat, origin_lng, dest_lat, dest_lng):
 
     uber_estimate = uber_est.json
 
+    return uber_estimate
+
+def getLyftEstimates(origin_lat, origin_lng, dest_lat, dest_lng):
+    """Send request to Lyft API for estimates."""
+
     lyft_est = lyft_client.get_cost_estimates(origin_lat, origin_lng, 
                                               dest_lat, dest_lng)
     lyft_estimate = lyft_est.json
 
-    return uber_estimate, lyft_estimate
+    return lyft_estimate
 
 def getUberAuth():
     """Authorize user's Uber account."""
@@ -86,11 +91,6 @@ def requestUber(code, state):
 
     ride_details = response.json
 
-    ride_id = ride_details.get('request_id')
-
-    response = uber_ride_client.update_sandbox_ride(ride_id, 'accepted')
-    response = uber_ride_client.update_sandbox_ride(ride_id, 'in_progress')
-
     print response.status_code
 
     time = uber_client.get_pickup_time_estimates(
@@ -102,20 +102,9 @@ def requestUber(code, state):
     eta = time.json
     minutes = eta['times'][0]['estimate'] / 60
 
-    gmaps = googlemaps.Client(key=os.environ['GOOGLE_API_KEY'])
-    result = gmaps.timezone((session['origin_lat'], session['origin_lng']), 
-             arrow.utcnow())
-    timezone = result['timeZoneId']
+    session['ride_type'] = 'Uber'
 
-    depart_time = arrow.now(timezone).replace(seconds=(minutes * 60))
-    arrive_time = depart_time.replace(seconds=session['uber_time'])
-
-    session['depart_timestamp'] = depart_time.timestamp
-    session['arrive_timestamp'] = arrive_time.timestamp
-    session['timezone'] = timezone
-
-    session['uber_depart_time'] = depart_time.strftime("%-I:%M %p")
-    session['uber_arrive_time'] = arrive_time.strftime("%-I:%M %p")
+    getTime(minutes)
 
 def getLyftAuth():
     """Authorize user's Lyft account."""
@@ -142,10 +131,6 @@ def requestLyft(code, state):
 
     ride_details = response.json
 
-    ride_id = ride_details.get('ride_id')
-
-    print response.status_code
-
     time = lyft_client.get_pickup_time_estimates(
         session['origin_lat'],
         session['origin_lng'],
@@ -155,17 +140,30 @@ def requestLyft(code, state):
     eta = time.json
     minutes = eta['eta_estimates'][0]['eta_seconds'] / 60
 
+    session['ride_type'] = 'Lyft'
+
+    getTime(minutes)
+   
+
+def getTime(minutes):
+    """Add departure and arrival times to session."""
+
     gmaps = googlemaps.Client(key=os.environ['GOOGLE_API_KEY'])
     result = gmaps.timezone((session['origin_lat'], session['origin_lng']), 
              arrow.utcnow())
     timezone = result['timeZoneId']
 
+    if session['ride_type'] == 'Uber':
+        ride_time = session['uber_time']
+    elif session['ride_type'] == 'Lyft':
+        ride_time = session['lyft_time']
+
     depart_time = arrow.now(timezone).replace(seconds=(minutes * 60))
-    arrive_time = depart_time.replace(seconds=session['lyft_time'])
+    arrive_time = depart_time.replace(seconds=ride_time)
 
     session['depart_timestamp'] = depart_time.timestamp
     session['arrive_timestamp'] = arrive_time.timestamp
     session['timezone'] = timezone
 
-    session['lyft_depart_time'] = depart_time.strftime("%-I:%M %p")
-    session['lyft_arrive_time'] = arrive_time.strftime("%-I:%M %p")
+    session['depart_time'] = depart_time.strftime("%-I:%M %p")
+    session['arrive_time'] = arrive_time.strftime("%-I:%M %p")

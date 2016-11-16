@@ -15,7 +15,7 @@ class User(db.Model):
 
     user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     email = db.Column(db.String(30), nullable=False) 
-    password = db.Column(db.String(20), nullable=False) #ENCRYPTION
+    password = db.Column(db.String(20), nullable=False)
 
     def __repr__(self):
         """User representation when printed."""
@@ -111,10 +111,10 @@ class Estimate(db.Model):
 
 """Helper functions"""
 
-def connect_to_db(app):
+def connect_to_db(app, db_uri='postgresql:///rideshares'):
     """Connect the database to Flask app."""
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///rideshares'
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
     db.init_app(app)

@@ -90,7 +90,7 @@
         {% endif %}
     </form>
 
-<!-- Manage Saved Addresses Modal -->
+<!-- Manage Addresses Modal -->
 
     <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="manage-address-modal" id="manage-address-modal">
         <div class="modal-dialog modal-sm">
@@ -114,6 +114,8 @@
     </div>  
 
 <script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&libraries=geometry,places&callback=initAutocomplete" async defer></script>
-<script src="/static/js/submit-addresses.js"></script>
+<script src="/static/js/addresses.js"></script>
+<script src="/static/js/estimates.js"></script>
+<script src="/static/js/ride-status.js"></script>
 
 {% endblock %}
