@@ -90,6 +90,8 @@
         {% endif %}
     </form>
 
+    <button type="button" name="charts" id="chart">CHARTS</button>
+    <div class='panning chart' id='final'> </div>
 <!-- Manage Addresses Modal -->
 
     <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="manage-address-modal" id="manage-address-modal">
@@ -112,6 +114,7 @@
             </div>
         </div>
     </div>  
+    <div id="graph" class="aGraph" style="position:relative;top:0px;left:0; float:left;"></div>
 
 <script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&libraries=geometry,places&callback=initAutocomplete" async defer></script>
 <script src="/static/js/addresses.js"></script>

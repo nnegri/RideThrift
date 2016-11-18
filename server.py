@@ -11,6 +11,7 @@ from apifunctions import (getUberEstimates, getLyftEstimates, getUberAuth,
                           requestUber, getLyftAuth, requestLyft)
 from datafunctions import (uberEstimatesToData, lyftEstimatesToData, 
                            addressInformation, addressToDatabase)
+from datetime import datetime
 
 import os
 import arrow
@@ -282,7 +283,49 @@ def ride_message():
     else:
         return "No current rides."
 
+@app.route('/query-ests')
+def query_est_db():
+    """Query database for estimate information."""
 
+    time = arrow.utcnow()
+    day = time.weekday()
+
+    dates = db.session.query(Estimate.time_requested).all()
+
+    daytimes = []
+    for date in dates:
+        adate = arrow.get(date.time_requested)
+        if (adate.weekday() == day):
+            days = (adate - time.datetime).days
+            mindate = time.replace(days=+days, hours=-1)
+            maxdate = time.replace(days=+days, hours=+4)
+            if (adate >= mindate) and (adate <= maxdate):
+                daytimes.append(date)
+    daytimes.sort()
+
+    surges = db.session.query(Estimate.time_requested, Estimate.surge).filter(
+                            (Estimate.ridetype_id == 2) & 
+                            (Estimate.time_requested >= daytimes[0]) & 
+                            (Estimate.time_requested <= daytimes[-1])).all()
+
+    lyft_surges = db.session.query(Estimate.time_requested, 
+                                Estimate.price_min, Estimate.price_max).filter(
+                                (Estimate.ridetype_id == 5) & 
+                                (Estimate.time_requested >= daytimes[0]) & 
+                                (Estimate.time_requested <= daytimes[-1])).all()
+
+    # mins = [surge[1] for surge in lyft_surges]
+    # maxes = [surge[2] for surge in lyft_surges]
+    # mins.sort()
+    # flat_min = mins[0]
+    # maxes.sort()
+    # flat_max = maxes[0]
+
+    # for lyft_surge in lyft_surges:
+    #     if lyft_surge[1] < 1:
+    #         lyft_surge[1] == 1.0
+
+    return jsonify(surges)
 
 if __name__ == "__main__":
 
@@ -296,6 +339,4 @@ if __name__ == "__main__":
     if sys.argv[-1] == "jstest":
         JS_TESTING_MODE = True
         
-    # app.run(debug=True)
-
     app.run(host="0.0.0.0", debug=True)

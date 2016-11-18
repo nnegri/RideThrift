@@ -6,6 +6,37 @@
     <link rel="stylesheet" 
           href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+        <style>
+            /* tell the SVG path to be a thin blue line without any area fill */
+            svg {
+              font-family: "Helvetica Neue", Helvetica, Aria, sans-serif;
+              font-size: 10px;
+            }
+
+            .axis path,
+            .axis line {
+              fill: none;
+              stroke: black;
+              shape-rendering: crispEdges;
+            }
+
+            line.cutoff {
+              stroke: black;
+              stroke-width: 2;
+            }
+
+            path.data {
+              fill: transparent;
+              stroke: grey;
+              stroke-width: 2;
+            }
+
+            #initial svg .data-1 {
+              stroke: rgba(128, 128, 128, 0.4);
+            }
+        </style>
 </head>
 <body>
 
@@ -80,6 +111,8 @@ Ride Thrift
         </div>
     </div> 
 <script src="/static/js/login-register.js"></script>
+
+
 {% if g.jasmine_tests %}
     <!-- stuff for testing -->
     <link rel="stylesheet" href="/static/js/jasmine.css">

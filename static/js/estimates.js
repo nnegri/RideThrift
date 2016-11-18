@@ -1,4 +1,209 @@
 'use strict';
+function showInputs(response) {
+
+  function toomanydata() {
+
+    var dataset = points;
+    var dateMin = d3.min(dataset, function(d) { return d[0]; });
+    // var dateMax = d3.max(dataset, function(d) { return d[0]; });
+    
+    var dateMax = new Date(dateMin);
+    dateMax.setHours(dateMin.getHours() + 1);
+
+    var margin = { 'left' : 30, 'bottom' : 20, 'top' : 15, 'right' : 240 },
+        width = 960,
+        height = 300,
+        w = width - margin.left - margin.right,
+        h = height - margin.top - margin.bottom,
+        xscale = d3.time.scale().domain([dateMin, dateMax]).range([0, w]),
+        yscale = d3.scale.linear().domain([1,4]).range([h, 0]),
+        xaxis = d3.svg.axis().scale(xscale).orient('bottom'),
+        yaxis = d3.svg.axis().scale(yscale).orient('left').tickValues(d3.range(1, 4, 1)),
+        clip = null;
+
+    function rescale() {
+      xscale.domain([dateMin, dateMax]).range([0, w = width - margin.left - margin.right]);
+      yscale.domain([1,4]).range([h, 0]); 
+    }
+
+    var line = d3.svg.line()
+        .x(function(d) { return xscale(d[0]); })
+        .y(function(d) { return yscale(d[1]); })
+        .interpolate('basis');
+        console.dir(line);
+        console.log(line.type);
+
+    var bisect = d3.bisector(function(d) { return d[0]; });
+
+    function chart(selection) { 
+      selection.each(function(data) {
+        var svg = d3.select(this).selectAll('svg')
+            .data([data.points])
+            .attr('width', width)
+            .attr('height', height)
+
+        var svge = svg.enter()
+          .append('svg')
+            .attr('width', width)
+            .attr('height', height)
+          .append('g')
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+        svge.append('g')
+            .attr('class', 'x axis')
+
+        svg.select('g.x.axis')
+            .attr('transform', 'translate(0, ' + h + ')')
+
+        svge.append('g')
+            .attr('class', 'y axis')
+
+        var idx = bisect.left(data.points, dateMax);
+
+        svge.append('g')
+            .attr('clip-path', clip)
+          .selectAll('path.data')
+            .data([data.points.slice(0, idx), data.points.slice(idx - 1)])
+          .enter().append('path')
+            .attr('class', function(d, i) { return 'data data-' + i; })
+
+        svge.append('g')
+            .attr('class', 'left anchor');
+
+        svge.append('g')
+            .attr('class', 'right anchor');
+
+        svg.select('g.right.anchor')
+            .attr('transform', 'translate(' + w + ', 0)');
+
+
+        svg.selectAll('.x.axis').call(xaxis)
+        svg.selectAll('.y.axis').call(yaxis)
+        svg.selectAll('.data').attr('d', line);
+      });
+    }
+
+    chart.margin_right = function(m) {
+      if (!arguments.length) return margin.right;
+      margin.right = m;
+      rescale();
+      return chart;
+    };
+
+    chart.height = function(h) {
+      if (!arguments.length) return height;
+      height = h;
+      rescale();
+      return chart;
+    };
+
+    chart.width = function(w) {
+      if (!arguments.length) return width;
+      width = w;
+      rescale();
+      return chart;
+    };
+
+    chart.view_width = function() {
+      return w;
+    };
+
+    chart.xscale = function(xs) {
+      if (!arguments.length) return xscale;
+      xscale = xs;
+      rescale();
+      return chart;
+    };
+    
+    chart.clip = function(c) {
+      if (!arguments.length) return clip;
+      clip = c;
+      return chart;
+    };
+
+    return chart;
+  }
+
+  var points = [];
+  for (var i=0; i < response.length; i++) {
+        points[i] = [];
+        points[i][0] = new Date(response[i][0]);
+        points[i][1] = response[i][1];
+    }
+   var setup = d3.range(0, 3).map(function() {
+        var chart = toomanydata()
+            .clip('url(#clipper)');
+        return { 'points' : points, 'chart' : chart };
+      });
+    var min = d3.min(points, function(d) { return d[0]; });
+    var max = d3.max(points, function(d) { return d[0]; });
+    console.log(max);
+    console.log(min);
+  var defs = d3.select('body')
+    .append('svg')
+      .attr('width', 0)
+      .attr('height', 0)
+    .append('defs');
+
+  defs.append('clipPath')
+      .attr('id', 'clipper')
+    .append('rect')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('width', 960)
+      .attr('height', 300);
+
+  d3.selectAll('#initial, #no-bounds, #final')
+      .data(setup)
+      .each(function(datum) {
+        d3.select(this).call(datum.chart)
+      });
+
+  d3.selectAll('#no-bounds, #final').each(function(datum) {
+    var selection = d3.select(this);
+
+    selection.call(datum.chart.width(720).margin_right(0));
+
+    datum.zoom = d3.behavior.zoom()
+        .x(datum.chart.xscale())
+        .scaleExtent([1, 1])
+        .on('zoom', function() {
+          selection.call(datum.chart);
+        });
+
+    selection.select('svg')
+        .attr('cursor', 'move')
+        .call(datum.zoom)
+        .on("mousewheel.zoom", null)
+        .on("DOMMouseScroll.zoom", null);
+  });
+
+  d3.select('#final').call(function(selection) {
+    var datum = selection.datum();
+
+    datum.zoom.on('zoom', function() {
+      var t = datum.zoom.translate(),
+          dx = Math.min(0, Math.max(t[0], datum.chart.view_width() - 2760)),
+          dy = t[1];
+
+      datum.zoom.translate([dx, dy]);
+      selection.call(datum.chart);
+    });
+
+  });
+
+}
+
+
+function getChartInput(evt) {
+    evt.preventDefault();
+              
+    $.get("/query-ests",
+    showInputs);
+}
+
+
+$(document).on("click", "#chart", getChartInput);
 
 /////////// HIDE REQUEST RADIOS AND SUBMIT BUTTONS AT PAGE LOAD ///////////
 
