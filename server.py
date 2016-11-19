@@ -11,7 +11,7 @@ from apifunctions import (getUberEstimates, getLyftEstimates, getUberAuth,
                           requestUber, getLyftAuth, requestLyft)
 from datafunctions import (uberEstimatesToData, lyftEstimatesToData, 
                            addressInformation, addressToDatabase)
-from datetime import datetime
+from datetime import datetime, date
 
 import os
 import arrow
@@ -283,13 +283,15 @@ def ride_message():
     else:
         return "No current rides."
 
-@app.route('/query-ests')
+@app.route('/query-ests', methods=['POST'])
 def query_est_db():
     """Query database for estimate information."""
 
+    uber_choice = request.form.get("uber")
+    lyft_choice = request.form.get("lyft")
+
     time = arrow.utcnow()
     day = time.weekday()
-
     dates = db.session.query(Estimate.time_requested).all()
 
     daytimes = []
@@ -297,35 +299,63 @@ def query_est_db():
         adate = arrow.get(date.time_requested)
         if (adate.weekday() == day):
             days = (adate - time.datetime).days
-            mindate = time.replace(days=+days, hours=-1)
-            maxdate = time.replace(days=+days, hours=+4)
+            mindate = time.replace(days=+days)
+            # minhours = 24*(days - 1) - 1
+            # mindate = time.replace(hours=+minhours)
+            maxdate = time.replace(days=+days, hours=+2)
             if (adate >= mindate) and (adate <= maxdate):
                 daytimes.append(date)
     daytimes.sort()
 
-    surges = db.session.query(Estimate.time_requested, Estimate.surge).filter(
-                            (Estimate.ridetype_id == 2) & 
+    uber_data = db.session.query(Estimate.time_requested, Estimate.surge).filter(
+                            (Estimate.ridetype_id == uber_choice) & 
                             (Estimate.time_requested >= daytimes[0]) & 
                             (Estimate.time_requested <= daytimes[-1])).all()
 
-    lyft_surges = db.session.query(Estimate.time_requested, 
-                                Estimate.price_min, Estimate.price_max).filter(
-                                (Estimate.ridetype_id == 5) & 
+    # lyft_data = db.session.query(Estimate.time_requested, Estimate.surge).filter(
+    #                             (Estimate.ridetype_id == lyft_choice) & 
+    #                             (Estimate.time_requested >= daytimes[0]) & 
+    #                             (Estimate.time_requested <= daytimes[-1])).all()
+
+    lyft_query = db.session.query(Estimate.time_requested, Estimate.price_min, Estimate.price_max, Estimate.ridetype_id).filter(
+                                (Estimate.ridetype_id == lyft_choice) & 
                                 (Estimate.time_requested >= daytimes[0]) & 
                                 (Estimate.time_requested <= daytimes[-1])).all()
 
-    # mins = [surge[1] for surge in lyft_surges]
-    # maxes = [surge[2] for surge in lyft_surges]
-    # mins.sort()
-    # flat_min = mins[0]
-    # maxes.sort()
-    # flat_max = maxes[0]
+    lyft_data = []
 
-    # for lyft_surge in lyft_surges:
-    #     if lyft_surge[1] < 1:
-    #         lyft_surge[1] == 1.0
+    for data in lyft_query:
+        price_min = data[1]
+        price_max = data[2] 
 
-    return jsonify(surges)
+        if data[3] == 4:
+            base_min = 475
+            base_max = 475
+        elif data[3] == 5:
+            base_min = 775
+            base_max = 1475
+        elif data[3] == 6:
+            base_min = 1175
+            base_max = 1975
+
+        if price_min <= base_min:
+                min_surge = 1
+        else:
+            min_surge = float(price_min / base_min)
+
+        if price_max <= base_max:
+            max_surge = 1
+        else:
+            max_surge = float(price_max / base_max)
+
+        total = min_surge + max_surge
+
+        surge = round((total / 2.0), 2)
+
+        lyft_data.append((data[0], surge))
+
+
+    return jsonify(uber_data, lyft_data)
 
 if __name__ == "__main__":
 

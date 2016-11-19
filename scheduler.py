@@ -155,6 +155,7 @@ def estimatesToData(origin_lat, origin_lng, dest_lat, dest_lng):
             surge = 1.0
         else:
             surge = round(float((min_surge + max_surge) / 2), 2)
+            ## surge = round((min_surge + max_surge) / 2.0), 2)
 
         sql = """INSERT INTO estimates (origin_lat, origin_long, dest_lat, 
                             dest_long, distance, time, time_requested, 

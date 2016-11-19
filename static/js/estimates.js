@@ -5,33 +5,37 @@ function showInputs(response) {
 
     var dataset = points;
     var dateMin = d3.min(dataset, function(d) { return d[0]; });
-    // var dateMax = d3.max(dataset, function(d) { return d[0]; });
-    
     var dateMax = new Date(dateMin);
     dateMax.setHours(dateMin.getHours() + 1);
 
-    var margin = { 'left' : 30, 'bottom' : 20, 'top' : 15, 'right' : 240 },
+    var surgeMax = d3.max(dataset, function(d) { return d[1]; });
+
+    var margin = { 'left' : 30, 'bottom' : 20, 'top' : 30, 'right' : 240 },
         width = 960,
         height = 300,
         w = width - margin.left - margin.right,
         h = height - margin.top - margin.bottom,
         xscale = d3.time.scale().domain([dateMin, dateMax]).range([0, w]),
-        yscale = d3.scale.linear().domain([1,4]).range([h, 0]),
+        yscale = d3.scale.linear().domain([1,surgeMax]).range([h, 0]),
         xaxis = d3.svg.axis().scale(xscale).orient('bottom'),
         yaxis = d3.svg.axis().scale(yscale).orient('left').tickValues(d3.range(1, 4, 1)),
         clip = null;
 
     function rescale() {
       xscale.domain([dateMin, dateMax]).range([0, w = width - margin.left - margin.right]);
-      yscale.domain([1,4]).range([h, 0]); 
+      yscale.domain([1,surgeMax]).range([h, 0]); 
     }
 
     var line = d3.svg.line()
         .x(function(d) { return xscale(d[0]); })
         .y(function(d) { return yscale(d[1]); })
         .interpolate('basis');
-        console.dir(line);
-        console.log(line.type);
+
+    var lyft_line = d3.svg.line()
+        .x(function(d) { return xscale(d[0]); })
+        .y(function(d) { return yscale(d[1]); })
+        .interpolate('basis');
+
 
     var bisect = d3.bisector(function(d) { return d[0]; });
 
@@ -65,7 +69,18 @@ function showInputs(response) {
           .selectAll('path.data')
             .data([data.points.slice(0, idx), data.points.slice(idx - 1)])
           .enter().append('path')
-            .attr('class', function(d, i) { return 'data data-' + i; })
+            .attr('class', function(d) { return 'data'; }).transition()
+            .duration(6000)
+            .attrTween('d', getInterpolation);
+
+        svge.append('g')
+            .attr('clip-path', clip)
+          .selectAll('path.data2')
+            .data([data.lyft_points.slice(0, idx), data.lyft_points.slice(idx - 1)])
+          .enter().append('path')
+            .attr('class', function(d, i) { return 'data2'; }).transition()
+            .duration(6000)
+            .attrTween('d', getlyftInterpolation);
 
         svge.append('g')
             .attr('class', 'left anchor');
@@ -76,10 +91,35 @@ function showInputs(response) {
         svg.select('g.right.anchor')
             .attr('transform', 'translate(' + w + ', 0)');
 
+        function getInterpolation() {
+
+          var interpolate = d3.scale.quantile()
+              .domain([0,1])
+              .range(d3.range(1, data.lyft_points.length + 1));
+
+          return function(t) {
+              var interpolatedLine = data.lyft_points.slice(0, interpolate(t));
+              return lyft_line(interpolatedLine);
+              }
+          }
+
+        function getlyftInterpolation() {
+
+        var interpolate = d3.scale.quantile()
+          .domain([0,1])
+          .range(d3.range(1, data.points.length + 1));
+
+        return function(t) {
+          var interpolatedLine = data.points.slice(0, interpolate(t));
+          return line(interpolatedLine);
+          }
+}
+
 
         svg.selectAll('.x.axis').call(xaxis)
         svg.selectAll('.y.axis').call(yaxis)
         svg.selectAll('.data').attr('d', line);
+        svg.selectAll('.data2').attr('d', lyft_line);
       });
     }
 
@@ -125,20 +165,33 @@ function showInputs(response) {
   }
 
   var points = [];
-  for (var i=0; i < response.length; i++) {
+  for (var i=0; i < response[0].length; i++) {
         points[i] = [];
-        points[i][0] = new Date(response[i][0]);
-        points[i][1] = response[i][1];
+        points[i][0] = new Date(response[0][i][0]);
+        points[i][1] = response[0][i][1];
     }
+
+  var lyft_points = [];
+  for (var i=0; i < response[1].length; i++) {
+        lyft_points[i] = [];
+        lyft_points[i][0] = new Date(response[1][i][0]);
+        if (response[1][i][1] < 1) {
+          lyft_points[i][1] = 1.0;
+        }
+        else {
+          lyft_points[i][1] = response[1][i][1];
+        }
+    }
+
    var setup = d3.range(0, 3).map(function() {
         var chart = toomanydata()
             .clip('url(#clipper)');
-        return { 'points' : points, 'chart' : chart };
+        return { 'points' : points, 'lyft_points' : lyft_points, 'chart' : chart };
       });
     var min = d3.min(points, function(d) { return d[0]; });
     var max = d3.max(points, function(d) { return d[0]; });
-    console.log(max);
-    console.log(min);
+
+
   var defs = d3.select('body')
     .append('svg')
       .attr('width', 0)
@@ -183,7 +236,7 @@ function showInputs(response) {
 
     datum.zoom.on('zoom', function() {
       var t = datum.zoom.translate(),
-          dx = Math.min(0, Math.max(t[0], datum.chart.view_width() - 2760)),
+          dx = Math.min(0, Math.max(t[0], datum.chart.view_width() - 1360)),
           dy = t[1];
 
       datum.zoom.translate([dx, dy]);
@@ -195,15 +248,15 @@ function showInputs(response) {
 }
 
 
-function getChartInput(evt) {
-    evt.preventDefault();
-              
-    $.get("/query-ests",
+
+function getChartInput(uberId, lyftId) {
+    var formInputs = {'uber' : uberId,
+                      'lyft' : lyftId}             
+    $.post("/query-ests",
+    formInputs,
     showInputs);
 }
 
-
-$(document).on("click", "#chart", getChartInput);
 
 /////////// HIDE REQUEST RADIOS AND SUBMIT BUTTONS AT PAGE LOAD ///////////
 
@@ -307,34 +360,48 @@ function showEstimates(results) {
     // Set default Uber choice, and change according to radio button selected
 
     $("#uber-ride-choice").val(uberxId);
+    var uberId = 2;
 
     $(".rdo-uber").on("change", function (evt) {
-    if ($("#rdo-pool").prop("checked") === true) {
-        $("#uber-ride-choice").val(poolId);
-    }
-    else if ($("#rdo-uberx").prop("checked") === true) {
-        $("#uber-ride-choice").val(uberxId);
-    }
-    else if ($("#rdo-uberxl").prop("checked") === true) {
-        $("#uber-ride-choice").val(uberxlId);
-    }
+        if ($("#rdo-pool").prop("checked") === true) {
+            $("#uber-ride-choice").val(poolId);
+            uberId = 1;
+        }
+        else if ($("#rdo-uberx").prop("checked") === true) {
+            $("#uber-ride-choice").val(uberxId);
+            uberId = 2;
+        }
+        else if ($("#rdo-uberxl").prop("checked") === true) {
+            $("#uber-ride-choice").val(uberxlId);
+            uberId = 3;
+        }
+
+        getChartInput(uberId, lyftId)
     })
 
     // Set default Lyft choice, and change according to radio button selected
     
     $("#lyft-ride-choice").val("lyft");
+    var lyftId = 5;
 
     $(".rdo-lyft").on("change", function (evt) {
-    if ($("#rdo-line").prop("checked") === true) {
-        $("#lyft-ride-choice").val("lyft_line");
-    }
-    else if ($("#rdo-lyft-lyft").prop("checked") === true) {
-        $("#lyft-ride-choice").val("lyft");
-    }
-    else if ($("#rdo-plus").prop("checked") === true) {
-    $("#lyft-ride-choice").val("lyft_plus");
-    }
+        if ($("#rdo-line").prop("checked") === true) {
+            $("#lyft-ride-choice").val("lyft_line");
+            lyftId = 4;
+        }
+        else if ($("#rdo-lyft-lyft").prop("checked") === true) {
+            $("#lyft-ride-choice").val("lyft");
+            lyftId = 5;
+        }
+        else if ($("#rdo-plus").prop("checked") === true) {
+            $("#lyft-ride-choice").val("lyft_plus");
+            lyftId = 6;
+        }
+
+        getChartInput(uberId, lyftId)
     })
+
+    getChartInput(uberId, lyftId) // Call function to create chart
     
 }
 
