@@ -3,6 +3,10 @@ from datetime import datetime
 import random
 import geocoder
 from flask import session, flash
+import arrow
+import googlemaps
+import os
+import pytz
 
 def uberEstimatesToData(uber_ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
     """Send data on estimates to estimates table."""
@@ -175,3 +179,109 @@ def addressToDatabase(addresses, addresses_db):
             elif len(addresses) == 2:
                 flash("Addresses saved.")
             i += 1
+
+
+def getDates(time, day):
+    """Gets all dates in range for user's query to populate surge rate chart."""
+
+    dates = db.session.query(Estimate.time_requested).filter(Estimate.time_requested 
+                            < datetime(2016, 11, 16, 0, 00, 00, 00000)).all()
+
+    daytimes = []
+    for date in dates:
+        if (time.time() < datetime(2016, 11, 11, 22, 00, 00, 000000).time() and  
+            date.time_requested.date().weekday() == day):
+            hours = ((date.time_requested - time).total_seconds()) / 60 / 60
+            if hours % 24 <= 2:
+                daytimes.append(date)
+        if (time.time() > datetime(2016, 11, 11, 22, 00, 00, 000000).time() and 
+            time.time() < datetime(2016, 11, 11, 23, 59, 59, 999999).time()):
+
+            if (date.time_requested.time() < time.time() and 
+                date.time_requested.date().weekday() == day + 1):
+
+                hours = ((date.time_requested - time).total_seconds()) / 60 / 60
+
+                if hours % 24 <= 2:
+
+                    daytimes.append(date)
+
+            if (date.time_requested.time() > time.time() and 
+                date.time_requested.date().weekday() == day):
+
+                hours = ((date.time_requested - time).total_seconds()) / 60 / 60
+
+                if hours % 24 <= 2:
+
+                    daytimes.append(date)
+
+
+    daytimes = list(set(daytimes))            
+    daytimes.sort()
+
+    return daytimes
+
+def getSurges(daytimes, uber_choice, lyft_choice):
+    """Get historical surge prices from database given date range."""
+
+    uber_query = db.session.query(Estimate.surge).filter(
+                            (Estimate.ridetype_id == uber_choice) & 
+                            (Estimate.time_requested >= daytimes[0]) & 
+                            (Estimate.time_requested <= daytimes[-1])).all()
+
+    uber_data = [data[0] for data in uber_query]
+
+
+    lyft_query = db.session.query(Estimate.price_min, Estimate.price_max, Estimate.ridetype_id).filter(
+                                (Estimate.ridetype_id == lyft_choice) & 
+                                (Estimate.time_requested >= daytimes[0]) & 
+                                (Estimate.time_requested <= daytimes[-1])).all()
+
+    lyft_data = []
+
+    for data in lyft_query:
+        price_min = data[0]
+        price_max = data[1]
+
+        if data[2] == 4:
+            base_min = 475
+            base_max = 475
+        elif data[2] == 5:
+            base_min = 775
+            base_max = 1475
+        elif data[2] == 6:
+            base_min = 1175
+            base_max = 1975
+
+        if price_min <= base_min:
+                min_surge = 1
+        else:
+            min_surge = float(price_min / base_min)
+
+        if price_max <= base_max:
+            max_surge = 1
+        else:
+            max_surge = float(price_max / base_max)
+
+        total = min_surge + max_surge
+
+        surge = round((total / 2.0), 2)
+
+        lyft_data.append(surge)
+
+    return uber_data, lyft_data
+
+def localizeTimes(daytimes):
+    """Localize times from database given user's origin location."""  
+
+    gmaps = googlemaps.Client(key=os.environ['GOOGLE_API_KEY'])
+    result = gmaps.timezone((session['origin_lat'], session['origin_lng']), 
+             arrow.utcnow())
+    tz = result['timeZoneId']
+    timezone = pytz.timezone(tz)
+
+
+    local_times = [pytz.utc.localize(daytime.time_requested, is_dst=None)
+    .astimezone(timezone).strftime('%d, %H: %M: %S') for daytime in daytimes]
+
+    return local_times

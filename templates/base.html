@@ -5,44 +5,45 @@
     <script src="https://code.jquery.com/jquery.js"></script>
     <link rel="stylesheet" 
           href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+    <link href="/static/js/c3.css" rel="stylesheet" type="text/css">
+
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <meta charset="utf-8">
     <script src="https://d3js.org/d3.v3.min.js"></script>
-        <style>
-            /* tell the SVG path to be a thin blue line without any area fill */
-            svg {
-              font-family: "Helvetica Neue", Helvetica, Aria, sans-serif;
-              font-size: 10px;
-            }
 
-            .axis path,
-            .axis line {
-              fill: none;
-              stroke: black;
-              shape-rendering: crispEdges;
-            }
+    <script src="/static/js/c3.min.js"></script>
 
-            line.cutoff {
-              stroke: black;
-              stroke-width: 2;
-            }
+    <style>
+    #chart .c3-line-Uber {
+      stroke-width: 1.5px;
+    }
+    #chart .c3-line-Lyft {
+      stroke-width: 1.5px;
+    }
 
-            path.data {
-              fill: transparent;
-              stroke: grey;
-              stroke-width: 2;
-            }
+    .c3 .c3-axis-x path, .c3 .c3-axis-x line {
+        stroke-width: 1.5px;
+    }
+    .c3 .c3-axis-y path, .c3 .c3-axis-y line {
+        stroke-width: 1.5px;
+    }
 
-            path.data2 {
-              fill: transparent;
-              stroke: pink;
-              stroke-width: 2;
-            }
+    #map {
+        height:400px;
+    }
 
-            /*#initial svg .data-1 {
-              stroke: rgba(128, 128, 128, 0.4);
-            }*/
-        </style>
+    .dropdown {
+        display: inline-block;
+    }
+
+    #surgedrop {
+        display: inline-block;
+    }
+
+    </style>
+
+
 </head>
 <body>
 

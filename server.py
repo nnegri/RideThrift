@@ -10,11 +10,15 @@ from model import (connect_to_db, db, User, Address, UserAddress, RideType, Esti
 from apifunctions import (getUberEstimates, getLyftEstimates, getUberAuth, 
                           requestUber, getLyftAuth, requestLyft)
 from datafunctions import (uberEstimatesToData, lyftEstimatesToData, 
-                           addressInformation, addressToDatabase)
-from datetime import datetime, date
+                           addressInformation, addressToDatabase, getDates, 
+                           getSurges, localizeTimes)
+from datetime import datetime, date, timedelta
 
 import os
 import arrow
+import googlemaps
+import pytz
+
 
 
 app = Flask(__name__)
@@ -129,6 +133,9 @@ def get_estimates():
 
     origin_lat = request.form.get("origin_lat")
     origin_lng = request.form.get("origin_lng")
+
+    session['origin_lat'] = origin_lat
+    session['origin_lng'] = origin_lng
     
     dest_lat = request.form.get("dest_lat")
     dest_lng = request.form.get("dest_lng")
@@ -288,74 +295,28 @@ def query_est_db():
     """Query database for estimate information."""
 
     uber_choice = request.form.get("uber")
+    if uber_choice == "":
+        uber_choice = session["uber_choice"]
+    else:
+        session["uber_choice"] = uber_choice
+
     lyft_choice = request.form.get("lyft")
+    if lyft_choice == "":
+        lyft_choice = session["lyft_choice"]
+    else:
+        session["lyft_choice"] = lyft_choice
 
-    time = arrow.utcnow()
-    day = time.weekday()
-    dates = db.session.query(Estimate.time_requested).all()
+    time = datetime.utcnow()
+    day = time.date().weekday()
 
-    daytimes = []
-    for date in dates:
-        adate = arrow.get(date.time_requested)
-        if (adate.weekday() == day):
-            days = (adate - time.datetime).days
-            mindate = time.replace(days=+days)
-            # minhours = 24*(days - 1) - 1
-            # mindate = time.replace(hours=+minhours)
-            maxdate = time.replace(days=+days, hours=+2)
-            if (adate >= mindate) and (adate <= maxdate):
-                daytimes.append(date)
-    daytimes.sort()
+    daytimes = getDates(time, day)
 
-    uber_data = db.session.query(Estimate.time_requested, Estimate.surge).filter(
-                            (Estimate.ridetype_id == uber_choice) & 
-                            (Estimate.time_requested >= daytimes[0]) & 
-                            (Estimate.time_requested <= daytimes[-1])).all()
+    uber_data, lyft_data = getSurges(daytimes, uber_choice, lyft_choice)
 
-    # lyft_data = db.session.query(Estimate.time_requested, Estimate.surge).filter(
-    #                             (Estimate.ridetype_id == lyft_choice) & 
-    #                             (Estimate.time_requested >= daytimes[0]) & 
-    #                             (Estimate.time_requested <= daytimes[-1])).all()
-
-    lyft_query = db.session.query(Estimate.time_requested, Estimate.price_min, Estimate.price_max, Estimate.ridetype_id).filter(
-                                (Estimate.ridetype_id == lyft_choice) & 
-                                (Estimate.time_requested >= daytimes[0]) & 
-                                (Estimate.time_requested <= daytimes[-1])).all()
-
-    lyft_data = []
-
-    for data in lyft_query:
-        price_min = data[1]
-        price_max = data[2] 
-
-        if data[3] == 4:
-            base_min = 475
-            base_max = 475
-        elif data[3] == 5:
-            base_min = 775
-            base_max = 1475
-        elif data[3] == 6:
-            base_min = 1175
-            base_max = 1975
-
-        if price_min <= base_min:
-                min_surge = 1
-        else:
-            min_surge = float(price_min / base_min)
-
-        if price_max <= base_max:
-            max_surge = 1
-        else:
-            max_surge = float(price_max / base_max)
-
-        total = min_surge + max_surge
-
-        surge = round((total / 2.0), 2)
-
-        lyft_data.append((data[0], surge))
+    local_times = localizeTimes(daytimes)
 
 
-    return jsonify(uber_data, lyft_data)
+    return jsonify(local_times, uber_data, lyft_data, uber_choice, lyft_choice)
 
 if __name__ == "__main__":
 

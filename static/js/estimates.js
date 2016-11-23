@@ -1,253 +1,254 @@
 'use strict';
+
+
 function showInputs(response) {
+  console.log(response[3]);
 
-  function toomanydata() {
+  var timeline = response[0];
+  timeline.splice(0, 0, 'x');
 
-    var dataset = points;
-    var dateMin = d3.min(dataset, function(d) { return d[0]; });
-    var dateMax = new Date(dateMin);
-    dateMax.setHours(dateMin.getHours() + 1);
+  var uber = response[1];
+  var lyft = response[2];
 
-    var surgeMax = d3.max(dataset, function(d) { return d[1]; });
+  var data = uber.concat(lyft);
+  var maxY = d3.max(data, function(d) { return d; });
 
-    var margin = { 'left' : 30, 'bottom' : 20, 'top' : 30, 'right' : 240 },
-        width = 960,
-        height = 300,
-        w = width - margin.left - margin.right,
-        h = height - margin.top - margin.bottom,
-        xscale = d3.time.scale().domain([dateMin, dateMax]).range([0, w]),
-        yscale = d3.scale.linear().domain([1,surgeMax]).range([h, 0]),
-        xaxis = d3.svg.axis().scale(xscale).orient('bottom'),
-        yaxis = d3.svg.axis().scale(yscale).orient('left').tickValues(d3.range(1, 4, 1)),
-        clip = null;
-
-    function rescale() {
-      xscale.domain([dateMin, dateMax]).range([0, w = width - margin.left - margin.right]);
-      yscale.domain([1,surgeMax]).range([h, 0]); 
-    }
-
-    var line = d3.svg.line()
-        .x(function(d) { return xscale(d[0]); })
-        .y(function(d) { return yscale(d[1]); })
-        .interpolate('basis');
-
-    var lyft_line = d3.svg.line()
-        .x(function(d) { return xscale(d[0]); })
-        .y(function(d) { return yscale(d[1]); })
-        .interpolate('basis');
-
-
-    var bisect = d3.bisector(function(d) { return d[0]; });
-
-    function chart(selection) { 
-      selection.each(function(data) {
-        var svg = d3.select(this).selectAll('svg')
-            .data([data.points])
-            .attr('width', width)
-            .attr('height', height)
-
-        var svge = svg.enter()
-          .append('svg')
-            .attr('width', width)
-            .attr('height', height)
-          .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-        svge.append('g')
-            .attr('class', 'x axis')
-
-        svg.select('g.x.axis')
-            .attr('transform', 'translate(0, ' + h + ')')
-
-        svge.append('g')
-            .attr('class', 'y axis')
-
-        var idx = bisect.left(data.points, dateMax);
-
-        svge.append('g')
-            .attr('clip-path', clip)
-          .selectAll('path.data')
-            .data([data.points.slice(0, idx), data.points.slice(idx - 1)])
-          .enter().append('path')
-            .attr('class', function(d) { return 'data'; }).transition()
-            .duration(6000)
-            .attrTween('d', getInterpolation);
-
-        svge.append('g')
-            .attr('clip-path', clip)
-          .selectAll('path.data2')
-            .data([data.lyft_points.slice(0, idx), data.lyft_points.slice(idx - 1)])
-          .enter().append('path')
-            .attr('class', function(d, i) { return 'data2'; }).transition()
-            .duration(6000)
-            .attrTween('d', getlyftInterpolation);
-
-        svge.append('g')
-            .attr('class', 'left anchor');
-
-        svge.append('g')
-            .attr('class', 'right anchor');
-
-        svg.select('g.right.anchor')
-            .attr('transform', 'translate(' + w + ', 0)');
-
-        function getInterpolation() {
-
-          var interpolate = d3.scale.quantile()
-              .domain([0,1])
-              .range(d3.range(1, data.lyft_points.length + 1));
-
-          return function(t) {
-              var interpolatedLine = data.lyft_points.slice(0, interpolate(t));
-              return lyft_line(interpolatedLine);
-              }
-          }
-
-        function getlyftInterpolation() {
-
-        var interpolate = d3.scale.quantile()
-          .domain([0,1])
-          .range(d3.range(1, data.points.length + 1));
-
-        return function(t) {
-          var interpolatedLine = data.points.slice(0, interpolate(t));
-          return line(interpolatedLine);
-          }
-}
-
-
-        svg.selectAll('.x.axis').call(xaxis)
-        svg.selectAll('.y.axis').call(yaxis)
-        svg.selectAll('.data').attr('d', line);
-        svg.selectAll('.data2').attr('d', lyft_line);
-      });
-    }
-
-    chart.margin_right = function(m) {
-      if (!arguments.length) return margin.right;
-      margin.right = m;
-      rescale();
-      return chart;
-    };
-
-    chart.height = function(h) {
-      if (!arguments.length) return height;
-      height = h;
-      rescale();
-      return chart;
-    };
-
-    chart.width = function(w) {
-      if (!arguments.length) return width;
-      width = w;
-      rescale();
-      return chart;
-    };
-
-    chart.view_width = function() {
-      return w;
-    };
-
-    chart.xscale = function(xs) {
-      if (!arguments.length) return xscale;
-      xscale = xs;
-      rescale();
-      return chart;
-    };
-    
-    chart.clip = function(c) {
-      if (!arguments.length) return clip;
-      clip = c;
-      return chart;
-    };
-
-    return chart;
+  if (response[3] == 1) {
+    var uber_label = 'Pool';
+  }
+  else if (response[3] == 2) {
+    var uber_label = 'UberX';
+  }
+  else if (response[3] == 3) {
+    var uber_label = 'UberXL';
   }
 
-  var points = [];
-  for (var i=0; i < response[0].length; i++) {
-        points[i] = [];
-        points[i][0] = new Date(response[0][i][0]);
-        points[i][1] = response[0][i][1];
-    }
+  if (response[4] == 4) {
+    var lyft_label = 'Line';
+  }
+  else if (response[4] == 5) {
+    var lyft_label = 'Lyft';
+  }
+  else if (response[4] == 6) {
+    var lyft_label = 'Plus';
+  }
 
-  var lyft_points = [];
-  for (var i=0; i < response[1].length; i++) {
-        lyft_points[i] = [];
-        lyft_points[i][0] = new Date(response[1][i][0]);
-        if (response[1][i][1] < 1) {
-          lyft_points[i][1] = 1.0;
-        }
-        else {
-          lyft_points[i][1] = response[1][i][1];
-        }
-    }
-
-   var setup = d3.range(0, 3).map(function() {
-        var chart = toomanydata()
-            .clip('url(#clipper)');
-        return { 'points' : points, 'lyft_points' : lyft_points, 'chart' : chart };
-      });
-    var min = d3.min(points, function(d) { return d[0]; });
-    var max = d3.max(points, function(d) { return d[0]; });
+  uber.splice(0, 0, 'Uber');
+  lyft.splice(0, 0, 'Lyft');
 
 
-  var defs = d3.select('body')
-    .append('svg')
-      .attr('width', 0)
-      .attr('height', 0)
-    .append('defs');
+  if (maxY == 1) {
+    var ticks = 0;
+  }
+  else {
+    var ticks = Math.ceil(maxY);
+  }
 
-  defs.append('clipPath')
-      .attr('id', 'clipper')
-    .append('rect')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('width', 960)
-      .attr('height', 300);
-
-  d3.selectAll('#initial, #no-bounds, #final')
-      .data(setup)
-      .each(function(datum) {
-        d3.select(this).call(datum.chart)
-      });
-
-  d3.selectAll('#no-bounds, #final').each(function(datum) {
-    var selection = d3.select(this);
-
-    selection.call(datum.chart.width(720).margin_right(0));
-
-    datum.zoom = d3.behavior.zoom()
-        .x(datum.chart.xscale())
-        .scaleExtent([1, 1])
-        .on('zoom', function() {
-          selection.call(datum.chart);
-        });
-
-    selection.select('svg')
-        .attr('cursor', 'move')
-        .call(datum.zoom)
-        .on("mousewheel.zoom", null)
-        .on("DOMMouseScroll.zoom", null);
+  c3.chart.internal.fn.getInterpolate = () => 'monotone';
+  var chart = c3.generate({
+      size: {
+        height: 300,
+        width: 600
+      },
+      data: {
+          x: 'x',
+          xFormat: '%d, %H: %M: %S', // 'xFormat' can be used as custom format of 'x'
+          columns: [
+              timeline,
+              uber,
+              lyft
+          ],
+          names: {
+              Uber: uber_label,
+              Lyft: lyft_label
+          },
+          axes: {
+            Uber: 'y'
+          },
+          type: 'area-spline'
+          },
+          axis: {
+              x: {
+                  type: 'timeseries',
+                  localtime: true,
+                  padding: {left: 0, right: 0},
+                  tick: {
+                      count: 24,
+                      format: '%-I: %M %p'
+                  }
+              },
+              y: {
+                min: 0,
+                max: 0,
+                padding: {top: 0, bottom: 0},
+                tick: {
+                  count: ticks
+                }
+              }
+          },
+          zoom: {
+          enabled: true
+          },
+          point: {
+          show: false
+          },
+          tooltip: {
+          show: false
+          },
+          transition: {
+          duration: 400
+          },
+          color : {
+            pattern: ['#000000', '#FF33D1']
+          }
   });
+      
+  if (maxY == 1) {
+    var maxRange = 2;
+  }
+  else {
+    var maxRange = Math.ceil(maxY)
+  }
+  
 
-  d3.select('#final').call(function(selection) {
-    var datum = selection.datum();
+  setTimeout(function () {
+      chart.axis.range({max: {y: maxRange}, min: {y: 1}});
+      }, 300);
 
-    datum.zoom.on('zoom', function() {
-      var t = datum.zoom.translate(),
-          dx = Math.min(0, Math.max(t[0], datum.chart.view_width() - 1360)),
-          dy = t[1];
 
-      datum.zoom.translate([dx, dy]);
-      selection.call(datum.chart);
+
+  function newLines(response) {
+    // var timeline = response[0];
+    // timeline.splice(0, 0, 'x');
+
+    var uber = response[1];
+    var lyft = response[2];
+
+    var data = uber.concat(lyft);
+    var maxY = d3.max(data, function(d) { return d; });
+
+    if (response[3] == 1) {
+    var uber_label = 'Pool';
+    }
+    else if (response[3] == 2) {
+      var uber_label = 'UberX';
+    }
+    else if (response[3] == 3) {
+      var uber_label = 'UberXL';
+    }
+
+    if (response[4] == 4) {
+      var lyft_label = 'Line';
+    }
+    else if (response[4] == 5) {
+      var lyft_label = 'Lyft';
+    }
+    else if (response[4] == 6) {
+      var lyft_label = 'Plus';
+    }
+
+    uber.splice(0, 0, 'Uber');
+    lyft.splice(0, 0, 'Lyft');
+    
+    chart.load({
+          columns: [
+              uber,
+              lyft
+          ],
+          names: {
+              Uber: uber_label,
+              Lyft: lyft_label
+          }
     });
+  }
+  function updateData(uberId, lyftId) {
+    var formInputs = {'uber' : uberId,
+                      'lyft' : lyftId}             
+    $.post("/query-ests",
+    formInputs,
+    newLines);
+  }
+
+  var uberId = 2;
+  $(".rdo-uber").on("change", function (evt) {
+        if ($("#rdo-pool").prop("checked") === true) {
+            uberId = 1;
+        }
+        else if ($("#rdo-uberx").prop("checked") === true) {
+            uberId = 2;
+        }
+        else if ($("#rdo-uberxl").prop("checked") === true) {
+            uberId = 3;
+        }
+
+        updateData(uberId, "");
+    });
+  var lyftId = 5;
+  $(".rdo-lyft").on("change", function (evt) {
+        if ($("#rdo-line").prop("checked") === true) {
+            lyftId = 4;
+        }
+        else if ($("#rdo-lyft-lyft").prop("checked") === true) {
+            lyftId = 5;
+        }
+        else if ($("#rdo-plus").prop("checked") === true) {
+            lyftId = 6;
+        }
+
+        updateData("", lyftId);
+    });
+  
+
+  function displayMap() {
+
+    var location = {lat: parseFloat($("#or-map-lat").val()), lng: parseFloat($("#or-map-lng").val())};
+    var dest = {lat: parseFloat($("#de-map-lat").val()), lng: parseFloat($("#de-map-lng").val())};
+    var map = new google.maps.Map(document.getElementById('map'), {
+      center: location,
+      zoom: 14,
+    });
+  
+    var directionsService = new google.maps.DirectionsService;
+    var directionsDisplay = new google.maps.DirectionsRenderer;
+    
+    directionsDisplay.setMap(map);
+    
+    directionsService.route({
+      origin: location,
+      destination: dest,
+      travelMode: 'DRIVING'
+    }, function(response, status) {
+      if (status === 'OK') {
+        directionsDisplay.setDirections(response);
+      } else {
+        window.alert('Directions request failed due to ' + status);
+      }
+
+    var trafficLayer = new google.maps.TrafficLayer();
+    trafficLayer.setMap(map);
+
 
   });
+
+    var bounds = new google.maps.LatLngBounds();
+    
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+      google.maps.event.trigger(map, 'resize');
+      bounds.extend(location);
+      bounds.extend(dest);
+      map.fitBounds(bounds);
+    });
+}   
+
+    displayMap();
+
+    $("#hist-surge").on("submit", function (evt) {
+        evt.preventDefault();
+        console.log($("#time-select").val().type);
+    })
+    
 
 }
-
-
 
 function getChartInput(uberId, lyftId) {
     var formInputs = {'uber' : uberId,
@@ -256,6 +257,28 @@ function getChartInput(uberId, lyftId) {
     formInputs,
     showInputs);
 }
+/////////////////////////////////
+
+
+// function redrawChart(uberId, lyftId) {
+//   var formInputs = {'uber' : uberId,
+//                       'lyft' : lyftId}             
+//     $.post("/query-ests",
+//     formInputs,
+//     showInputs);
+
+// }
+
+
+// if ($("#ride-message").val() === "") {
+//     $("#tabs").show();
+//     $("#or-map-lat")
+//     redrawChart(2, 5);
+//     }
+
+
+  
+
 
 
 /////////// HIDE REQUEST RADIOS AND SUBMIT BUTTONS AT PAGE LOAD ///////////
@@ -265,6 +288,8 @@ $("#uber-req-button").hide();
 
 $(".rdo-lyft").hide();
 $("#lyft-req-button").hide();
+
+$("#tabs").hide();
 
 
 /////////// REQUEST ESTIMATES USING AJAX ///////////
@@ -365,18 +390,14 @@ function showEstimates(results) {
     $(".rdo-uber").on("change", function (evt) {
         if ($("#rdo-pool").prop("checked") === true) {
             $("#uber-ride-choice").val(poolId);
-            uberId = 1;
         }
         else if ($("#rdo-uberx").prop("checked") === true) {
             $("#uber-ride-choice").val(uberxId);
-            uberId = 2;
         }
         else if ($("#rdo-uberxl").prop("checked") === true) {
             $("#uber-ride-choice").val(uberxlId);
-            uberId = 3;
         }
 
-        getChartInput(uberId, lyftId)
     })
 
     // Set default Lyft choice, and change according to radio button selected
@@ -387,23 +408,23 @@ function showEstimates(results) {
     $(".rdo-lyft").on("change", function (evt) {
         if ($("#rdo-line").prop("checked") === true) {
             $("#lyft-ride-choice").val("lyft_line");
-            lyftId = 4;
         }
         else if ($("#rdo-lyft-lyft").prop("checked") === true) {
             $("#lyft-ride-choice").val("lyft");
-            lyftId = 5;
         }
         else if ($("#rdo-plus").prop("checked") === true) {
             $("#lyft-ride-choice").val("lyft_plus");
-            lyftId = 6;
         }
 
-        getChartInput(uberId, lyftId)
     })
 
-    getChartInput(uberId, lyftId) // Call function to create chart
+    $("#tabs").show();
+    
+    
+    getChartInput(uberId, lyftId); // Call function to create chart
     
 }
+
 
 function getAddressInput(evt) {
     // Use AJAX to submit user input to route, 
@@ -412,7 +433,7 @@ function getAddressInput(evt) {
     evt.preventDefault();
 
     if ($("#orig-lat-est").val() == "origin" || $("#dest-lat-est").val() == "dest") {
-        alert("Please enter both origin and destination.")
+        alert("Please enter both origin and destination.");
     }
 
     else {
@@ -422,8 +443,8 @@ function getAddressInput(evt) {
         var de_lat = $("#dest-lat-est").val();
         var de_lng = $("#dest-lng-est").val();
 
-        var origin = new google.maps.LatLng($("#orig-lat-est").val(), $("#orig-lng-est").val());
-        var dest = new google.maps.LatLng($("#dest-lat-est").val(), $("#dest-lng-est").val());
+        var origin = new google.maps.LatLng(or_lat, or_lng);
+        var dest = new google.maps.LatLng(de_lat, de_lng);
 
         var service = new google.maps.DistanceMatrixService();
 
@@ -441,10 +462,10 @@ function getAddressInput(evt) {
                 }
                 else {
                     var formInputs = {
-                    "origin_lat": $("#orig-lat-est").val(),
-                    "origin_lng": $("#orig-lng-est").val(),
-                    "dest_lat": $("#dest-lat-est").val(),
-                    "dest_lng": $("#dest-lng-est").val(),
+                    "origin_lat": or_lat,
+                    "origin_lng": or_lng,
+                    "dest_lat": de_lat,
+                    "dest_lng": de_lng,
                     "origin-save" : $("#origin-save").val(),
                     "dest-save" : $("#dest-save").val(),
                     "origin-address" : $("#origin-address").val(),
@@ -455,11 +476,11 @@ function getAddressInput(evt) {
                     "label-de" : $("#label-de").val()
                     };
 
-                                        
+
                     $.post("/estimates.json",
                     formInputs,
                     showEstimates);
-                    
+
                 }
             }
         );
