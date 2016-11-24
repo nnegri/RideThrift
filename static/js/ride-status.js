@@ -21,15 +21,23 @@ function showMessage(response) {
             " is on its way! Please be ready to depart in " + 
             response['minutes'] + m + " You will reach your destination at " + 
             response['arrive_time'] + ".");
-        // $("#ride-message").val("");
-        $("#ride-message").attr("value", "");
+
+        $("#ride-message").data("status", "");
+        $("#ridethrift").hide();
+        $("#route-msg").show();
+        $("#ride-message").show();
+
     }
     else if (response['minutes'] === 0) {
         $("#ride-message").html("Your " + response['ride'] + 
             " has arrived! You will reach your destination at " +
             response['arrive_time'] + ".");
-        // $("#ride-message").val("");
-        $("#ride-message").attr("value", "");
+
+        $("#ride-message").data("status", "");
+        $("#ridethrift").hide();
+        $("#route-msg").show();
+        $("#ride-message").show();
+
     }
     else if (response['minutes'] < 0 && response['minutes_arr'] > 0) {
         if (response['minutes_arr'] === 1) {
@@ -41,13 +49,22 @@ function showMessage(response) {
 
         $("#ride-message").html("You are on your way! You will reach your destination in " +
             response['minutes_arr'] + ma + "at " + response['arrive_time'] + ".");
-        // $("#ride-message").val("");
-        $("#ride-message").attr("value", "");
+
+        $("#ride-message").data("status", "");
+        $("#ridethrift").hide();
+        $("#route-msg").show();
+        $("#ride-message").show();
+
     }
     else if (response['minutes'] < 0  && response['minutes_arr'] <= 0) {
         $("#ride-message").html("");
-        // $("#ride-message").val("done");
-        $("#ride-message").attr("value", "done");
+
+        $("#ride-message").data("status", "done");
+
+        $("#route-msg").hide();
+        $("#map2").hide();
+        $("#ridethrift").show();
+        $("#ride-message").hide();
     }
 
 }
@@ -56,9 +73,10 @@ function showMessage(response) {
 function writeMessage() {
     // Ajax request to route, to retrieve departure and arrival times for ride.
     // Does not make request if ride is done
-    if ($("#ride-message").val() === "") { 
+    if ($("#ride-message").data("status") != "done") { 
         $.get("/ride_message.json",
         showMessage);
+
     }
 }
 
@@ -69,8 +87,14 @@ var callRide = function (evt) {
     setInterval(writeMessage, 20000);
     // Set interval to initiate request to server every 20 seconds
     writeMessage();
+
+    $("#map2").show();
+    $.get("/display-map.json",
+        displayMap);
+
 }
 
 callRide(); 
 // Show ride progress message upon calling ridde and/or re-loading the page
 
+$("#route-msg").hide()

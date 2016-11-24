@@ -1,18 +1,23 @@
 'use strict';
 
+/////////// DISPLAY SURGE CHART AND GOOGLE MAP USING AJAX  ///////////
 
-function showInputs(response) {
-  console.log(response[3]);
+function showChart(response) {
+  // Show Historical Surge Prices based on current weekday and time
 
+  // Timeline as X axis, insert data type into input for chart
   var timeline = response[0];
   timeline.splice(0, 0, 'x');
 
+  // Define datapoints for uber and lyft chart lines
   var uber = response[1];
   var lyft = response[2];
 
   var data = uber.concat(lyft);
+  // Determine max surge on Y axis
   var maxY = d3.max(data, function(d) { return d; });
 
+  // Determine labels for data points
   if (response[3] == 1) {
     var uber_label = 'Pool';
   }
@@ -33,10 +38,11 @@ function showInputs(response) {
     var lyft_label = 'Plus';
   }
 
+  // Insert data type into inputs for chart
   uber.splice(0, 0, 'Uber');
   lyft.splice(0, 0, 'Lyft');
 
-
+  // Space out Y axis ticks according to max Y
   if (maxY == 1) {
     var ticks = 0;
   }
@@ -44,11 +50,12 @@ function showInputs(response) {
     var ticks = Math.ceil(maxY);
   }
 
+  // Line chart created with C3.js
   c3.chart.internal.fn.getInterpolate = () => 'monotone';
   var chart = c3.generate({
       size: {
-        height: 300,
-        width: 600
+        height: 350,
+        width: 700
       },
       data: {
           x: 'x',
@@ -102,7 +109,8 @@ function showInputs(response) {
             pattern: ['#000000', '#FF33D1']
           }
   });
-      
+
+  
   if (maxY == 1) {
     var maxRange = 2;
   }
@@ -110,20 +118,23 @@ function showInputs(response) {
     var maxRange = Math.ceil(maxY)
   }
   
-
+  // Dynamically set max Y axis range
   setTimeout(function () {
       chart.axis.range({max: {y: maxRange}, min: {y: 1}});
       }, 300);
 
 
-
   function newLines(response) {
-    // var timeline = response[0];
-    // timeline.splice(0, 0, 'x');
+    // Update chart lines and axes based on user request for different ride
+    // types and/or different weekdays and times
 
     var uber = response[1];
     var lyft = response[2];
 
+    var time = response[0]; // Time inputs for new x axes
+    var minX = d3.min(time, function(t) { return t; });
+    var maxX = d3.max(time, function(t) { return t; });
+    
     var data = uber.concat(lyft);
     var maxY = d3.max(data, function(d) { return d; });
 
@@ -150,135 +161,197 @@ function showInputs(response) {
     uber.splice(0, 0, 'Uber');
     lyft.splice(0, 0, 'Lyft');
     
+    var timeline = response[0];
+    timeline.splice(0, 0, 'x');
+
     chart.load({
           columns: [
+              timeline,
               uber,
               lyft
           ],
           names: {
               Uber: uber_label,
               Lyft: lyft_label
-          }
+          },
+          x: 'x',
+          xFormat: '%d, %H: %M: %S'
     });
+
+    if (maxY == 1) {
+    var maxRange = 2;
+    }
+    else {
+      var maxRange = Math.ceil(maxY)
+    }
+
+    chart.axis.range({max: {y: maxRange}, min: {y: 1}});
+
   }
+
   function updateData(uberId, lyftId) {
+    // Perform AJAX request to update chart when user clicks radio buttons
+    // for various ride types
+
     var formInputs = {'uber' : uberId,
-                      'lyft' : lyftId}             
-    $.post("/query-ests",
+                      'lyft' : lyftId,
+                      'data' : 'current'}             
+    $.post("/query-ests.json",
     formInputs,
     newLines);
   }
 
-  var uberId = 2;
+  var uberId = 2; // Default if only Lyft radio button is changed
   $(".rdo-uber").on("change", function (evt) {
-        if ($("#rdo-pool").prop("checked") === true) {
-            uberId = 1;
-        }
-        else if ($("#rdo-uberx").prop("checked") === true) {
-            uberId = 2;
-        }
-        else if ($("#rdo-uberxl").prop("checked") === true) {
-            uberId = 3;
-        }
+    if ($("#rdo-pool").prop("checked") === true) {
+        uberId = 1;
+    }
+    else if ($("#rdo-uberx").prop("checked") === true) {
+        uberId = 2;
+    }
+    else if ($("#rdo-uberxl").prop("checked") === true) {
+        uberId = 3;
+    }
 
-        updateData(uberId, "");
-    });
-  var lyftId = 5;
+    updateData(uberId, "");
+  });
+
+  var lyftId = 5; // Default if only Uber radio button is changed
   $(".rdo-lyft").on("change", function (evt) {
-        if ($("#rdo-line").prop("checked") === true) {
-            lyftId = 4;
-        }
-        else if ($("#rdo-lyft-lyft").prop("checked") === true) {
-            lyftId = 5;
-        }
-        else if ($("#rdo-plus").prop("checked") === true) {
-            lyftId = 6;
-        }
+    if ($("#rdo-line").prop("checked") === true) {
+        lyftId = 4;
+    }
+    else if ($("#rdo-lyft-lyft").prop("checked") === true) {
+        lyftId = 5;
+    }
+    else if ($("#rdo-plus").prop("checked") === true) {
+        lyftId = 6;
+    }
 
-        updateData("", lyftId);
-    });
-  
+    updateData("", lyftId);
+  });
 
-  function displayMap() {
+  // Perform AJAX request to update chart when user requests specific weekday
+  // and time
+  $("#hist-surge").on("submit", function (evt) {
 
-    var location = {lat: parseFloat($("#or-map-lat").val()), lng: parseFloat($("#or-map-lng").val())};
-    var dest = {lat: parseFloat($("#de-map-lat").val()), lng: parseFloat($("#de-map-lng").val())};
-    var map = new google.maps.Map(document.getElementById('map'), {
-      center: location,
-      zoom: 14,
-    });
-  
-    var directionsService = new google.maps.DirectionsService;
-    var directionsDisplay = new google.maps.DirectionsRenderer;
-    
-    directionsDisplay.setMap(map);
-    
-    directionsService.route({
-      origin: location,
-      destination: dest,
-      travelMode: 'DRIVING'
-    }, function(response, status) {
-      if (status === 'OK') {
-        directionsDisplay.setDirections(response);
-      } else {
-        window.alert('Directions request failed due to ' + status);
-      }
+    evt.preventDefault();
 
-    var trafficLayer = new google.maps.TrafficLayer();
-    trafficLayer.setMap(map);
+    if ($("#rdo-pool").prop("checked") === true) {
+        uberId = 1;
+    }
+    else if ($("#rdo-uberx").prop("checked") === true) {
+        uberId = 2;
+    }
+    else if ($("#rdo-uberxl").prop("checked") === true) {
+        uberId = 3;
+    }
 
+    if ($("#rdo-line").prop("checked") === true) {
+        lyftId = 4;
+    }
+    else if ($("#rdo-lyft-lyft").prop("checked") === true) {
+        lyftId = 5;
+    }
+    else if ($("#rdo-plus").prop("checked") === true) {
+        lyftId = 6;
+    }
+
+    var formInputs = {'uber' : uberId,
+                      'lyft' : lyftId,
+                      'day' : $("#day").val(),
+                      'time': $("#time-select").val(),
+                      'data': 'historical'}     
+
+    $.post("/query-ests.json",
+    formInputs,
+    newLines);
 
   });
 
-    var bounds = new google.maps.LatLngBounds();
-    
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-      google.maps.event.trigger(map, 'resize');
+}   
+
+
+function displayMap(response) {
+    // Display Google Map, using Origin and Destination latitudes and longitudes
+    // input from user's request for price estimates
+    if (response[0] === "") {
+      return;
+    }
+    if (response[4] != "none") {
+      // Do not display if an estimate has not been given, or a ride has not
+      // been called
+
+      var location = {lat: parseFloat(response[0]), lng: parseFloat(response[1])};
+      var dest = {lat: parseFloat(response[2]), lng: parseFloat(response[3])};
+
+      // Use Google Maps API to initialize Map
+      var map = new google.maps.Map(document.getElementById(response[4]), {
+        center: location,
+        zoom: 14,
+      });
+      
+      // Display route
+      var directionsService = new google.maps.DirectionsService;
+      var directionsDisplay = new google.maps.DirectionsRenderer;
+      
+      directionsDisplay.setMap(map);
+      
+      directionsService.route({
+        origin: location,
+        destination: dest,
+        travelMode: 'DRIVING'
+      }, function(response, status) {
+        if (status === 'OK') {
+          directionsDisplay.setDirections(response);
+        } else {
+          window.alert('Directions request failed due to ' + status);
+        }
+
+      // Display traffic
+      var trafficLayer = new google.maps.TrafficLayer();
+      trafficLayer.setMap(map);
+
+    });
+
+      // Zoom and focus on route
+      var bounds = new google.maps.LatLngBounds();
       bounds.extend(location);
       bounds.extend(dest);
       map.fitBounds(bounds);
-    });
-}   
+      
+      if (response[4] === "map") {
+        // If a ride hasn't been called, but an estimate has been requested,
+        // display a map on the map tab
 
-    displayMap();
+        $("#route-msg").hide();
 
-    $("#hist-surge").on("submit", function (evt) {
-        evt.preventDefault();
-        console.log($("#time-select").val().type);
-    })
-    
-
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+          google.maps.event.trigger(map, 'resize');
+          bounds.extend(location);
+          bounds.extend(dest);
+          map.fitBounds(bounds);
+        });
+      }
+    }
 }
 
-function getChartInput(uberId, lyftId) {
+
+function getDisplayInput(uberId, lyftId) {
+    // Perform AJAX request to retrieve data from database for Historical
+    // Surge Price chart, and from the session for the Google Map
+
     var formInputs = {'uber' : uberId,
-                      'lyft' : lyftId}             
-    $.post("/query-ests",
+                      'lyft' : lyftId,
+                      'data' : 'current'}             
+    $.post("/query-ests.json",
     formInputs,
-    showInputs);
+    showChart);
+
+    $.get("/display-map.json",
+    displayMap);
 }
-/////////////////////////////////
-
-
-// function redrawChart(uberId, lyftId) {
-//   var formInputs = {'uber' : uberId,
-//                       'lyft' : lyftId}             
-//     $.post("/query-ests",
-//     formInputs,
-//     showInputs);
-
-// }
-
-
-// if ($("#ride-message").val() === "") {
-//     $("#tabs").show();
-//     $("#or-map-lat")
-//     redrawChart(2, 5);
-//     }
-
-
   
-
 
 
 /////////// HIDE REQUEST RADIOS AND SUBMIT BUTTONS AT PAGE LOAD ///////////
@@ -296,6 +369,11 @@ $("#tabs").hide();
 
 function showEstimates(results) {
     // Display estimate results on page.
+
+    $("#map2").hide();
+    $("#route-msg").hide();
+    $("#ridethrift").hide();
+    $("#ride-message").hide();
 
     var poolId = (results[0]["pool_product_id"]);
     var uberxId = (results[0]["uberx_product_id"]);
@@ -420,8 +498,7 @@ function showEstimates(results) {
 
     $("#tabs").show();
     
-    
-    getChartInput(uberId, lyftId); // Call function to create chart
+    getDisplayInput(uberId, lyftId); // Call function to create chart and map
     
 }
 

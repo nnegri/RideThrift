@@ -1,5 +1,5 @@
 from model import (db, connect_to_db, User, Address, UserAddress, RideType, Estimate)
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 import geocoder
 from flask import session, flash
@@ -180,6 +180,42 @@ def addressToDatabase(addresses, addresses_db):
                 flash("Addresses saved.")
             i += 1
 
+
+def timeDay(raw_time, raw_day):
+    """Get time and day in correct format for surge chart query."""
+
+    hour, minute = raw_time.split(":")
+
+    t = timedelta(hours=int(hour), minutes=int(minute))
+
+    gmaps = googlemaps.Client(key=os.environ['GOOGLE_API_KEY'])
+    result = gmaps.timezone((session['origin_lat'], session['origin_lng']), 
+         arrow.utcnow())
+    tz = result['timeZoneId']
+    timezone = pytz.timezone(tz)
+
+    dt = datetime(2016, 11, 18, 00, 00, 00, 000000)
+    local_time = timezone.localize(dt) + t
+    utc = local_time.astimezone(pytz.utc)
+    
+    time = utc.replace(tzinfo=None)       
+
+    if raw_day == "Monday":
+        day = 0
+    if raw_day == "Tuesday":
+        day = 1
+    if raw_day == "Wednesday":
+        day = 2
+    if raw_day == "Thursday":
+        day = 3
+    if raw_day == "Friday":
+        day = 4
+    if raw_day == "Saturday":
+        day = 5
+    if raw_day == "Sunday":
+        day = 6
+
+    return time, day
 
 def getDates(time, day):
     """Gets all dates in range for user's query to populate surge rate chart."""

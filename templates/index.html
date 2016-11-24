@@ -1,15 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container-fluid">
-    <h1>Ride Thrift</h2>
-    <div class="row">
-        <div class="col-xs-offset-3 col-xs-9"> <h4 id="ride-message" value="start"></h4> </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-6">
+    <div class="col-xs-4">
         <form id="estimate-form" method="post" action="/estimates.json">
+            <div class="estimate-entry">
             <label>Origin:</label>
-
             <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-est" value="origin"> 
             <input type="hidden" class="orig-lng-rides"name="origin-lng" id="orig-lng-est" value="origin">
             <input type="hidden" name="origin-save" id="origin-save">
@@ -33,10 +28,9 @@
                     <option value="manage-saved-addresses">Manage Saved Addresses
                 </select>
             {% endif %}
-        </div>
-        <div class="col-xs-6">
+         </div>
+         <div class="estimate-entry">
             <label>Destination:</label>
-
             <input type="hidden" class="dest-lat-rides" name="dest-lat" id="dest-lat-est" value="dest"> 
             <input type="hidden" class="dest-lng-rides" name="dest-lng" id="dest-lng-est" value="dest">
             <input type="hidden" name="dest-save" id="dest-save">
@@ -58,12 +52,16 @@
                     {% endfor %}
                     <option value="manage-saved-addresses">Manage Saved Addresses
                 </select>
-            {% endif %}
+            {% endif %}        
+            <div id="submit-est">
+                <input type="submit" value="Get Estimates"><br>    
+            </div>
         </div>
+        </form> 
     </div>
-            <br><input type="submit" value="Get Estimates"><br>    
-        </form>
-    <div class="row">
+    <div class="col-xs-8" id="msg-and-map">
+        <div class="row"> <h4 id="ride-message" data-status="start"></h4> </div>
+        <div class="row">
         <div class="col-xs-6">
             <form action="/call_uber" method="POST" id="call-uber">
                 <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-uber" value="origin"> 
@@ -96,8 +94,54 @@
                 {% endif %}
             </form>
         </div>
+        </div>
+        <div class="row">
+            <h1 id="ridethrift">Ride Thrift</h1>
+            <h3 id="route-msg">Route Map</h3>
+            <div id="map2"></div>
+            <div class="container" id="tabs">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#surges">Surges</a></li>
+                    <li><a data-toggle="tab" href="#gmap" id="maptoggle">Map</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="surges" class="tab-pane fade in active">
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <h3 id="surgedrop">Historical Surge Rates</h3>
+                                <div id="surge-chart"></div>
+                            </div>
+                            <div class="col-xs-4">
+                                <form id="hist-surge">
+                                <div class="form-group">
+                                    <label for="day">Day</label>
+                                    <select class="form-control" id="day">
+                                        <option>Monday</option>
+                                        <option>Tuesday</option>
+                                        <option>Wednesday</option>
+                                        <option>Thursday</option>
+                                        <option>Friday</option>
+                                        <option>Saturday</option>
+                                        <option>Sunday</option>
+                                    </select>
+                                </div>
+                                    Select a time:
+                                    <input type="time" name="usr_time" id="time-select">
+                                    <input type="submit" value="Surge Rates">
+                                </form>
+                            </div>
+                        </div>
+                        <div id="chart"></div>
+                    </div>
+                        <div id="gmap" class="tab-pane fade">
+                            <h3>Route Map</h3>
+                            <div id="map"></div>
+                        </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <!-- <div class='panning chart' id='final'> </div> -->
+</div>
 <!-- Manage Addresses Modal -->
 
     <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="manage-address-modal" id="manage-address-modal">
@@ -120,56 +164,6 @@
             </div>
         </div>
     </div>  
-    <!-- <div id="graph" class="aGraph" style="position:relative;top:0px;left:0; float:left;"></div> -->
-    
-    <div class="container" id="tabs">
-  
-      <ul class="nav nav-tabs">
-        <li class="active"><a data-toggle="tab" href="#surges">Surges</a></li>
-        <li><a data-toggle="tab" href="#gmap" id="maptoggle">Map</a></li>
-      </ul>
-
-      <div class="tab-content">
-        <div id="surges" class="tab-pane fade in active">
-            <div class="row">
-            <div class="col-xs-6">
-              <h3 id="surgedrop">Historical Surge Rates</h3>
-            </div>
-            <div class="col-xs-6">
-                <form id="hist-surge">
-                <div class="form-group">
-                  <label for="day">Day</label>
-                  <select class="form-control" id="day">
-                    <option>Monday</option>
-                    <option>Tuesday</option>
-                    <option>Wednesday</option>
-                    <option>Thursday</option>
-                    <option>Friday</option>
-                    <option>Saturday</option>
-                    <option>Sunday</option>
-                  </select>
-                </div>
-                
-                  Select a time:
-                  <input type="time" name="usr_time" id="time-select">
-                <input type="submit" value="Surge Rates">
-                
-        </form>
-        </div>
-        </div>
-          <div id="chart"></div>
-        </div>
-        <span class="orig-lat-rides" id="or-map-lat"></span>
-        <span class="orig-lng-rides" id="or-map-lng"></span>
-        <span class="dest-lat-rides" id="de-map-lat"></span>
-        <span class="dest-lng-rides" id="de-map-lng"></span>
-        <div id="gmap" class="tab-pane fade">
-          <h3>Route Map</h3>
-            <div id="map"></div>
-    </div>
-  </div>
-</div>
-
 
 </div>   
  

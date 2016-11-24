@@ -10,8 +10,8 @@ from model import (connect_to_db, db, User, Address, UserAddress, RideType, Esti
 from apifunctions import (getUberEstimates, getLyftEstimates, getUberAuth, 
                           requestUber, getLyftAuth, requestLyft)
 from datafunctions import (uberEstimatesToData, lyftEstimatesToData, 
-                           addressInformation, addressToDatabase, getDates, 
-                           getSurges, localizeTimes)
+                           addressInformation, addressToDatabase, timeDay, 
+                           getDates, getSurges, localizeTimes)
 from datetime import datetime, date, timedelta
 
 import os
@@ -130,6 +130,8 @@ def get_estimates():
     session['lyft_depart_time'] = ""
     session['uber_arrive_time'] = ""
     session['uber_depart_time'] = ""
+    session['timezone'] = ""
+    session["ride_called"] = False
 
     origin_lat = request.form.get("origin_lat")
     origin_lng = request.form.get("origin_lng")
@@ -139,6 +141,9 @@ def get_estimates():
     
     dest_lat = request.form.get("dest_lat")
     dest_lng = request.form.get("dest_lng")
+
+    session['dest_lat'] = dest_lat
+    session['dest_lng'] = dest_lng
 
     # Retrive Uber & Lyft estimates from APIs, enter estimates into database,
     # and format results to send to front end for user display
@@ -184,7 +189,6 @@ def get_estimates():
 
     addressToDatabase(addresses, addresses) 
     ###cannot test, flash message
-
     return jsonify(uber_estimates, lyft_estimates)
 
 
@@ -221,6 +225,8 @@ def call_uber():
     state = request.args.get('state')
 
     requestUber(code, state)
+
+    session["ride_called"] = True
 
     return redirect('/')
 
@@ -259,6 +265,8 @@ def call_lyft():
 
     requestLyft(code, state)
 
+    session["ride_called"] = True
+
     return redirect('/')
 
 
@@ -268,29 +276,31 @@ def ride_message():
     """Message for arrival and updates on ride."""
 
     if 'timezone' in session:
-        # if session['timezone'] != "":
-        minutes = (session['depart_timestamp'] - 
-                   arrow.now(session['timezone']).timestamp) / 60
-        minutes_arr = (session['arrive_timestamp'] - 
+        if session['timezone'] != "":
+            minutes = (session['depart_timestamp'] - 
                        arrow.now(session['timezone']).timestamp) / 60
+            minutes_arr = (session['arrive_timestamp'] - 
+                           arrow.now(session['timezone']).timestamp) / 60
 
-        depart_time = session['depart_time']
-        arrive_time = session['arrive_time']
+            depart_time = session['depart_time']
+            arrive_time = session['arrive_time']
 
-        ride = session['ride_type']
+            ride = session['ride_type']
 
-        time = {
-        "depart_time" : depart_time,
-        "arrive_time" : arrive_time,
-        "minutes" : minutes,
-        "minutes_arr" : minutes_arr,
-        "ride" : ride}
+            time = {
+            "depart_time" : depart_time,
+            "arrive_time" : arrive_time,
+            "minutes" : minutes,
+            "minutes_arr" : minutes_arr,
+            "ride" : ride}
 
-        return jsonify(time)
+            return jsonify(time)
+        else:
+            return "No current rides."
     else:
         return "No current rides."
 
-@app.route('/query-ests', methods=['POST'])
+@app.route('/query-ests.json', methods=['POST'])
 def query_est_db():
     """Query database for estimate information."""
 
@@ -306,8 +316,16 @@ def query_est_db():
     else:
         session["lyft_choice"] = lyft_choice
 
-    time = datetime.utcnow()
-    day = time.date().weekday()
+
+    if request.form.get("data") == 'current':
+        time = datetime.utcnow()
+        day = time.date().weekday()
+
+    elif request.form.get("data") == 'historical':
+        raw_time = request.form.get("time")
+        raw_day = request.form.get("day")
+
+        time, day = timeDay(raw_time, raw_day)
 
     daytimes = getDates(time, day)
 
@@ -315,8 +333,31 @@ def query_est_db():
 
     local_times = localizeTimes(daytimes)
 
-
     return jsonify(local_times, uber_data, lyft_data, uber_choice, lyft_choice)
+
+
+@app.route('/display-map.json')
+def display_map():
+    """Get positions to display on map."""
+
+    if 'origin_lat' in session:
+        origin_lat = session['origin_lat']
+        origin_lng = session['origin_lng']
+        dest_lat = session['dest_lat']
+        dest_lng = session['dest_lng']
+
+        if "ride_called" in session:
+            if session["ride_called"] == True:
+                gmap = "map2"
+            else:
+                gmap = "map"
+        else:
+            gmap = "none"
+
+        return jsonify(origin_lat, origin_lng, dest_lat, dest_lng, gmap)
+    else:
+        return jsonify(["","","","",""])
+
 
 if __name__ == "__main__":
 
