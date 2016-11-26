@@ -1,14 +1,14 @@
 from model import (db, connect_to_db, User, Address, UserAddress, RideType, Estimate)
 from datetime import datetime, timedelta
 import random
-import geocoder
+# import geocoder
 from flask import session, flash
 import arrow
 import googlemaps
 import os
 import pytz
 
-def uberEstimatesToData(uber_ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
+def uber_estimates_to_data(uber_ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
     """Send data on estimates to estimates table."""
 
     time_requested = datetime.utcnow()
@@ -62,7 +62,7 @@ def uberEstimatesToData(uber_ride_estimates, origin_lat, origin_lng, dest_lat, d
 
     return uber_est_dict
 
-def lyftEstimatesToData(lyft_ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
+def lyft_estimates_to_data(lyft_ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
     """Send data on estimates to estimates table."""
 
     time_requested = datetime.utcnow()
@@ -117,7 +117,7 @@ def lyftEstimatesToData(lyft_ride_estimates, origin_lat, origin_lng, dest_lat, d
     return lyft_est_dict
 
 
-def addressInformation(orig_lat, orig_lng, origin_address, origin_name, 
+def address_information(orig_lat, orig_lng, origin_address, origin_name, 
                        orig_label, dest_lat, dest_lng, dest_address, 
                        dest_name, dest_label):
     """Gather addresses from user input to compare to addresses from database."""
@@ -152,7 +152,7 @@ def addressInformation(orig_lat, orig_lng, origin_address, origin_name,
     return addresses, addresses_db
 
 
-def addressToDatabase(addresses, addresses_db):
+def address_to_database(addresses, addresses_db):
     """Send user saved addresses to database."""
 
     i=0
@@ -167,7 +167,7 @@ def addressToDatabase(addresses, addresses_db):
             db.session.add(input_address)
             db.session.commit()    
             
-        new_user_address = UserAddress(user_id=session['user_id'], 
+        new_user_address = UserAddress(user_id=session["user_id"], 
                                        address_id=input_address.address_id, 
                                        label=address["label"])
 
@@ -181,17 +181,17 @@ def addressToDatabase(addresses, addresses_db):
             i += 1
 
 
-def timeDay(raw_time, raw_day):
+def time_day(raw_time, raw_day):
     """Get time and day in correct format for surge chart query."""
 
     hour, minute = raw_time.split(":")
 
     t = timedelta(hours=int(hour), minutes=int(minute))
 
-    gmaps = googlemaps.Client(key=os.environ['GOOGLE_API_KEY'])
-    result = gmaps.timezone((session['origin_lat'], session['origin_lng']), 
+    gmaps = googlemaps.Client(key=os.environ["GOOGLE_API_KEY"])
+    result = gmaps.timezone((session["origin_lat"], session["origin_lng"]), 
          arrow.utcnow())
-    tz = result['timeZoneId']
+    tz = result["timeZoneId"]
     timezone = pytz.timezone(tz)
 
     dt = datetime(2016, 11, 18, 00, 00, 00, 000000)
@@ -217,8 +217,8 @@ def timeDay(raw_time, raw_day):
 
     return time, day
 
-def getDates(time, day):
-    """Gets all dates in range for user's query to populate surge rate chart."""
+def get_dates(time, day):
+    """Gets all dates in range for user"s query to populate surge rate chart."""
 
     dates = db.session.query(Estimate.time_requested).filter(Estimate.time_requested 
                             < datetime(2016, 11, 16, 0, 00, 00, 00000)).all()
@@ -257,7 +257,7 @@ def getDates(time, day):
 
     return daytimes
 
-def getSurges(daytimes, uber_choice, lyft_choice):
+def get_surges(daytimes, uber_choice, lyft_choice):
     """Get historical surge prices from database given date range."""
 
     uber_query = db.session.query(Estimate.surge).filter(
@@ -307,17 +307,17 @@ def getSurges(daytimes, uber_choice, lyft_choice):
 
     return uber_data, lyft_data
 
-def localizeTimes(daytimes):
-    """Localize times from database given user's origin location."""  
+def localize_times(daytimes):
+    """Localize times from database given user"s origin location."""  
 
-    gmaps = googlemaps.Client(key=os.environ['GOOGLE_API_KEY'])
-    result = gmaps.timezone((session['origin_lat'], session['origin_lng']), 
+    gmaps = googlemaps.Client(key=os.environ["GOOGLE_API_KEY"])
+    result = gmaps.timezone((session["origin_lat"], session["origin_lng"]), 
              arrow.utcnow())
-    tz = result['timeZoneId']
+    tz = result["timeZoneId"]
     timezone = pytz.timezone(tz)
 
 
     local_times = [pytz.utc.localize(daytime.time_requested, is_dst=None)
-    .astimezone(timezone).strftime('%d, %H: %M: %S') for daytime in daytimes]
+    .astimezone(timezone).strftime("%d, %H: %M: %S") for daytime in daytimes]
 
     return local_times

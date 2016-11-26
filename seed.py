@@ -92,8 +92,8 @@ def set_val_add_id():
     result = db.session.query(func.max(Address.address_id)).one()
     max_id = int(result[0])
 
-    query = "SELECT setval('addresses_address_id_seq', :new_id)"
-    db.session.execute(query, {'new_id': max_id + 1})
+    query = "SELECT setval("addresses_address_id_seq", :new_id)"
+    db.session.execute(query, {"new_id": max_id + 1})
     db.session.commit()
 
 

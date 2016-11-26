@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
 <!-- <div class="container-fluid"> -->
+<div id="main">
 <div class="row">
     <div class="container-fluid" id="landing-cont">
-        
         <div id="text-landing">
         <h1 id="ridethrift">Ride Thrift</h1>
+
         </div>
         <video autoplay="" loop="" class="fillWidth fadeIn wow collapse in" data-wow-delay="0.5s" poster="/static/img/traffic.jpg" id="video-background">
             <source src="/static/img/Traffic - 6457.mp4" type="video/mp4">Your browser does not support the video tag. I suggest you upgrade your browser.
@@ -14,8 +15,8 @@
 </div>
     <div class="row">
         <div class="row" id="ride-msg-row"> <h4 id="ride-message" data-status="start"></h4> </div>
-        <div class="row" id="map2-row">
-        <div class="center-block" id="map2"></div>
+        <div class="row" id="map-row">
+        <div class="center-block" id="map"></div>
         </div>
     <div class="row" id="est-form-row">
           
@@ -58,6 +59,7 @@
                     {% for user_address in user.user_addresses %}
                         <option value="{{ user_address.address.address }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}">{{ user_address.label }}
                     {% endfor %}
+                    <option disabled>──────────</option>
                     <option value="manage-saved-addresses">Manage Saved Addresses
                 </select>
 
@@ -87,6 +89,7 @@
                     {% for user_address in user.user_addresses %}
                         <option value="{{ user_address.address.address }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}">{{ user_address.label }}
                     {% endfor %}
+                    <option disabled>──────────</option>
                     <option value="manage-saved-addresses">Manage Saved Addresses
                 </select>
             {% endif %}   
@@ -98,11 +101,13 @@
             </div>
         
         </form> 
-
         <div class="row">
-        
+                    <img id="loading" class="center-block">
+        </div>
+        </div>
+        <div class="row">
         <div class="row" id="est-display-row">
-        <div class="col-xs-offset-4 col-xs-2">
+        <div class="col-xs-offset-3 col-xs-4" id="uber-options">
             <form action="/call_uber" method="POST" id="call-uber">
                 <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-uber" value="origin"> 
                 <input type="hidden" class="orig-lng-rides" name="origin-lng" id="orig-lng-uber" value="origin">
@@ -120,7 +125,7 @@
                 {% endif %}
             </form>
         </div>
-        <div class="col-xs-offset-1 col-xs-2">
+        <div class="col-xs-4" id="lyft-options">
             <form action="/call_lyft" method="POST" id="call-lyft">
                 <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-uber" value="origin"> 
                 <input type="hidden" class="orig-lng-rides" name="origin-lng" id="orig-lng-uber" value="origin">
@@ -139,7 +144,7 @@
             </form>
         </div>
         </div>
-        <div class="row" id="tab-row">
+        <!-- <div class="row" id="tab-row"> -->
             
                  
 
@@ -152,11 +157,11 @@
                     <div id="surges" class="tab-pane fade in active"> -->
 
                         <div class="row" id="surge-chart-row">
-                            <div class="col-xs-offset-2 col-xs-4">
+                            <div class="col-xs-offset-1 col-xs-4">
                                 <h3 id="surgedrop">Historical Surge Rates</h3>
                                 <div id="surge-chart"></div>
                             </div>
-                            <div class="col-xs-4">
+                            <div class="col-xs-3" id="day-time-col">
                                 <form id="hist-surge">
                                 <!-- <div class="form-group"> -->
                                     <!-- <label for="day">Day</label> -->
@@ -171,11 +176,16 @@
                                         <option>Sunday</option>
                                     </select>
                                 <!-- </div> -->
-                                    <span id="select-time">Time:</span>
+                                    <span id="select-time">    Time:</span>
                                     <input type="time" name="usr_time" id="time-select">
-                                    <input type="submit" value="Surge Rates">
+                                </div>
+                                <div class="col-xs-1">
+                                    <input type="submit" class="btn btn-info" value="Surge Rates">
                                 </form>
                             </div>
+                        </div>
+                        <div class="row">
+                            <img id="loading2" class="center-block">
                         </div>
                         <div class="col-xs-offset-2 col-xs-10">
                         <div id="chart"></div>
@@ -195,7 +205,7 @@
 
 
                 </div> -->
-            </div>
+            <!-- </div> -->
            
         
         </div>
@@ -205,9 +215,10 @@
 
 
     </div>
+</div>  
+
 <!-- </div> -->
 <!-- Manage Addresses Modal -->
-
     <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="manage-address-modal" id="manage-address-modal">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
@@ -221,18 +232,18 @@
                     {% endif %}
                     </div>
                     <div>
-                        <input type="submit" value="Delete Addresses">
+                        <input type="submit" class="btn btn-info" value="Delete Addresses">
                     </div>
                 </form>
                 <a href="/">Cancel</a>
             </div>
         </div>
     </div>  
-  
- 
+
 <script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&libraries=geometry,places&callback=initAutocomplete" async defer></script>
 <script src="/static/js/addresses.js"></script>
 <script src="/static/js/estimates.js"></script>
+<script src="/static/js/display.js"></script>
 <script src="/static/js/ride-status.js"></script>
 
 

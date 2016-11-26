@@ -5,284 +5,17 @@
     <script src="https://code.jquery.com/jquery.js"></script>
     <link rel="stylesheet" 
           href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-
-    <link href="/static/js/c3.css" rel="stylesheet" type="text/css">
-
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
     <meta charset="utf-8">
     <script src="https://d3js.org/d3.v3.min.js"></script>
-
     <script src="/static/js/c3.min.js"></script>
+    <link href="/static/js/c3.css" rel="stylesheet" type="text/css">
+
+     <link rel='stylesheet' href='static/style/ridethrift.css'>
     <link href="https://fonts.googleapis.com/css?family=Fugaz+One|Montserrat" rel="stylesheet">
 
-    <style>
-
-    body {
-        height:100%;
-        width:100%;
-        margin: 0 auto;
-
-        font-family: 'Montserrat', sans-serif;
-        background-color: #393740;
-        color: #393740;
-    }
-
-    .navbar {
-        margin-bottom: 0px;
-        border-color: transparent;
-        background-color: transparent;
-        z-index: 2;
-    }
-
-    hr {
-        margin-top: 0px;
-        margin-bottom: 0px;
-    }
-
-    .row {
-        margin-right: 0;
-        margin-left: 0;
-    }
-
-    #landing-cont {
-        position: relative;
-        min-height: auto;
-        text-align: center;
-        color: #fff;
-        width: 100%;
-        background-color: #c9c9c9;
-        background-image: url('traffic.jpg');
-        background-position: center;
-        /*-webkit-background-size: cover;
-        -moz-background-size: cover;*/
-        /*background-size: cover;*/
-        /*-o-background-size: cover;*/
-    }
-
-    #text-landing {
-        position: relative;
-        width: 100%;
-        padding: 250px 0px 150px;
-        text-align: center;
-        z-index: 2;
     
-    }
-
-    #ridethrift {
-        text-align: center;
-        font-family: 'Fugaz One', cursive;
-        font-size: 4em;
-        color: #d4d4d4;
-    }
-
-    #video-background {
-      position: absolute;
-      right: 0; 
-      bottom: 0;
-      min-width: 100%; 
-      min-height: 100%;
-      width: auto; 
-      height: auto;
-      z-index: 1;
-    }
-
-    #estimate-form label {
-        color: #d4d4d4;
-        font-size: 2em;
-        padding-bottom: 5%;
-    }
-
-    #save-row {
-        padding-top: 3%;
-        padding-bottom: 5%;
-    }
-
-    #input-label {
-        color: #d4d4d4;
-    }
-
-    #disclaimer {
-        padding-top: 5%;
-        padding-left: 4%;
-        padding-bottom: 2%;
-        font-size: 0.85em;
-        color: #d4d4d4;
-    }
-
-    #est-form-row {
-        padding-top: 5%;
-        background-color: #393740;
-        padding-bottom: 2.5%;
-    }
-
-
-
-    #est-display-row {
-        padding-top: 2.5%;
-        padding-bottom: 2.5%;
-        background-color: #2a2831;
-        border-color: #ff7438;
-        border-width: 2px;
-        border-style: solid;
-    }
-
-    #submit-est {
-        padding-top: 4%;
-        text-align: center;
-        padding-bottom: 5%;
-    }
-
-    #uber-req-button {
-        background-color: #2a2831;
-    }
-
-    #lyft-req-button {
-        background-color: #2a2831;
-    }
-
-    #request-ride-row {
-        padding-top: 3%;
-    }
-
-    .btn-info {
-        border-color: #d4d4d4;
-        text-align: center;
-        background-color: #393740;
-    }
-
-    .btn-info:hover {
-        opacity: 0.7;
-        border-color: #d4d4d4;
-        text-align: center;
-        background-color: #393740;
-    }
-
-    .btn-info:active {
-        border-color: #d4d4d4;
-        text-align: center;
-        background-color: #393740 !important;
-    }
-
-    .btn-info:focus {
-        border-color: #d4d4d4;
-        text-align: center;
-        background-color: #393740 !important;
-    }
-
-    #call-uber label {
-        color: #d4d4d4;
-        font-size: 1.5em;
-    }
-
-    #call-uber #uber {
-        color: #d4d4d4;
-        font-size: 2em;
-        text-align: center;
-    }
-
-    #call-lyft label {
-        color: #d4d4d4;
-        font-size: 1.5em;
-    }
-
-    #call-lyft #lyft {
-        color: #d4d4d4;
-        font-size: 2em;
-        text-align: center;
-    }
-
-    /*#chart svg {
-      width: 100%;
-      min-height: 400px;
-    }*/
-    #chart .c3-line-Uber {
-      stroke-width: 1.5px;
-    }
-    #chart .c3-line-Lyft {
-      stroke-width: 1.5px;
-    }
-
-    .c3 .c3-axis-x path, .c3 .c3-axis-x line {
-        stroke-width: 1.5px;
-    }
-    .c3 .c3-axis-y path, .c3 .c3-axis-y line {
-        stroke-width: 1.5px;
-    }
-
-    #map {
-        height:400px;
-        width:800px;
-    }
-    #map2 {
-        height: 0px;
-        width: 0px;
-    }
-
-    #map2-row {
-        background-color: #393740;
-    }
-
-    #map-tab-row {
-        padding-top: 5%;
-    }
-
-    #surge-chart-row {
-        padding-top: 5%;
-        padding-bottom: 5%;
-    }
-
-    
-    #ride-msg-row {
-        padding-top: 3%;
-        padding-bottom: 2%;
-        text-align: center;
-        background-color: #393740;
-    }
-
-    #ride-message {
-        color: #d4d4d4;
-        font-size: 1.5em;
-    }
-
-    .dropdown {
-        display: inline-block;
-    }
-
-    #surgedrop {
-        display: inline-block;
-    }
-
-    .auto {
-        width: 60%;
-    }
-
-    #tab-row {
-        background-color: #393740;
-    }
-
-    #surgedrop {
-        color: #d4d4d4;
-        margin-top: 0px;
-    }
-
-    #select-time {
-        color: #d4d4d4;
-    }
-
-    .c3 .c3-axis-x path, .c3 .c3-axis-x line, .c3 .c3-axis-x text {
-        stroke: #d4d4d4;
-    }
-
-    .c3 .c3-axis-y path, .c3 .c3-axis-y line, .c3 .c3-axis-y text {
-        stroke: #d4d4d4;
-    }
-
-    .c3 .c3-legend-item text {
-        stroke: #d4d4d4;
-    }
-
-    </style>
-
 
 </head>
 <body>
@@ -349,11 +82,11 @@
                         </label>
                     </div>
                     <div>
-                        <input type="submit" value="Log In">
+                        <input type="submit" class="btn btn-info" value="Log In">
                     </div>
                 </form>
                 <span id="login-msg"></span><br>
-                New user? <button type="button" class="btn btn-primary btn-lg" id="rg" data-toggle="modal" data-target="#register-modal">Register Here!</button>
+                New user? <button type="button" class="btn btn-info" id="rg" data-toggle="modal" data-target="#register-modal">Register Here!</button>
                 <a href="/">Cancel</a>
             </div>
         </div>
@@ -377,11 +110,11 @@
                     </div>
 
                     <div>
-                        <input type="submit" value="Register">
+                        <input type="submit" class="btn btn-info" value="Register">
                     </div>
                 </form>
                 <span id="reg-msg"></span><br>
-                Already Registered? <button type="button" class="btn btn-primary btn-lg" id="lgn" data-toggle="modal" data-target="#login-modal">Login Here!</button>
+                Already Registered? <button type="button" class="btn btn-info" id="lgn" data-toggle="modal" data-target="#login-modal">Login Here!</button>
                 <a href="/">Cancel</a>
             </div>
         </div>
@@ -391,11 +124,11 @@
 
 {% if g.jasmine_tests %}
     <!-- stuff for testing -->
-    <link rel="stylesheet" href="/static/js/jasmine.css">
-    <script src="/static/js/jasmine.js"></script>
-    <script src="/static/js/jasmine-html.js"></script>
-    <script src="/static/js/boot.js"></script>
-    <script src="/static/js/ridethrift-test.js"></script>
+    <link rel="stylesheet" href="/static/js/js-tests/jasmine.css">
+    <script src="/static/js/js-tests/jasmine.js"></script>
+    <script src="/static/js/js-tests/jasmine-html.js"></script>
+    <script src="/static/js/js-tests/boot.js"></script>
+    <script src="/static/js/js-tests/ridethrift-test.js"></script>
     <!-- end of stuff for testing -->
 {% endif %}
 </body>

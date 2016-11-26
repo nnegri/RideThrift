@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 /////////// POPULATE HIDDEN INPUTS FOR COST ESTIMATES USING GOOGLEMAPS API ///////////
 
 var placeSearch, autocomplete_orig, autocomplete_dest;
@@ -30,9 +30,9 @@ function fillInOrAddress() {
         $('#origin-address').val(val_form);
     }
     
-    $("#or-display-address").html(val_name);
+    $('#or-display-address').html(val_name);
 
-    $("#origin-name").val(val_name);
+    $('#origin-name').val(val_name);
 
     var val = or_place.geometry.location.lat();
     $('.orig-lat-rides').val(val); 
@@ -40,7 +40,7 @@ function fillInOrAddress() {
     var val = or_place.geometry.location.lng();
     $('.orig-lng-rides').val(val);
 
-    $("#save-origin").show();
+    $('#save-origin').show();
 
 }
 
@@ -58,9 +58,9 @@ function fillInDeAddress() {
         $('#dest-address').val(val_form);
     }
     
-    $("#de-display-address").html(val_name);
+    $('#de-display-address').html(val_name);
 
-    $("#dest-name").val(val_name);
+    $('#dest-name').val(val_name);
 
     var val = de_place.geometry.location.lat();
     $('.dest-lat-rides').val(val);
@@ -68,7 +68,7 @@ function fillInDeAddress() {
     var val = de_place.geometry.location.lng();
     $('.dest-lng-rides').val(val);
 
-    $("#save-dest").show();
+    $('#save-dest').show();
 }
 
 function geolocate() {
@@ -90,7 +90,7 @@ function geolocate() {
 }
 
 // Set origin as user's current location
-$("#location").on("click", function (evt) {
+$('#location').on('click', function (evt) {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
         var geolocation = {
@@ -102,60 +102,60 @@ $("#location").on("click", function (evt) {
 
         var geocoder = new google.maps.Geocoder();
         geocoder.geocode({
-            "location": geolocation
+            'location': geolocation
         }, function (results) {
             var val = results[0].formatted_address
             $('#origin-address').val(val);
-            $("#or-display-address").html(val);
-            $("#origin-name").val(val);
-            $("#autocomplete-orig").val(val);
+            $('#or-display-address').html(val);
+            $('#origin-name').val(val);
+            $('#autocomplete-orig').val(val);
             });
         })
 
-        $("#save-origin").show();
+        $('#save-origin').show();
 
     }
     else {
-        alert("Cannot find current location.")
+        alert('Cannot find current location.')
     }
 });
 
 
 /////////// POPULATE HIDDEN INPUTS FOR COST ESTIMATES USING SAVED ADDRESSES ///////////
 
-$("#origin-drop").on("change", function (evt) {
-    if ($("#origin-drop").val() === "manage-saved-addresses") {
-        ($("#manage-address-modal").modal('show'));
+$('#origin-drop').on('change', function (evt) {
+    if ($('#origin-drop').val() === 'manage-saved-addresses') {
+        ($('#manage-address-modal').modal('show'));
     }
 
-    if ($("#origin-drop").val() != "saved-addresses" && 
-        $("#origin-drop").val() != "manage-saved-addresses") {
-        $("autocomplete").val("");
-        $("#autocomplete-orig").val($("#origin-drop").val());
-        var or_lat = $(this).find("option:selected").data("lat");
-        var or_lng = $(this).find("option:selected").data("lng");
+    if ($('#origin-drop').val() != 'saved-addresses' && 
+        $('#origin-drop').val() != 'manage-saved-addresses') {
+        $('autocomplete').val('');
+        $('#autocomplete-orig').val($('#origin-drop').val());
+        var or_lat = $(this).find('option:selected').data('lat');
+        var or_lng = $(this).find('option:selected').data('lng');
 
-        $(".orig-lat-rides").val(or_lat);
-        $(".orig-lng-rides").val(or_lng);
-        $("#save-origin").hide()        
+        $('.orig-lat-rides').val(or_lat);
+        $('.orig-lng-rides').val(or_lng);
+        $('#save-origin').hide()        
     }
 });
 
-$("#dest-drop").on("change", function (evt) {
-    if ($("#dest-drop").val() === "manage-saved-addresses") {
-        ($("#manage-address-modal").modal('show'));
+$('#dest-drop').on('change', function (evt) {
+    if ($('#dest-drop').val() === 'manage-saved-addresses') {
+        ($('#manage-address-modal').modal('show'));
     }
 
-    if ($("#dest-drop").val() != "saved-addresses" && 
-        $("#dest-drop").val() != "manage-saved-addresses") {
-        $("autocomplete").val("");
-        $("#autocomplete-dest").val($("#dest-drop").val());
-        var de_lat = $(this).find("option:selected").data("lat");
-        var de_lng = $(this).find("option:selected").data("lng");
+    if ($('#dest-drop').val() != 'saved-addresses' && 
+        $('#dest-drop').val() != 'manage-saved-addresses') {
+        $('autocomplete').val('');
+        $('#autocomplete-dest').val($('#dest-drop').val());
+        var de_lat = $(this).find('option:selected').data('lat');
+        var de_lng = $(this).find('option:selected').data('lng');
 
-        $(".dest-lat-rides").val(de_lat);
-        $(".dest-lng-rides").val(de_lng);
-        $("#save-dest").hide();
+        $('.dest-lat-rides').val(de_lat);
+        $('.dest-lng-rides').val(de_lng);
+        $('#save-dest').hide();
 
     }
 });
@@ -163,25 +163,25 @@ $("#dest-drop").on("change", function (evt) {
 
 /////////// POPULATE HIDDEN INPUTS IF USER WANTS TO SAVE ADDRESSES ///////////
 
-$("#orig-save").val("");
+$('#orig-save').val('');
 
-$("#orig-check").on("change", function (evt) {
-    if ($("#orig-check").prop("checked")) {
-        $("#origin-save").val("save");
+$('#orig-check').on('change', function (evt) {
+    if ($('#orig-check').prop('checked')) {
+        $('#origin-save').val('save');
     }
-    else if ($("#orig-check").prop("checked") === false) {
-        $("#origin-save").val("");
+    else if ($('#orig-check').prop('checked') === false) {
+        $('#origin-save').val('');
     }
 });
 
-$("#orig-save").val("");
+$('#orig-save').val('');
 
-$("#dest-check").on("change", function (evt) {
-    if ($("#dest-check").prop("checked")) {     
-        $("#dest-save").val("save");
+$('#dest-check').on('change', function (evt) {
+    if ($('#dest-check').prop('checked')) {     
+        $('#dest-save').val('save');
     }
-    else if ($("#dest-check").prop("checked") === false) {
-        $("#dest-save").val("");
+    else if ($('#dest-check').prop('checked') === false) {
+        $('#dest-save').val('');
     }
 });
 
@@ -189,7 +189,7 @@ $("#dest-check").on("change", function (evt) {
 /////////// DELETE USER ADDRESSES FROM DATABASE USING AJAX ///////////
 
 function deleteAddresses (results) {
-    $("#manage-address-modal").modal("hide");
+    $('#manage-address-modal').modal('hide');
     location.reload();
 }
 
@@ -199,23 +199,23 @@ function chooseAddresses (evt) {
 
     var formInputs = {};
 
-    $(".address-check").each(function (index) {
-        if ($(this).prop("checked")) {
+    $('.address-check').each(function (index) {
+        if ($(this).prop('checked')) {
             formInputs[index] = $(this).val();
         }
     });
 
-    $.post("/delete_addresses.json",
+    $.post('/delete_addresses.json',
         formInputs,
         deleteAddresses);
 }
 
-$("#delete-address").on("submit", chooseAddresses);
+$('#delete-address').on('submit', chooseAddresses);
 
 
 /////////// HIDE SAVE INPUTS AT PAGE LOAD ///////////
 
-$("#save-origin").hide();
-$("#save-dest").hide();
+$('#save-origin').hide();
+$('#save-dest').hide();
 
 

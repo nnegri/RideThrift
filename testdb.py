@@ -16,8 +16,8 @@ class RideThriftUnitTestCase(TestCase):
         self.client = app.test_client()
 
         # Show Flask errors that happen during tests
-        app.config['TESTING'] = True
-        app.config['SECRET_KEY'] = 'SECRET'
+        app.config["TESTING"] = True
+        app.config["SECRET_KEY"] = "SECRET"
         self.client = app.test_client() 
         # Connect to test database
         connect_to_db(app, "postgresql:///testdb")
@@ -42,37 +42,37 @@ class RideThriftUnitTestCase(TestCase):
         
         result = getUberEstimates(37.7620333, -122.4347591, 37.8009561, -122.4270201)
 
-        self.assertIn('prices', result)
+        self.assertIn("prices", result)
 
     def test_lyft_estimate(self):
         """Test retrieving Lyft estimates from API."""
 
         result = getLyftEstimates(37.7620333, -122.4347591, 37.8009561, -122.4270201)
 
-        self.assertIn('cost_estimates', result)
+        self.assertIn("cost_estimates", result)
 
     def test_address(self):
         """Test checking if user address is already in database."""
 
-        result = addressInformation('37.7811847', '-122.39963410000001', 
-            '399 4th St, San Francisco, CA 94107, USA', 'Whole Foods Market', 
-            '', '', '', '', '', '')
+        result = addressInformation("37.7811847", "-122.39963410000001", 
+            "399 4th St, San Francisco, CA 94107, USA", "Whole Foods Market", 
+            "", "", "", "", "", "")
 
-        self.assertIn('Whole Foods Market', result[0][0]['label'])
-        self.assertIn('683 Sutter St, San Francisco, CA 94102, USA', result[1])
+        self.assertIn("Whole Foods Market", result[0][0]["label"])
+        self.assertIn("683 Sutter St, San Francisco, CA 94102, USA", result[1])
 
     # def test_address_db(self):
-    #     addresses = [{'lat': '37.7811847', 'lng': '-122.39963410000001', 
-    #             'label': 'Whole Foods Market', 'name': 'Whole Foods Market', 
-    #             'address': '399 4th St, San Francisco, CA 94107, USA'}]
-    #     addresses_db = [u'683 Sutter St, San Francisco, CA 94102, USA', 
-    #                     u'822 Alabama St, San Francisco, CA 94110, USA', 
-    #                     u'1730 Franklin St, Oakland, CA 94612, USA', 
-    #                     u'1830 Cowper St, Palo Alto, CA 94301, USA']
+    #     addresses = [{"lat": "37.7811847", "lng": "-122.39963410000001", 
+    #             "label": "Whole Foods Market", "name": "Whole Foods Market", 
+    #             "address": "399 4th St, San Francisco, CA 94107, USA"}]
+    #     addresses_db = [u"683 Sutter St, San Francisco, CA 94102, USA", 
+    #                     u"822 Alabama St, San Francisco, CA 94110, USA", 
+    #                     u"1730 Franklin St, Oakland, CA 94612, USA", 
+    #                     u"1830 Cowper St, Palo Alto, CA 94301, USA"]
     #     result = addressToDatabase(addresses, addresses_db, 1)
     #     print result.data
     # #     # RuntimeError: Working outside of request context. 
-    #     # Even after taking into account session['user_id'], flash messages still cause an issue
+    #     # Even after taking into account session["user_id"], flash messages still cause an issue
         
 
 class FlaskTests(TestCase):
@@ -85,7 +85,7 @@ class FlaskTests(TestCase):
         self.client = app.test_client()
 
         # Show Flask errors that happen during tests
-        app.config['TESTING'] = True
+        app.config["TESTING"] = True
 
     def test_index(self):
         """Test homepage page."""
@@ -111,7 +111,7 @@ class FlaskTestsDatabase(TestCase):
         self.client = app.test_client()
 
         # Show Flask errors that happen during tests
-        app.config['TESTING'] = True
+        app.config["TESTING"] = True
 
         # Connect to test database
         connect_to_db(app, "postgresql:///testdb")
@@ -160,18 +160,18 @@ class FlaskTestsDatabase(TestCase):
         """Test calling a Lyft."""
 
         result = self.client.post("/call_lyft", 
-                                  data={'origin-lat' : 37.7620333,
-                                        'origin-lng' : -122.4347591,
-                                        'dest-lat' : 37.8009561,
-                                        'dest-lng' : -122.4270201,
-                                        'lyft-ride-type' : 'lyft'
+                                  data={"origin-lat" : 37.7620333,
+                                        "origin-lng" : -122.4347591,
+                                        "dest-lat" : 37.8009561,
+                                        "dest-lng" : -122.4270201,
+                                        "lyft-ride-type" : "lyft"
                                         },
                                   follow_redirects=False)
 
-        self.assertIn('client_id', result.data)
-        # Won't work if the ride is not available. I prevent the user from
+        self.assertIn("client_id", result.data)
+        # Won"t work if the ride is not available. I prevent the user from
         # selecting a non-available ride on the front end...
-        # Uber ride types vary city to city so I didn't try to include a test here
+        # Uber ride types vary city to city so I didn"t try to include a test here
 
 class FlaskTestsLoggedIn(TestCase):
     """Flask tests with user logged in to session."""
@@ -179,8 +179,8 @@ class FlaskTestsLoggedIn(TestCase):
     def setUp(self):
         """Stuff to do before every test."""
 
-        app.config['TESTING'] = True
-        app.config['SECRET_KEY'] = 'SECRET'
+        app.config["TESTING"] = True
+        app.config["SECRET_KEY"] = "SECRET"
         self.client = app.test_client() 
 
         # Connect to test database
@@ -193,7 +193,7 @@ class FlaskTestsLoggedIn(TestCase):
         
         with self.client as c:
             with c.session_transaction() as sess:
-                sess['user_id'] = 1
+                sess["user_id"] = 1
 
     def tearDown(self):
         """Do at end of every test."""
@@ -216,7 +216,7 @@ class FlaskTestsLoggedOut(TestCase):
     def setUp(self):
         """Stuff to do before every test."""
 
-        app.config['TESTING'] = True
+        app.config["TESTING"] = True
         self.client = app.test_client()
 
 

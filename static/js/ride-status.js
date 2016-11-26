@@ -11,54 +11,54 @@ function showMessage(response) {
     
     if (response['minutes'] > 0) {
         if (response['minutes'] === 1) {
-            m = " minute.";
+            m = ' minute.';
         }
         else {
-            m = " minutes.";
+            m = ' minutes.';
         }
 
-        $("#ride-message").html("Your " + response['ride'] + 
-            " is on its way! Please be ready to depart in " + 
-            response['minutes'] + m + " You will reach your destination at " + 
-            response['arrive_time'] + ".");
+        $('#ride-message').html('Your ' + response['ride'] + 
+            ' is on its way! Please be ready to depart in ' + 
+            response['minutes'] + m + ' You will reach your destination at ' + 
+            response['arrive_time'] + '.');
 
-        $("#ride-message").data("status", "");
-        $("#map2").show();
-        $("#ride-message").show();
+        $('#ride-message').data('status', '');
+        $('#map').show();
+        $('#ride-message').show();
 
     }
     else if (response['minutes'] === 0) {
-        $("#ride-message").html("Your " + response['ride'] + 
-            " has arrived! You will reach your destination at " +
-            response['arrive_time'] + ".");
+        $('#ride-message').html('Your ' + response['ride'] + 
+            ' has arrived! You will reach your destination at ' +
+            response['arrive_time'] + '.');
 
-        $("#ride-message").data("status", "");
-        $("#map2").show();
-        $("#ride-message").show();
+        $('#ride-message').data('status', '');
+        $('#map').show();
+        $('#ride-message').show();
 
     }
     else if (response['minutes'] < 0 && response['minutes_arr'] > 0) {
         if (response['minutes_arr'] === 1) {
-            ma = " minute, ";
+            ma = ' minute, ';
         }
         else {
-            ma = " minutes, ";
+            ma = ' minutes, ';
         }
 
-        $("#ride-message").html("You are on your way! You will reach your destination in " +
-            response['minutes_arr'] + ma + "at " + response['arrive_time'] + ".");
+        $('#ride-message').html('You are on your way! You will reach your destination in ' +
+            response['minutes_arr'] + ma + 'at ' + response['arrive_time'] + '.');
 
-        $("#ride-message").data("status", "");
-        $("#map2").show();
-        $("#ride-message").show();
+        $('#ride-message').data('status', '');
+        $('#map').show();
+        $('#ride-message').show();
 
     }
     else if (response['minutes'] < 0  && response['minutes_arr'] <= 0) {
-        $("#ride-message").html("");
+        $('#ride-message').html('');
 
-        $("#ride-message").data("status", "done");
-        $("#map2").hide();
-        $("#ride-message").hide();
+        $('#ride-message').data('status', 'done');
+        $('#map').hide();
+        $('#ride-message').hide();
     }
 
 }
@@ -67,8 +67,8 @@ function showMessage(response) {
 function writeMessage() {
     // Ajax request to route, to retrieve departure and arrival times for ride.
     // Does not make request if ride is done
-    if ($("#ride-message").data("status") != "done") { 
-        $.get("/ride_message.json",
+    if ($('#ride-message').data('status') != 'done') { 
+        $.get('/ride_message.json',
         showMessage);
 
     }
@@ -82,7 +82,7 @@ var callRide = function (evt) {
     // Set interval to initiate request to server every 20 seconds
     writeMessage();
 
-    $.get("/display-map.json",
+    $.get('/display-map.json',
         displayMap);
 
 }
@@ -90,5 +90,5 @@ var callRide = function (evt) {
 callRide(); 
 // Show ride progress message upon calling ridde and/or re-loading the page
 
-$("#map2").css("height", "0px");
-$("#map2").css("width", "0px");
+$('#map').css('height', '0px');
+$('#map').css('width', '0px');
