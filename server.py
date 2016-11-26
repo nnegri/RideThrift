@@ -333,6 +333,7 @@ def query_est_db():
 
     local_times = localizeTimes(daytimes)
 
+
     return jsonify(local_times, uber_data, lyft_data, uber_choice, lyft_choice)
 
 
@@ -361,7 +362,7 @@ def display_map():
 
 if __name__ == "__main__":
 
-    app.debug = True
+    app.debug = False
 
     connect_to_db(app)
 

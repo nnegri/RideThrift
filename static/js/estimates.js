@@ -54,8 +54,8 @@ function showChart(response) {
   c3.chart.internal.fn.getInterpolate = () => 'monotone';
   var chart = c3.generate({
       size: {
-        height: 350,
-        width: 700
+        height: 400,
+        width: 1000
       },
       data: {
           x: 'x',
@@ -106,7 +106,7 @@ function showChart(response) {
           duration: 400
           },
           color : {
-            pattern: ['#000000', '#FF33D1']
+            pattern: ['#8c869d', '#FF33D1']
           }
   });
 
@@ -187,6 +187,14 @@ function showChart(response) {
 
     chart.axis.range({max: {y: maxRange}, min: {y: 1}});
 
+    if (maxY == 1) {
+      var ticks = 0;
+    }
+    else {
+      var ticks = Math.ceil(maxY);
+    }
+
+    axis.y.tick.count(ticks);
   }
 
   function updateData(uberId, lyftId) {
@@ -281,6 +289,10 @@ function displayMap(response) {
     if (response[4] != "none") {
       // Do not display if an estimate has not been given, or a ride has not
       // been called
+      if (response[4] === "map2") {
+        $("#map2").css("height", "400px");
+        $("#map2").css("width", "800px");
+      }
 
       var location = {lat: parseFloat(response[0]), lng: parseFloat(response[1])};
       var dest = {lat: parseFloat(response[2]), lng: parseFloat(response[3])};
@@ -324,7 +336,6 @@ function displayMap(response) {
         // If a ride hasn't been called, but an estimate has been requested,
         // display a map on the map tab
 
-        $("#route-msg").hide();
 
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
           google.maps.event.trigger(map, 'resize');
@@ -332,6 +343,12 @@ function displayMap(response) {
           bounds.extend(dest);
           map.fitBounds(bounds);
         });
+
+      // google.maps.event.addDomListener(window, "resize", function() {
+      // var center = map.getCenter();
+      // google.maps.event.trigger(map, "resize");
+      // map.setCenter(center); 
+      // });
       }
     }
 }
@@ -362,7 +379,9 @@ $("#uber-req-button").hide();
 $(".rdo-lyft").hide();
 $("#lyft-req-button").hide();
 
-$("#tabs").hide();
+// $("#tabs").hide();
+$("#tab-row").hide();
+
 
 
 /////////// REQUEST ESTIMATES USING AJAX ///////////
@@ -371,8 +390,6 @@ function showEstimates(results) {
     // Display estimate results on page.
 
     $("#map2").hide();
-    $("#route-msg").hide();
-    $("#ridethrift").hide();
     $("#ride-message").hide();
 
     var poolId = (results[0]["pool_product_id"]);
@@ -403,29 +420,29 @@ function showEstimates(results) {
     $(".rdo-uber").show();
     $("#uber-req-button").show();
 
-    $("#uber").html("Uber:");
+    $("#uber").html("Uber");
     if (isNaN(poolEst)) {
-        $("#pool").html("Pool: None available");
+        $("#pool").html("Pool:  None available");
         $("#rdo-pool").hide();
     }
     else {
-        $("#pool").html("Pool: $" + poolEst.toFixed(2));
+        $("#pool").html("Pool:  $" + poolEst.toFixed(2));
         $("#pool").val(rideArray.indexOf(poolEst));
     }
     if (isNaN(uberEst)) {
-        $("#uberx").html("UberX: None available");
+        $("#uberx").html("UberX:  None available");
         $("#rdo-uberx").hide();
     }
     else {
-        $("#uberx").html("UberX: $" + uberEst.toFixed(2));
+        $("#uberx").html("UberX:  $" + uberEst.toFixed(2));
         $("#uberx").val(rideArray.indexOf(poolEst));
     }
     if (isNaN(xlEst)) {
-        $("#uberxl").html("UberXL: None available");
+        $("#uberxl").html("UberXL:  None available");
         $("#rdo-uberxl").hide();
     }
     else {
-        $("#uberxl").html("UberXL: $" + xlEst.toFixed(2));
+        $("#uberxl").html("UberXL:  $" + xlEst.toFixed(2));
         $("#uberxl").val(rideArray.indexOf(xlEst));
     }
 
@@ -434,13 +451,13 @@ function showEstimates(results) {
     $(".rdo-lyft").show();
     $("#lyft-req-button").show();
 
-    $("#lyft").html("Lyft:");
+    $("#lyft").html("Lyft");
     if (isNaN(lineEst)) {
-        $("#line").html("Line: None available");
+        $("#line").html("Line:  None available");
         $("#rdo-line").hide();
     }
     else {
-        $("#line").html("Line: $" + lineEst.toFixed(2));
+        $("#line").html("Line:  $" + lineEst.toFixed(2));
         $("#line").val(rideArray.indexOf(lineEst));
     }
     if (isNaN(lyftEst)) {
@@ -452,11 +469,11 @@ function showEstimates(results) {
         $("#lyft-lyft").val(rideArray.indexOf(lyftEst));
     }
     if (isNaN(plusEst)) {
-        $("#plus").html("Plus: None available");
+        $("#plus").html("Plus:  None available");
         $("#rdo-plus").hide();
     }
     else {
-        $("#plus").html("Plus: $" + plusEst.toFixed(2));
+        $("#plus").html("Plus:  $" + plusEst.toFixed(2));
         $("#plus").val(rideArray.indexOf(plusEst));
     }
     
@@ -496,7 +513,10 @@ function showEstimates(results) {
 
     })
 
-    $("#tabs").show();
+    // $("#tabs").show();
+    $("#tab-row").show();
+
+    $("#est-display-row").show();
     
     getDisplayInput(uberId, lyftId); // Call function to create chart and map
     
@@ -568,3 +588,5 @@ function getAddressInput(evt) {
 
 // Request estimates upon submitting origin and destination. 
 $("#estimate-form").on("submit", getAddressInput);
+$("#est-display-row").hide();
+$("tab-row").hide();

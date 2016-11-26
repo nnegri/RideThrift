@@ -23,8 +23,7 @@ function showMessage(response) {
             response['arrive_time'] + ".");
 
         $("#ride-message").data("status", "");
-        $("#ridethrift").hide();
-        $("#route-msg").show();
+        $("#map2").show();
         $("#ride-message").show();
 
     }
@@ -34,8 +33,7 @@ function showMessage(response) {
             response['arrive_time'] + ".");
 
         $("#ride-message").data("status", "");
-        $("#ridethrift").hide();
-        $("#route-msg").show();
+        $("#map2").show();
         $("#ride-message").show();
 
     }
@@ -51,8 +49,7 @@ function showMessage(response) {
             response['minutes_arr'] + ma + "at " + response['arrive_time'] + ".");
 
         $("#ride-message").data("status", "");
-        $("#ridethrift").hide();
-        $("#route-msg").show();
+        $("#map2").show();
         $("#ride-message").show();
 
     }
@@ -60,10 +57,7 @@ function showMessage(response) {
         $("#ride-message").html("");
 
         $("#ride-message").data("status", "done");
-
-        $("#route-msg").hide();
         $("#map2").hide();
-        $("#ridethrift").show();
         $("#ride-message").hide();
     }
 
@@ -88,7 +82,6 @@ var callRide = function (evt) {
     // Set interval to initiate request to server every 20 seconds
     writeMessage();
 
-    $("#map2").show();
     $.get("/display-map.json",
         displayMap);
 
@@ -97,4 +90,5 @@ var callRide = function (evt) {
 callRide(); 
 // Show ride progress message upon calling ridde and/or re-loading the page
 
-$("#route-msg").hide()
+$("#map2").css("height", "0px");
+$("#map2").css("width", "0px");
