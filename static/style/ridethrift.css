@@ -42,10 +42,6 @@ hr {
     background-color: #c9c9c9;
     background-image: url('traffic.jpg');
     background-position: center;
-    /*-webkit-background-size: cover;
-    -moz-background-size: cover;*/
-    /*background-size: cover;*/
-    /*-o-background-size: cover;*/
 }
 
 #text-landing {
@@ -59,7 +55,6 @@ hr {
 
 #ridethrift {
     text-align: center;
-    /*padding-top: 10%;*/
     font-family: 'Fugaz One', cursive;
     font-size: 4em;
     color: #d4d4d4;

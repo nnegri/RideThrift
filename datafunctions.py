@@ -1,7 +1,6 @@
 from model import (db, connect_to_db, User, Address, UserAddress, RideType, Estimate)
 from datetime import datetime, timedelta
 import random
-# import geocoder
 from flask import session, flash
 import arrow
 import googlemaps
@@ -275,6 +274,7 @@ def get_surges(daytimes, uber_choice, lyft_choice):
 
     lyft_data = []
 
+    # Correct surge rates according to base rates for given route.
     for data in lyft_query:
         price_min = data[0]
         price_max = data[1]
@@ -318,6 +318,6 @@ def localize_times(daytimes):
 
 
     local_times = [pytz.utc.localize(daytime.time_requested, is_dst=None)
-    .astimezone(timezone).strftime("%d, %H: %M: %S") for daytime in daytimes]
+        .astimezone(timezone).strftime("%d, %H: %M: %S") for daytime in daytimes]
 
     return local_times

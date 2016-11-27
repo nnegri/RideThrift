@@ -4,8 +4,8 @@ from model import User, Address, UserAddress, RideType, Estimate, connect_to_db,
 from server import app
 import server
 from seed import load_users, load_addresses, load_ridetypes, load_user_addresses, set_val_add_id
-from apifunctions import getUberEstimates, getLyftEstimates
-from datafunctions import addressInformation, addressToDatabase
+from apifunctions import get_uber_estimates, get_lyft_estimates
+from datafunctions import address_information, address_to_database
 
 
 class RideThriftUnitTestCase(TestCase):
@@ -40,39 +40,26 @@ class RideThriftUnitTestCase(TestCase):
     def test_uber_estimate(self):
         """Test retrieving Uber estimates from API."""
         
-        result = getUberEstimates(37.7620333, -122.4347591, 37.8009561, -122.4270201)
+        result = get_uber_estimates(37.7620333, -122.4347591, 37.8009561, -122.4270201)
 
         self.assertIn("prices", result)
 
     def test_lyft_estimate(self):
         """Test retrieving Lyft estimates from API."""
 
-        result = getLyftEstimates(37.7620333, -122.4347591, 37.8009561, -122.4270201)
+        result = get_lyft_estimates(37.7620333, -122.4347591, 37.8009561, -122.4270201)
 
         self.assertIn("cost_estimates", result)
 
     def test_address(self):
         """Test checking if user address is already in database."""
 
-        result = addressInformation("37.7811847", "-122.39963410000001", 
+        result = address_information("37.7811847", "-122.39963410000001", 
             "399 4th St, San Francisco, CA 94107, USA", "Whole Foods Market", 
             "", "", "", "", "", "")
 
         self.assertIn("Whole Foods Market", result[0][0]["label"])
         self.assertIn("683 Sutter St, San Francisco, CA 94102, USA", result[1])
-
-    # def test_address_db(self):
-    #     addresses = [{"lat": "37.7811847", "lng": "-122.39963410000001", 
-    #             "label": "Whole Foods Market", "name": "Whole Foods Market", 
-    #             "address": "399 4th St, San Francisco, CA 94107, USA"}]
-    #     addresses_db = [u"683 Sutter St, San Francisco, CA 94102, USA", 
-    #                     u"822 Alabama St, San Francisco, CA 94110, USA", 
-    #                     u"1730 Franklin St, Oakland, CA 94612, USA", 
-    #                     u"1830 Cowper St, Palo Alto, CA 94301, USA"]
-    #     result = addressToDatabase(addresses, addresses_db, 1)
-    #     print result.data
-    # #     # RuntimeError: Working outside of request context. 
-    #     # Even after taking into account session["user_id"], flash messages still cause an issue
         
 
 class FlaskTests(TestCase):
@@ -169,9 +156,9 @@ class FlaskTestsDatabase(TestCase):
                                   follow_redirects=False)
 
         self.assertIn("client_id", result.data)
-        # Won"t work if the ride is not available. I prevent the user from
-        # selecting a non-available ride on the front end...
-        # Uber ride types vary city to city so I didn"t try to include a test here
+        # Won't work if the ride is not available. I prevent the user from
+        # selecting a non-available ride on the front end
+        # Uber ride types vary city to city
 
 class FlaskTestsLoggedIn(TestCase):
     """Flask tests with user logged in to session."""

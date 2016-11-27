@@ -5,8 +5,9 @@
 function showChart(response) {
   // Show Historical Surge Prices based on current weekday and time
 
-  $('body').scrollspy({ target: '#surge-chart-row' });
-
+  document.querySelector('#est-display-row').scrollIntoView({ 
+    behavior: 'smooth' 
+  });
 
   // Timeline as X axis, insert data type into input for chart
   var timeline = response[0];
@@ -52,8 +53,6 @@ function showChart(response) {
   else {
     var ticks = Math.ceil(maxY);
   }
-
-  $("#loading2").attr("src", "");
 
   // Line chart created with C3.js
   c3.chart.internal.fn.getInterpolate = () => 'monotone';
@@ -291,12 +290,13 @@ function displayMap(response) {
     if (response[0] === '') {
       return;
     }
-    // if (response[4] != 'none') { // DON'T NEED?
-      // Do not display if an estimate has not been given, or a ride has not
-      // been called
+    
     if (response[4] === 'map') {
       $('#map').css('height', '400px');
       $('#map').css('width', '800px');
+      document.querySelector('#ride-msg-row').scrollIntoView({ 
+        behavior: 'smooth' 
+      });
     }
 
     var location = {lat: parseFloat(response[0]), lng: parseFloat(response[1])};
@@ -337,33 +337,12 @@ function displayMap(response) {
     bounds.extend(dest);
     map.fitBounds(bounds);
     
-    // if (response[4] === 'map') {
-    //   // If a ride hasn't been called, but an estimate has been requested,
-    //   // display a map on the map tab
-
-
-    //   $('a[data-toggle='tab']').on('shown.bs.tab', function (e) {
-    //     google.maps.event.trigger(map, 'resize');
-    //     bounds.extend(location);
-    //     bounds.extend(dest);
-    //     map.fitBounds(bounds);
-    //   });
-
-    // google.maps.event.addDomListener(window, 'resize', function() {
-    // var center = map.getCenter();
-    // google.maps.event.trigger(map, 'resize');
-    // map.setCenter(center); 
-    // });
-    // }
-  // }
 }
 
 
 function getDisplayInput(uberId, lyftId) {
     // Perform AJAX request to retrieve data from database for Historical
     // Surge Price chart
-
-    $("#loading2").attr("src", "/static/img/progress2.gif");
 
     var formInputs = {'uber' : uberId,
                       'lyft' : lyftId,

@@ -21,8 +21,6 @@ function showEstimates(results) {
     $('#map').hide();
     $('#ride-message').hide();
 
-
-
     var poolId = (results[0]['pool_product_id']);
     var uberxId = (results[0]['uberx_product_id']);
     var uberxlId = (results[0]['uberxl_product_id']);
@@ -111,7 +109,6 @@ function showEstimates(results) {
 
     $("#loading").attr("src", "");
 
-
     // Set default Uber choice, and change according to radio button selected
 
     $('#uber-ride-choice').val(uberxId);
@@ -148,7 +145,6 @@ function showEstimates(results) {
 
     })
 
-    // $('#tabs').show();
     $('#surge-chart-row').show();
 
     $('#est-display-row').show();
@@ -165,24 +161,6 @@ function getAddressInput(evt) {
     evt.preventDefault();
 
     $("#loading").attr("src", "/static/img/progress2.gif");
-
-  //     $('#main').animate({
-  //       scrollTop: $('#surge-chart-row').offset().top
-  // }, 1000);
-
-    // $('#main').animate({
-    //     scrollTop: $('#surge-chart-row').offset().top
-    // }, 1000);
-
-    // var offset = $('#surge-chart-row').offset();
-    // var $main = $('#main');
-    // $main.animate({
-    //     scrollTop: offset.top - ($main.offset().top - $main.scrollTop())
-    // }, 'fast');
-
-    // $('html,body').animate({scrollTop: 485}, 2000);
-
-
 
     if ($('#orig-lat-est').val() == 'origin' || $('#dest-lat-est').val() == 'dest') {
         alert('Please enter both origin and destination.');

@@ -16,8 +16,6 @@ from datetime import datetime, date, timedelta
 
 import os
 import arrow
-# import googlemaps
-# import pytz
 
 
 
@@ -188,7 +186,7 @@ def get_estimates():
                             dest_label)
 
     address_to_database(addresses, addresses) 
-    ###cannot test, flash message
+
     return jsonify(uber_estimates, lyft_estimates)
 
 

@@ -1,30 +1,24 @@
 {% extends 'base.html' %}
 {% block content %}
-<!-- <div class="container-fluid"> -->
-<div id="main">
+
 <div class="row">
     <div class="container-fluid" id="landing-cont">
         <div id="text-landing">
-        <h1 id="ridethrift">Ride Thrift</h1>
-
+            <h1 id="ridethrift">Ride Thrift</h1>
         </div>
         <video autoplay="" loop="" class="fillWidth fadeIn wow collapse in" data-wow-delay="0.5s" poster="/static/img/traffic.jpg" id="video-background">
-            <source src="/static/img/Traffic - 6457.mp4" type="video/mp4">Your browser does not support the video tag. I suggest you upgrade your browser.
+        <source src="/static/img/Traffic - 6457.mp4" type="video/mp4">Your browser does not support the video tag. I suggest you upgrade your browser.
         </video>
     </div>
 </div>
-    <div class="row">
-        <div class="row" id="ride-msg-row"> <h4 id="ride-message" data-status="start"></h4> </div>
-        <div class="row" id="map-row">
-        <div class="center-block" id="map"></div>
-        </div>
-    <div class="row" id="est-form-row">
-          
 
-    
-        <form id="estimate-form" method="post" action="/estimates.json">
-            <div class="col-xs-offset-3 col-xs-4" id="origin-est-div">
-            <!-- <div class="estimate-entry"> -->
+<div class="row" id="ride-msg-row"> <h4 id="ride-message" data-status="start"></h4> </div>
+<div class="row" id="map-row">
+    <div class="center-block" id="map"></div>
+</div>
+<div class="row" id="est-form-row">   
+    <form id="estimate-form" method="post" action="/estimates.json">
+        <div class="col-md-offset-3 col-md-4 col-xs-12" id="origin-est-div">
             <label>Origin:</label>
             <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-est" value="origin"> 
             <input type="hidden" class="orig-lng-rides"name="origin-lng" id="orig-lng-est" value="origin">
@@ -37,23 +31,12 @@
                 <button type="button" name="location" id="location"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span></button><br>
                  {% if "user_id" in session %}
                     <div class="row" id="save-row">
-                    <span id="save-origin"><span id="input-label">Save </span><input type="checkbox" name="origin" value="save" id="orig-check">
-                    <span id="input-label">Label: </span><input type="text" name="label-or" id="label-or"></span><br>
-                </div>
+                        <span id="save-origin"><span id="input-label">Save </span><input type="checkbox" name="origin" value="save" id="orig-check">
+                        <span id="input-label">Label: </span><input type="text" name="label-or" id="label-or"></span><br>
+                    </div>
                 {% endif %}
             </div>     
             {% if "user_id" in session %}
-         <!--        <div class="form-group">
-                    <select class="form-control" id="origin-drop">
-                       <option value="saved-addresses">Saved Addresses
-                        {% for user_address in user.user_addresses %}
-                            <option value="{{ user_address.address.address }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}">{{ user_address.label }}
-                        {% endfor %}
-                        <option class="divider"</option>
-                        <option value="manage-saved-addresses">Manage Saved Addresses
-                    </select>
-                </div> -->
-
                 <select name="origins" id="origin-drop">
                     <option value="saved-addresses">Saved Addresses
                     {% for user_address in user.user_addresses %}
@@ -62,185 +45,146 @@
                     <option disabled>──────────</option>
                     <option value="manage-saved-addresses">Manage Saved Addresses
                 </select>
-
             {% endif %}
-         </div>
-         <div class="col-xs-4">
-         <!-- <div class="estimate-entry"> -->
-            <label>Destination:</label>
-            <input type="hidden" class="dest-lat-rides" name="dest-lat" id="dest-lat-est" value="dest"> 
-            <input type="hidden" class="dest-lng-rides" name="dest-lng" id="dest-lng-est" value="dest">
-            <input type="hidden" name="dest-save" id="dest-save">
-            <input type="hidden" id="dest-address" name="dest-address">
-            <input type="hidden" id="dest-name" name="dest-name">
-            <div id="locationField">
-                <input class = "auto" id="autocomplete-dest" placeholder="Enter your address"
-                 onFocus="geolocate()" type="text"></input><br>
-                {% if "user_id" in session %}
-                    <div class="row" id="save-row">
+        </div>
+     <div class="col-md-4 col-xs-12">
+        <label>Destination:</label>
+        <input type="hidden" class="dest-lat-rides" name="dest-lat" id="dest-lat-est" value="dest"> 
+        <input type="hidden" class="dest-lng-rides" name="dest-lng" id="dest-lng-est" value="dest">
+        <input type="hidden" name="dest-save" id="dest-save">
+        <input type="hidden" id="dest-address" name="dest-address">
+        <input type="hidden" id="dest-name" name="dest-name">
+        <div id="locationField">
+            <input class = "auto" id="autocomplete-dest" placeholder="Enter your address"
+             onFocus="geolocate()" type="text"></input><br>
+            {% if "user_id" in session %}
+                <div class="row" id="save-row">
                     <span id="save-dest"><span id="input-label">Save </span><input type="checkbox" name="dest" value="save" id="dest-check">
                     <span id="input-label">Label: </span><input type="text" name="label-de" id="label-de"></span><br>
-                    </div>
-                {% endif %}
-            </div>
+                </div>
+            {% endif %}
+        </div>
+        {% if "user_id" in session %}
+            <select name="dests" id="dest-drop">
+                <option value="saved-addresses">Saved Addresses
+                {% for user_address in user.user_addresses %}
+                    <option value="{{ user_address.address.address }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}">{{ user_address.label }}
+                {% endfor %}
+                <option disabled>──────────</option>
+                <option value="manage-saved-addresses">Manage Saved Addresses
+            </select>
+        {% endif %}   
+    </div>  
+</div>
+<div class="row" id="submit-est">
+    <input type="submit" class="btn btn-info" value="Get Estimates"><br>    
+</div>
+    </form> 
+
+<div class="row">
+    <img id="loading" class="center-block">
+</div>
+
+<div class="row" id="est-display-row">
+    <div class="col-md-offset-3 col-md-4 col-xs-12" id="uber-options">
+        <form action="/call_uber" method="POST" id="call-uber">
+            <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-uber" value="origin"> 
+            <input type="hidden" class="orig-lng-rides" name="origin-lng" id="orig-lng-uber" value="origin">
+            <input type="hidden" class="dest-lat-rides" name="dest-lat" id="dest-lat-uber" value="dest"> 
+            <input type="hidden" class="dest-lng-rides" name="dest-lng" id="dest-lng-uber" value="dest">
+            <input type="hidden" name="uber-ride-type" id="uber-ride-choice">
+            <span id="uber"></span><br>
+            <input class="rdo-uber" type="radio" name="uber-rdo" id="rdo-pool"> <label id="pool"></label><br>
+            <input class="rdo-uber" type="radio" name="uber-rdo" id="rdo-uberx" checked="checked"> <label id="uberx"></label><br>
+            <input class="rdo-uber" type="radio" name="uber-rdo" id="rdo-uberxl"> <label id="uberxl"></label><br>
             {% if "user_id" in session %}
-                <select name="dests" id="dest-drop">
-                    <option value="saved-addresses">Saved Addresses
-                    {% for user_address in user.user_addresses %}
-                        <option value="{{ user_address.address.address }}" data-lat="{{ user_address.address.latitude }}" data-lng="{{ user_address.address.longitude }}">{{ user_address.label }}
-                    {% endfor %}
-                    <option disabled>──────────</option>
-                    <option value="manage-saved-addresses">Manage Saved Addresses
-                </select>
-            {% endif %}   
-            </div>  
-        </div>
-
-            <div class="row" id="submit-est">
-                <input type="submit" class="btn btn-info" value="Get Estimates"><br>    
+            <div class="row" id="request-ride-row">
+                <input type="submit" class="btn btn-info" value="Request Uber" id="uber-req-button">
             </div>
-        
-        </form> 
-        <div class="row">
-                    <img id="loading" class="center-block">
-        </div>
-        </div>
-        <div class="row">
-        <div class="row" id="est-display-row">
-        <div class="col-xs-offset-3 col-xs-4" id="uber-options">
-            <form action="/call_uber" method="POST" id="call-uber">
-                <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-uber" value="origin"> 
-                <input type="hidden" class="orig-lng-rides" name="origin-lng" id="orig-lng-uber" value="origin">
-                <input type="hidden" class="dest-lat-rides" name="dest-lat" id="dest-lat-uber" value="dest"> 
-                <input type="hidden" class="dest-lng-rides" name="dest-lng" id="dest-lng-uber" value="dest">
-                <input type="hidden" name="uber-ride-type" id="uber-ride-choice">
-                <span id="uber"></span><br>
-                <input class="rdo-uber" type="radio" name="uber-rdo" id="rdo-pool"> <label id="pool"></label><br>
-                <input class="rdo-uber" type="radio" name="uber-rdo" id="rdo-uberx" checked="checked"> <label id="uberx"></label><br>
-                <input class="rdo-uber" type="radio" name="uber-rdo" id="rdo-uberxl"> <label id="uberxl"></label><br>
-                {% if "user_id" in session %}
-                <div class="row" id="request-ride-row">
-                    <input type="submit" class="btn btn-info" value="Request Uber" id="uber-req-button">
-                </div>
-                {% endif %}
-            </form>
-        </div>
-        <div class="col-xs-4" id="lyft-options">
-            <form action="/call_lyft" method="POST" id="call-lyft">
-                <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-uber" value="origin"> 
-                <input type="hidden" class="orig-lng-rides" name="origin-lng" id="orig-lng-uber" value="origin">
-                <input type="hidden" class="dest-lat-rides" name="dest-lat" id="dest-lat-uber" value="dest"> 
-                <input type="hidden" class="dest-lng-rides" name="dest-lng" id="dest-lng-uber" value="dest">
-                <input type="hidden" name="lyft-ride-type" id="lyft-ride-choice">
-                <span id="lyft"></span><br>
-                <input class="rdo-lyft" type="radio" name="lyft-rdo" id="rdo-line"> <label id="line"></label><br>
-                <input class="rdo-lyft" type="radio" name="lyft-rdo" id="rdo-lyft-lyft" checked="checked"> <label id="lyft-lyft"></label><br>
-                <input class="rdo-lyft" type="radio" name="lyft-rdo" id="rdo-plus"> <label id="plus"></label><br>
-                {% if "user_id" in session %}
-                <div class="row" id="request-ride-row">
-                    <input type="submit" class="btn btn-info" value="Request Lyft" id="lyft-req-button">
-                </div>
-                {% endif %}
-            </form>
-        </div>
-        </div>
-        <!-- <div class="row" id="tab-row"> -->
-            
-                 
-
-            <!-- <div class="center-block" id="tabs">
-                <ul class="nav nav-tabs">
-                    <li class="active"><a data-toggle="tab" href="#surges">Surges</a></li>
-                    <li><a data-toggle="tab" href="#gmap" id="maptoggle">Map</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div id="surges" class="tab-pane fade in active"> -->
-
-                        <div class="row" id="surge-chart-row">
-                            <div class="col-xs-offset-1 col-xs-4">
-                                <h3 id="surgedrop">Historical Surge Rates</h3>
-                                <div id="surge-chart"></div>
-                            </div>
-                            <div class="col-xs-3" id="day-time-col">
-                                <form id="hist-surge">
-                                <!-- <div class="form-group"> -->
-                                    <!-- <label for="day">Day</label> -->
-                                    <select name="weekday" id="day">
-                                        <option>Day</option>
-                                        <option>Monday</option>
-                                        <option>Tuesday</option>
-                                        <option>Wednesday</option>
-                                        <option>Thursday</option>
-                                        <option>Friday</option>
-                                        <option>Saturday</option>
-                                        <option>Sunday</option>
-                                    </select>
-                                <!-- </div> -->
-                                    <span id="select-time">    Time:</span>
-                                    <input type="time" name="usr_time" id="time-select">
-                                </div>
-                                <div class="col-xs-1">
-                                    <input type="submit" class="btn btn-info" value="Surge Rates">
-                                </form>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <img id="loading2" class="center-block">
-                        </div>
-                        <div class="col-xs-offset-2 col-xs-10">
-                        <div id="chart"></div>
-                        </div>
-                    </div>
-
-
-                     <!--    <div id="gmap" class="tab-pane fade">
-                            <div class="row" id="map-tab-row">
-                            <div class="center-block">
-                            
-                            <div id="map"></div>
-                            </div>
-                        </div>
-                        </div>
-                        </div>
-
-
-                </div> -->
-            <!-- </div> -->
-           
-        
-        </div>
-        <div class="row" id="disclaimer">*Price estimates have been manipulated for display, as to comply with API usage agreements. This site is not affiliated with, maintained by, or in any way officially connected with Uber Technologies, Inc. or Lyft, Inc.</div>
+            {% endif %}
+        </form>
     </div>
-    
+    <div class="col-md-4 col-xs-12" id="lyft-options">
+        <form action="/call_lyft" method="POST" id="call-lyft">
+            <input type="hidden" class="orig-lat-rides" name="origin-lat" id="orig-lat-uber" value="origin"> 
+            <input type="hidden" class="orig-lng-rides" name="origin-lng" id="orig-lng-uber" value="origin">
+            <input type="hidden" class="dest-lat-rides" name="dest-lat" id="dest-lat-uber" value="dest"> 
+            <input type="hidden" class="dest-lng-rides" name="dest-lng" id="dest-lng-uber" value="dest">
+            <input type="hidden" name="lyft-ride-type" id="lyft-ride-choice">
+            <span id="lyft"></span><br>
+            <input class="rdo-lyft" type="radio" name="lyft-rdo" id="rdo-line"> <label id="line"></label><br>
+            <input class="rdo-lyft" type="radio" name="lyft-rdo" id="rdo-lyft-lyft" checked="checked"> <label id="lyft-lyft"></label><br>
+            <input class="rdo-lyft" type="radio" name="lyft-rdo" id="rdo-plus"> <label id="plus"></label><br>
+            {% if "user_id" in session %}
+            <div class="row" id="request-ride-row">
+                <input type="submit" class="btn btn-info" value="Request Lyft" id="lyft-req-button">
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
 
+<div class="row" id="surge-chart-row">
+    <div class="col-md-offset-1 col-md-4 col-xs-12">
+        <h3 id="surgedrop">Historical Surge Rates</h3>
+        <div id="surge-chart"></div>
+    </div>
+    <div class="col-md-3 col-xs-12" id="day-time-col">
+        <form id="hist-surge">
+        <!-- <div class="form-group"> -->
+            <!-- <label for="day">Day</label> -->
+            <select name="weekday" id="day">
+                <option>Day</option>
+                <option>Monday</option>
+                <option>Tuesday</option>
+                <option>Wednesday</option>
+                <option>Thursday</option>
+                <option>Friday</option>
+                <option>Saturday</option>
+                <option>Sunday</option>
+            </select>
+        <!-- </div> -->
+            <span id="select-time">    Time:</span>
+            <input type="time" name="usr_time" id="time-select">
+    </div>
+    <div class="col-md-1 col-xs-12">
+        <input type="submit" class="btn btn-info" value="Surge Rates">
+    </form>
+    </div>
+</div>
 
+<div class="row">
+    <div class="col-md-offset-2 col-md-10 col-xs-12">
+        <div id="chart"></div>
+    </div>
+</div>
+
+<div class="row" id="disclaimer">*Price estimates have been manipulated for display, as to comply with API usage agreements. This site is not affiliated with, maintained by, or in any way officially connected with Uber Technologies, Inc. or Lyft, Inc.</div>
+
+<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="manage-address-modal" id="manage-address-modal">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <h1>Manage Addresses</h1>
+            <form id="delete-address" method="post" action="/delete_addresses.json">
+                <div id="manage-addresses">
+                {% if "user_id" in session %}    
+                    {% for user_address in user.user_addresses %}
+                        <input type="checkbox" class="address-check" name="delete" value="{{ user_address.user_add_id }}"> {{ user_address.label }}<br>
+                    {% endfor %}
+                {% endif %}
+                </div>
+                <div>
+                    <input type="submit" class="btn btn-info" value="Delete Addresses">
+                </div>
+            </form>
+            <a href="/">Cancel</a>
+        </div>
     </div>
 </div>  
 
-<!-- </div> -->
-<!-- Manage Addresses Modal -->
-    <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="manage-address-modal" id="manage-address-modal">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <h1>Manage Addresses</h1>
-                <form id="delete-address" method="post" action="/delete_addresses.json">
-                    <div id="manage-addresses">
-                    {% if "user_id" in session %}    
-                        {% for user_address in user.user_addresses %}
-                            <input type="checkbox" class="address-check" name="delete" value="{{ user_address.user_add_id }}"> {{ user_address.label }}<br>
-                        {% endfor %}
-                    {% endif %}
-                    </div>
-                    <div>
-                        <input type="submit" class="btn btn-info" value="Delete Addresses">
-                    </div>
-                </form>
-                <a href="/">Cancel</a>
-            </div>
-        </div>
-    </div>  
 
 <script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&libraries=geometry,places&callback=initAutocomplete" async defer></script>
+<script src="/static/js/smoothscroll.js"></script>
 <script src="/static/js/addresses.js"></script>
 <script src="/static/js/estimates.js"></script>
 <script src="/static/js/display.js"></script>
