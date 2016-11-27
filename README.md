@@ -22,10 +22,10 @@ Users can also delete addresses stored in their account:
 ![](https://cloud.githubusercontent.com/assets/22204860/20652870/28cddff8-b4b7-11e6-8fb0-3d9e1500e580.png)
 
 Current estimates are retrieved from Uber and Lyft APIs, and shown here. Prices have been slightly manipulated as to comply with API usage agreements. 
-![](https://cloud.githubusercontent.com/assets/22204860/20652871/2e057918-b4b7-11e6-9cd5-5a5776fc637f.png)
+![](https://cloud.githubusercontent.com/assets/22204860/20653001/239bc7cc-b4ba-11e6-849f-153cf97131d2.png)
 
 Users can see historical surge prices on the line chart for current time or a selected day and time:
-![](https://cloud.githubusercontent.com/assets/22204860/20652872/32547a14-b4b7-11e6-931e-0d7a7f148111.png)
+![](https://cloud.githubusercontent.com/assets/22204860/20653002/24bd61ce-b4ba-11e6-9e83-111e9bd3ea27.png)
 
 They can then select a ride and authorize their Uber/Lyft account to request:
 ![](https://cloud.githubusercontent.com/assets/22204860/20652875/39704968-b4b7-11e6-81fe-d42d610219d4.png)
