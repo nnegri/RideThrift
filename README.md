@@ -16,20 +16,23 @@ APIs: Uber, Lyft, Google Places Autocomplete and Distance Matrix, Google Maps<br
 ## <a name="features"></a>Features
 
 User can choose their origin and destination, based on current location, autocomplete options or saved addresses:
-![](https://drive.google.com/open?id=0ByANEx2cqXZ6SUQ5QVhfXzV2TGs)
+![](https://cloud.githubusercontent.com/assets/22204860/20652868/246e5384-b4b7-11e6-93b0-c8cdd7dc0707.png)
 
 Users can also delete addresses stored in their account:
-![](https://drive.google.com/open?id=0ByANEx2cqXZ6a19CYjIyS2dsV1k)
+![](https://cloud.githubusercontent.com/assets/22204860/20652870/28cddff8-b4b7-11e6-8fb0-3d9e1500e580.png)
 
 Current estimates are retrieved from Uber and Lyft APIs, and shown here. Prices have been slightly manipulated as to comply with API usage agreements. 
+![](https://cloud.githubusercontent.com/assets/22204860/20652871/2e057918-b4b7-11e6-9cd5-5a5776fc637f.png)
 
 Users can see historical surge prices on the line chart for current time or a selected day and time:
+![](https://cloud.githubusercontent.com/assets/22204860/20652872/32547a14-b4b7-11e6-931e-0d7a7f148111.png)
 
 They can then select a ride and authorize their Uber/Lyft account to request:
-
+![](https://cloud.githubusercontent.com/assets/22204860/20652875/39704968-b4b7-11e6-81fe-d42d610219d4.png)
+![](https://cloud.githubusercontent.com/assets/22204860/20652876/3b8181ae-b4b7-11e6-984e-e9fb2d73e6a6.png)
 
 Once the request is completed, a status message is updated throughout the trip:
-
+![](https://cloud.githubusercontent.com/assets/22204860/20652879/40e69116-b4b7-11e6-8316-1667f5f9ea72.png)
 
 
 ## <a name="install"></a>Installation
