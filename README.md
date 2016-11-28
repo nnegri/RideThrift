@@ -82,8 +82,8 @@ source secrets.sh
 Set up the database:
 
 ```
-python -i model.py
-db.create_all()
+python model.py
+python seed.py
 ```
 
 Run the app:

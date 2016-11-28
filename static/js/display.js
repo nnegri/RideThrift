@@ -5,10 +5,6 @@
 function showChart(response) {
   // Show Historical Surge Prices based on current weekday and time
 
-  document.querySelector('#est-display-row').scrollIntoView({ 
-    behavior: 'smooth' 
-  });
-
   // Timeline as X axis, insert data type into input for chart
   var timeline = response[0];
   timeline.splice(0, 0, 'x');
@@ -344,6 +340,10 @@ function getDisplayInput(uberId, lyftId) {
     // Perform AJAX request to retrieve data from database for Historical
     // Surge Price chart
 
+    document.querySelector('#est-display-row').scrollIntoView({ 
+      behavior: 'smooth' 
+    });
+    
     var formInputs = {'uber' : uberId,
                       'lyft' : lyftId,
                       'data' : 'current'}             
