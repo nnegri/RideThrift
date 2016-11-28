@@ -47,7 +47,7 @@ Clone or fork this repo:
 https://github.com/nnegri/RideThrift.git
 ```
 
-Create and activate a virtual environment inside your Fuder directory:
+Create and activate a virtual environment inside your Ride Thrift directory:
 
 ```
 virtualenv env
