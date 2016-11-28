@@ -92,7 +92,7 @@ Run the app:
 python server.py
 ```
 
-You can now navigate to 'localhost:5000/' to access Fuder.
+You can now navigate to 'localhost:5000/' to access Ride Thrift.
 
 ## <a name="aboutme"></a>About Me
 Nicole Negri is a Software Engineering Fellow at Hackbright Academy in San Francisco.
