@@ -317,7 +317,7 @@ def query_est_db():
 
     if request.form.get("data") == "current":
         time = datetime.utcnow()
-        day = time.date().weekday()
+        day = time.date().weekday() - 1 # for screencast, fix later
 
     elif request.form.get("data") == "historical":
         raw_time = request.form.get("time")
@@ -330,7 +330,6 @@ def query_est_db():
     uber_data, lyft_data = get_surges(daytimes, uber_choice, lyft_choice)
 
     local_times = localize_times(daytimes)
-
 
     return jsonify(local_times, uber_data, lyft_data, uber_choice, lyft_choice)
 
@@ -345,11 +344,8 @@ def display_map():
         dest_lat = session["dest_lat"]
         dest_lng = session["dest_lng"]
 
-        # if "ride_called" in session:
         if session["ride_called"] == True:
             gmap = "map"
-            # else:
-            #     gmap = "map"
         else:
             gmap = "none"
 

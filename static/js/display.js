@@ -115,7 +115,7 @@ function showChart(response) {
     var maxRange = 2;
   }
   else {
-    var maxRange = Math.ceil(maxY)
+    var maxRange = Math.ceil(maxY);
   }
   
   // Dynamically set max Y axis range
@@ -269,7 +269,7 @@ function showChart(response) {
                       'lyft' : lyftId,
                       'day' : $('#day').val(),
                       'time': $('#time-select').val(),
-                      'data': 'historical'}     
+                      'data': 'historical'};    
 
     $.post('/query-ests.json',
     formInputs,
@@ -346,7 +346,8 @@ function getDisplayInput(uberId, lyftId) {
     
     var formInputs = {'uber' : uberId,
                       'lyft' : lyftId,
-                      'data' : 'current'}             
+                      'data' : 'current'}     
+
     $.post('/query-ests.json',
     formInputs,
     showChart);
