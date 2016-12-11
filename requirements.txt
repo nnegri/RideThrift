@@ -13,3 +13,5 @@ arrow
 pytz
 schedule
 googlemaps
+uber-rides
+lyft_rides
