@@ -37,9 +37,9 @@ uber_auth_flow = AuthorizationCodeGrant(
     os.environ["UBER_CLIENT_ID"], 
     ["request"],
     os.environ["UBER_CLIENT_SECRET"],
-    "http://localhost:5000/callback",
+    "http://localhost:5000/callback" or "https://ridethrift.herokuapp.com/callback",
     )
-
+    
 
 def get_uber_estimates(origin_lat, origin_lng, dest_lat, dest_lng):
     """Send request to Uber API for estimates."""
