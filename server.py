@@ -22,7 +22,8 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "SECRET")
+# app.secret_key = os.environ.get("FLASK_SECRET_KEY", "SECRET")
+app.config['SECRET_KEY'] = os.environ.get("FLASK_SECRET_KEY", "SECRET")
 
 app.jinja_env.undefined = StrictUndefined
 app.jinja_env.auto_reload = True
