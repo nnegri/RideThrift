@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
-
+import os
 
 
 """Model definitions"""
