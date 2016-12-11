@@ -22,7 +22,7 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
-app.secret_key = "SECRET"
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "SECRET")
 
 app.jinja_env.undefined = StrictUndefined
 app.jinja_env.auto_reload = True
@@ -368,4 +368,10 @@ if __name__ == "__main__":
     if sys.argv[-1] == "jstest":
         JS_TESTING_MODE = True
         
-    app.run(host="0.0.0.0", debug=True)
+    # app.run(host="0.0.0.0", debug=True)
+
+    DEBUG = "NO_DEBUG" not in os.environ
+    PORT = int(os.environ.get("PORT", 5000))
+
+    app.run(host="0.0.0.0", port=PORT, debug=DEBUG)
+
