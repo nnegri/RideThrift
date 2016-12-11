@@ -95,5 +95,5 @@ python server.py
 You can now navigate to 'localhost:5000/' to access Ride Thrift.
 
 ## <a name="aboutme"></a>About Me
-Nicole Negri is a Software Engineering Fellow at Hackbright Academy in San Francisco.
+Nicole Negri is a Software Engineer in the Bay Area; this is her first project.
 Visit her on [LinkedIn](http://www.linkedin.com/in/nicole-negri).
