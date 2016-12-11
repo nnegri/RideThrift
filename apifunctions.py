@@ -71,7 +71,7 @@ def get_uber_auth():
 
 def request_uber(code, state):
     """Request an Uber."""
-    url = "http//0.0.0.0:5000/" or "https://ridethrift.herokuapp.com/"
+    url =  "https://ridethrift.herokuapp.com/" or "http//0.0.0.0:5000/"
     redirect_url = url + "callback?code=%s&state=%s" % (code, state)
     uber_session = uber_auth_flow.get_session(redirect_url)
     uber_ride_client = UberRidesClient(uber_session, sandbox_mode=True)
