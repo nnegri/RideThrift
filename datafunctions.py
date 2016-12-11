@@ -49,7 +49,7 @@ def uber_estimates_to_data(uber_ride_estimates, origin_lat, origin_lng, dest_lat
 
         distance = uber["distance"]
         uber_time = uber["duration"]
-        if uber["surge_multiplier"]:
+        if "surge_multiplier" in uber:
             surge = float(uber["surge_multiplier"])
         else:
             surge = 1.0 #FIX
