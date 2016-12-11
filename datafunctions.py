@@ -9,7 +9,7 @@ import pytz
 
 def uber_estimates_to_data(uber_ride_estimates, origin_lat, origin_lng, dest_lat, dest_lng):
     """Send data on estimates to estimates table."""
-
+    print uber_ride_estimates
     time_requested = datetime.utcnow()
     session["time_requested"] = time_requested
 
