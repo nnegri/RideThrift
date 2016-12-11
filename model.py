@@ -111,10 +111,10 @@ class Estimate(db.Model):
 
 """Helper functions"""
 
-def connect_to_db(app, db_uri="postgresql:///rideshares"):
+def connect_to_db(app, db_uri=None):
     """Connect the database to Flask app."""
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri or 'postgres:///rideshares'
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
