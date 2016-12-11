@@ -11,11 +11,12 @@ from apifunctions import (get_uber_estimates, get_lyft_estimates, get_uber_auth,
                           request_uber, get_lyft_auth, request_lyft)
 from datafunctions import (uber_estimates_to_data, lyft_estimates_to_data, 
                            address_information, address_to_database, time_day, 
-                           get_dates, get_surges, localize_times)
+                           get_dates, get_surges, localize_times, current_day)
 from datetime import datetime, date, timedelta
 
 import os
 import arrow
+from datetime import datetime, timedelta
 
 
 
@@ -314,17 +315,16 @@ def query_est_db():
     else:
         session["lyft_choice"] = lyft_choice
 
-
     if request.form.get("data") == "current":
         time = datetime.utcnow()
-        day = time.date().weekday() - 1 # for screencast, fix later
+        day, time = current_day(time)
 
     elif request.form.get("data") == "historical":
         raw_time = request.form.get("time")
         raw_day = request.form.get("day")
 
         time, day = time_day(raw_time, raw_day)
-
+    print "\n\n\nTIMEDAY", time, day
     daytimes = get_dates(time, day)
 
     uber_data, lyft_data = get_surges(daytimes, uber_choice, lyft_choice)
