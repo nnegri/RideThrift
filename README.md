@@ -84,6 +84,7 @@ Set up the database:
 ```
 python model.py
 python seed.py
+psql estimates < estimates.sql
 ```
 
 Run the app:
