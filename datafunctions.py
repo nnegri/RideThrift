@@ -182,34 +182,6 @@ def address_to_database(addresses, addresses_db):
                 flash("Addresses saved.")
             i += 1
 
-def current_day(time):
-    """Find timezone offset of user's current location."""
-
-    gmaps = googlemaps.Client(key=os.environ["GOOGLE_API_KEY"])
-    result = gmaps.timezone((session["origin_lat"], session["origin_lng"]), 
-         arrow.utcnow())
-
-    offset = -(result["rawOffset"] / 60 / 60)
-    t = timedelta(hours=int(offset))
-    time = time + timedelta(hours=int(8 - offset))
-    print "\n\n\nTIME", time.time(), time.date().weekday()
-    if offset > 0:
-        if (time.time() > datetime(2016, 11, 11, 00, 00, 00, 000000).time() and
-           time.time() < (datetime(2016, 11, 11, 00, 00, 00, 000000) + t).time()):
-            day = time.date().weekday() - 1
-        else:
-            day = time.date().weekday()
-
-    if offset < 0:
-        if (time.time() > (datetime(2016, 11, 11, 23, 59, 59, 999999) - t).time() and
-           time.time() < datetime(2016, 11, 11, 23, 59, 59, 999999).time()):
-            day = time.date().weekday() + 1
-        else:
-            day = time.date().weekday()
-
-    return day, time
-
-
 def time_day(raw_time, raw_day):
     """Get time and day in correct format for surge chart query."""
 
@@ -217,16 +189,13 @@ def time_day(raw_time, raw_day):
 
     t = timedelta(hours=int(hour), minutes=int(minute))
 
-    gmaps = googlemaps.Client(key=os.environ["GOOGLE_API_KEY"])
-    result = gmaps.timezone((session["origin_lat"], session["origin_lng"]), 
-         arrow.utcnow())
-    tz = result["timeZoneId"]
-    timezone = pytz.timezone(tz)
+    # Pacific time harcoded because surge data is not localized
+    timezone = pytz.timezone("America/Los_Angeles")
 
     dt = datetime(2016, 11, 18, 00, 00, 00, 000000)
     local_time = timezone.localize(dt) + t
+
     utc = local_time.astimezone(pytz.utc)
-    
     time = utc.replace(tzinfo=None)       
 
     if raw_day == "Monday":
@@ -340,12 +309,7 @@ def get_surges(daytimes, uber_choice, lyft_choice):
 def localize_times(daytimes):
     """Localize times from database given user"s origin location."""  
 
-    # gmaps = googlemaps.Client(key=os.environ["GOOGLE_API_KEY"])
-    # result = gmaps.timezone((session["origin_lat"], session["origin_lng"]), 
-    #          arrow.utcnow())
-    # tz = result["timeZoneId"]
-    # timezone = pytz.timezone(tz)
-
+    # Pacific time harcoded because surge data is not localized
     timezone = pytz.timezone("America/Los_Angeles")
 
     local_times = [pytz.utc.localize(daytime.time_requested, is_dst=None)

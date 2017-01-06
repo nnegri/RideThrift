@@ -11,7 +11,7 @@ from apifunctions import (get_uber_estimates, get_lyft_estimates, get_uber_auth,
                           request_uber, get_lyft_auth, request_lyft)
 from datafunctions import (uber_estimates_to_data, lyft_estimates_to_data, 
                            address_information, address_to_database, time_day, 
-                           get_dates, get_surges, localize_times, current_day)
+                           get_dates, get_surges, localize_times)
 from datetime import datetime, date, timedelta
 
 import os
@@ -318,7 +318,7 @@ def query_est_db():
 
     if request.form.get("data") == "current":
         time = datetime.utcnow()
-        day, time = current_day(time)
+        day = time.date().weekday()
 
     elif request.form.get("data") == "historical":
         raw_time = request.form.get("time")
