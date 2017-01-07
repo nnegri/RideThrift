@@ -82,9 +82,10 @@ source secrets.sh
 Set up the database:
 
 ```
+createdb rideshares
 python model.py
 python seed.py
-psql estimates < estimates.sql
+psql rideshares < estimates.sql
 ```
 
 Run the app:
