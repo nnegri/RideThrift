@@ -214,7 +214,7 @@ def signin_uber():
     session["uber_ride_type"] = ride_type
 
     url = get_uber_auth()
-    print "\n\n\nHERE URL", url
+
     return redirect(url)
 
 
@@ -326,7 +326,7 @@ def query_est_db():
         raw_day = request.form.get("day")
 
         time, day = time_day(raw_time, raw_day)
-    print "\n\n\nTIMEDAY", time, day
+
     daytimes = get_dates(time, day)
 
     uber_data, lyft_data = get_surges(daytimes, uber_choice, lyft_choice)
