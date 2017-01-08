@@ -214,7 +214,7 @@ def signin_uber():
     session["uber_ride_type"] = ride_type
 
     url = get_uber_auth()
-
+    print "\n\n\nHERE URL", url
     return redirect(url)
 
 
