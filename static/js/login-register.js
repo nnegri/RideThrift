@@ -58,8 +58,8 @@ function registerUser(evt) {
     evt.preventDefault();
 
     var formInputs = {
-        "email": $("#email").val(),
-        "password": $("#password").val(),
+        "email": $("#reg-email").val(),
+        "password": $("#reg-password").val(),
     };
               
     $.post("/register",

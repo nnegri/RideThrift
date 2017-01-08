@@ -81,8 +81,9 @@ def register_user():
     password = request.form["password"].strip()
 
     emails = [query[0] for query in db.session.query(User.email).all()]
-
+    print "EMAILS", emails, email
     if email in emails:
+        print "HERE"
         user_exists = {"register" : "exists"}
         return jsonify(user_exists)
 
