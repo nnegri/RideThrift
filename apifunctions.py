@@ -86,7 +86,7 @@ def request_uber(code, state):
     credentials = uber_session.oauth2credential
     access_token = credentials.access_token
 
-    uber_ride_client.cancel_current_ride()
+    # uber_ride_client.cancel_current_ride()
     
     response = uber_ride_client.request_ride(
         product_id=session["uber_ride_type"],
@@ -112,6 +112,8 @@ def request_uber(code, state):
     session["ride_type"] = "Uber"
 
     get_time(minutes)
+
+    uber_ride_client.cancel_current_ride()
 
 def get_lyft_auth():
     """Authorize user"s Lyft account."""
