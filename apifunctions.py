@@ -80,14 +80,15 @@ def request_uber(code, state):
     url = uber_base_uri
     print "\n\n\nREQUEST", url
     redirect_url = url + "callback?code=%s&state=%s" % (code, state)
+    print redirect_url
     uber_session = uber_auth_flow.get_session(redirect_url)
     uber_ride_client = UberRidesClient(uber_session, sandbox_mode=True)
-    
+    print dir(uber_ride_client)
     credentials = uber_session.oauth2credential
     access_token = credentials.access_token
 
     # uber_ride_client.cancel_current_ride()
-    
+
     response = uber_ride_client.request_ride(
         product_id=session["uber_ride_type"],
         start_latitude=session["origin_lat"],
