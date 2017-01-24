@@ -224,7 +224,7 @@ def call_uber():
 
     code = request.args.get("code")
     state = request.args.get("state")
-
+    print "\n\nCODE", code, "\n\nSTATE", state
     request_uber(code, state)
 
     session["ride_called"] = True
