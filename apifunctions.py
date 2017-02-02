@@ -33,10 +33,10 @@ lyft_auth_flow = lyft_rides.auth.AuthorizationCodeGrant(
 uber_est_session = Session(server_token=os.environ["UBER_SERVER_TOKEN"])
 uber_client = UberRidesClient(uber_est_session)
 
-if "NO_DEBUG" in os.environ:
-    uber_base_uri = "https://ridethrift.herokuapp.com/callback"
-else:
-    uber_base_uri = "http://localhost:5000/callback"
+# if "NO_DEBUG" in os.environ:
+#     uber_base_uri = "https://ridethrift.herokuapp.com/callback"
+# else:
+#     uber_base_uri = "http://localhost:5000/callback"
 
 uber_auth_flow = AuthorizationCodeGrant(
     os.environ["UBER_CLIENT_ID"], 
@@ -77,8 +77,6 @@ def get_uber_auth():
 def request_uber(code, state):
     """Request an Uber."""
 
-    # url = uber_base_uri
-    # redirect_url = url + 
     redirect_url = "http://0.0.0.0:5000/callback?code=%s&state=%s" % (code, state)
 
     uber_session = uber_auth_flow.get_session(redirect_url)
