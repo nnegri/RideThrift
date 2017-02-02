@@ -34,7 +34,7 @@ uber_est_session = Session(server_token=os.environ["UBER_SERVER_TOKEN"])
 uber_client = UberRidesClient(uber_est_session)
 
 if "NO_DEBUG" in os.environ:
-    uber_base_uri = "https://ridethrift.herokuapp.com/submit"
+    uber_base_uri = "https://ridethrift.herokuapp.com/callback"
 else:
     uber_base_uri = "http://localhost:5000/callback"
 
@@ -80,7 +80,7 @@ def request_uber(code, state):
     url = uber_base_uri
 
     if "NO_DEBUG" in os.environ:
-        redirect_url = url + "?state=%s&code=%s" % (state, code)
+        redirect_url = url + "callback?code=%s&state=%s" % (code, state)
     else:
         redirect_url = url + "callback?code=%s&state=%s" % (code, state)
 

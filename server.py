@@ -81,9 +81,7 @@ def register_user():
     password = request.form["password"].strip()
 
     emails = [query[0] for query in db.session.query(User.email).all()]
-    print "EMAILS", emails, email
     if email in emails:
-        print "HERE"
         user_exists = {"register" : "exists"}
         return jsonify(user_exists)
 
@@ -214,7 +212,6 @@ def signin_uber():
     session["uber_ride_type"] = ride_type
 
     url = get_uber_auth()
-    print "\n\n\nURL", url, "\n\n\n"
     return redirect(url)
 
 
@@ -224,7 +221,6 @@ def call_uber():
 
     code = request.args.get("code")
     state = request.args.get("state")
-    print "\n\nCODE", code, "\n\nSTATE", state
     request_uber(code, state)
 
     session["ride_called"] = True
