@@ -76,13 +76,10 @@ def get_uber_auth():
 
 def request_uber(code, state):
     """Request an Uber."""
-    # url =  "https://ridethrift.herokuapp.com/" or "http//0.0.0.0:5000/"
-    url = uber_base_uri
 
-    if "NO_DEBUG" in os.environ:
-        redirect_url = url + "callback?code=%s&state=%s" % (code, state)
-    else:
-        redirect_url = url + "callback?code=%s&state=%s" % (code, state)
+    # url = uber_base_uri
+    # redirect_url = url + 
+    redirect_url = "http://0.0.0.0:5000/callback?code=%s&state=%s" % (code, state)
 
     uber_session = uber_auth_flow.get_session(redirect_url)
     uber_ride_client = UberRidesClient(uber_session, sandbox_mode=True)
