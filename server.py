@@ -214,16 +214,17 @@ def signin_uber():
     if "NO_DEBUG" in os.environ: 
     #If running on Heroku, skip OAuth (additional permissions required for deployment)
 
-        time = uber_client.get_pickup_time_estimates(
-        session["origin_lat"],
-        session["origin_lng"],
-        product_id=session["uber_ride_type"]
-        )
-        eta = time.json
-        minutes = eta["times"][0]["estimate"] / 60
-        get_time(minutes)
-        session["ride_type"] = "Uber"
+        # time = uber_client.get_pickup_time_estimates(
+        # session["origin_lat"],
+        # session["origin_lng"],
+        # product_id=session["uber_ride_type"]
+        # )
+        # eta = time.json
+        # minutes = eta["times"][0]["estimate"] / 60
+        # get_time(minutes)
+        # session["ride_type"] = "Uber"
 
+        request_uber(None, None)
         session["ride_called"] = True
         return redirect("/")
 

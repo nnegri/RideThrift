@@ -77,27 +77,28 @@ def get_uber_auth():
 def request_uber(code, state):
     """Request an Uber."""
 
-    redirect_url = "http://0.0.0.0:5000/callback?code=%s&state=%s" % (code, state)
+    if "NO_DEBUG" not in os.environ:
+        redirect_url = "http://0.0.0.0:5000/callback?code=%s&state=%s" % (code, state)
 
-    uber_session = uber_auth_flow.get_session(redirect_url)
-    uber_ride_client = UberRidesClient(uber_session, sandbox_mode=True)
+        uber_session = uber_auth_flow.get_session(redirect_url)
+        uber_ride_client = UberRidesClient(uber_session, sandbox_mode=True)
 
-    credentials = uber_session.oauth2credential
-    access_token = credentials.access_token
+        credentials = uber_session.oauth2credential
+        access_token = credentials.access_token
 
-    uber_ride_client.cancel_current_ride()
+        uber_ride_client.cancel_current_ride()
 
-    response = uber_ride_client.request_ride(
-        product_id=session["uber_ride_type"],
-        start_latitude=session["origin_lat"],
-        start_longitude=session["origin_lng"],
-        end_latitude=session["dest_lat"],
-        end_longitude=session["dest_lng"]
-        )
+        response = uber_ride_client.request_ride(
+            product_id=session["uber_ride_type"],
+            start_latitude=session["origin_lat"],
+            start_longitude=session["origin_lng"],
+            end_latitude=session["dest_lat"],
+            end_longitude=session["dest_lng"]
+            )
 
-    ride_details = response.json
+        ride_details = response.json
 
-    print response.status_code
+        print response.status_code
 
     time = uber_client.get_pickup_time_estimates(
         session["origin_lat"],
