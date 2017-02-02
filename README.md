@@ -4,6 +4,7 @@ Ride Thrift provides price comparisons for rideshare apps, using the Uber and Ly
 
 ##Deployment
 https://ridethrift.herokuapp.com/
+
 *Please note the "request a ride" feature is for proof of concept only;
 requests have been set to sandbox mode.
 
@@ -31,6 +32,7 @@ Current estimates are retrieved from Uber and Lyft APIs, and shown here. Prices 
 
 Users can see historical surge prices on the line chart for current time or a selected day and time:
 ![](https://cloud.githubusercontent.com/assets/22204860/20653002/24bd61ce-b4ba-11e6-9e83-111e9bd3ea27.png)
+![](https://cloud.githubusercontent.com/assets/22204860/22537812/7c8eb542-e8c2-11e6-98fe-fb20f977abd2.jpg)
 
 They can then select a ride and authorize their Uber/Lyft account to request:
 ![](https://cloud.githubusercontent.com/assets/22204860/20652875/39704968-b4b7-11e6-81fe-d42d610219d4.png)
