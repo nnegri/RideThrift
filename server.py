@@ -8,7 +8,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from model import (connect_to_db, db, User, Address, UserAddress, RideType, Estimate)
 from apifunctions import (get_uber_estimates, get_lyft_estimates, get_uber_auth, 
-                          request_uber, get_lyft_auth, request_lyft, get_time)
+                          request_uber, get_lyft_auth, request_lyft)
 from datafunctions import (uber_estimates_to_data, lyft_estimates_to_data, 
                            address_information, address_to_database, time_day, 
                            get_dates, get_surges, localize_times)
@@ -213,16 +213,6 @@ def signin_uber():
 
     if "NO_DEBUG" in os.environ: 
     #If running on Heroku, skip OAuth (additional permissions required for deployment)
-
-        # time = uber_client.get_pickup_time_estimates(
-        # session["origin_lat"],
-        # session["origin_lng"],
-        # product_id=session["uber_ride_type"]
-        # )
-        # eta = time.json
-        # minutes = eta["times"][0]["estimate"] / 60
-        # get_time(minutes)
-        # session["ride_type"] = "Uber"
 
         request_uber(None, None)
         session["ride_called"] = True
