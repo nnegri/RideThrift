@@ -1,14 +1,14 @@
-#Ride Thrift
+# Ride Thrift
 
 Ride Thrift provides price comparisons for rideshare apps, using the Uber and Lyft APIs to retrieve on the minute estimates for a route chosen by the user. Google Maps and Places APIs provide autocomplete and geolocation functionality, as well as a route map. Users have the option to save and delete addresses in their account, which are stored in the database. Users may request rides from their own accounts through OAuth, and the status of the trip is dynamically updated via AJAX.  C3.js, a D3-based library, is utilized for data visualization of historical surge/primetime rates for any given day and time. Data on surge pricing was collected via automated API requests running over the course of a week.
 
-##Deployment
+## Deployment
 https://ridethrift.herokuapp.com/
 
 *Please note the "request a ride" feature is for proof of concept only;
 requests have been set to sandbox mode.
 
-##Contents
+## Contents
 * [Tech Stack](#technologies)
 * [Features](#features)
 * [Installation](#install)
